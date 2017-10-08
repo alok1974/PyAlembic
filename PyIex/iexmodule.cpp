@@ -54,7 +54,7 @@ namespace PyIex {
 namespace {
 
 void
-testCxxExceptions (int i)
+testCxxExceptions(int i)
 {
     //
     // This function is only for testing.
@@ -65,20 +65,20 @@ testCxxExceptions (int i)
 
     switch (i)
     {
-      case 1:
-	throw int (1);
+    case 1:
+        throw int(1);
 
-      case 2:
-	throw std::invalid_argument ("2");
+    case 2:
+        throw std::invalid_argument("2");
 
-      case 3:
-	throw IEX_NAMESPACE::BaseExc ("3");
+    case 3:
+        throw IEX_NAMESPACE::BaseExc("3");
 
-      case 4:
-	throw IEX_NAMESPACE::ArgExc ("4");
+    case 4:
+        throw IEX_NAMESPACE::ArgExc("4");
 
-      default:
-	;
+    default:
+        ;
     }
 }
 
@@ -123,170 +123,172 @@ PYBIND11_MODULE(iex, m){
     m.def("testMakeArgExc", &testMakeArgExc);
 
     static py::exception<BaseExc> PyBaseExc(m, "BaseExc");
-    static py::exception<ArgExc> PyArgExc(m, "ArgExc");
-    static py::exception<LogicExc> PyLogicExc(m, "LogicExc");
-    static py::exception<InputExc> PyInputExc(m, "InputExc");
-    static py::exception<IoExc> PyIoExc(m, "IoExc");
-    static py::exception<MathExc> PyMathExc(m, "MathExc");
-    static py::exception<NoImplExc> PyNoImplExc(m, "NoImplExc");
-    static py::exception<NullExc> PyNullExc(m, "NullExc");
-    static py::exception<TypeExc> PyTypeExc(m, "TypeExc");
-    static py::exception<ErrnoExc> PyErrnoExc(m, "ErrnoExc");
-    static py::exception<EpermExc> PyEpermExc(m, "EpermExc");
-    static py::exception<EnoentExc> PyEnoentExc(m, "EnoentExc");
-    static py::exception<EsrchExc> PyEsrchExc(m, "EsrchExc");
-    static py::exception<EintrExc> PyEintrExc(m, "EintrExc");
-    static py::exception<EioExc> PyEioExc(m, "EioExc");
-    static py::exception<EnxioExc> PyEnxioExc(m, "EnxioExc");
-    static py::exception<E2bigExc> PyE2bigExc(m, "E2bigExc");
-    static py::exception<EnoexecExc> PyEnoexecExc(m, "EnoexecExc");
-    static py::exception<EbadfExc> PyEbadfExc(m, "EbadfExc");
-    static py::exception<EchildExc> PyEchildExc(m, "EchildExc");
-    static py::exception<EagainExc> PyEagainExc(m, "EagainExc");
-    static py::exception<EnomemExc> PyEnomemExc(m, "EnomemExc");
-    static py::exception<EaccesExc> PyEaccesExc(m, "EaccesExc");
-    static py::exception<EfaultExc> PyEfaultExc(m, "EfaultExc");
-    static py::exception<EnotblkExc> PyEnotblkExc(m, "EnotblkExc");
-    static py::exception<EbusyExc> PyEbusyExc(m, "EbusyExc");
-    static py::exception<EexistExc> PyEexistExc(m, "EexistExc");
-    static py::exception<ExdevExc> PyExdevExc(m, "ExdevExc");
-    static py::exception<EnodevExc> PyEnodevExc(m, "EnodevExc");
-    static py::exception<EnotdirExc> PyEnotdirExc(m, "EnotdirExc");
-    static py::exception<EisdirExc> PyEisdirExc(m, "EisdirExc");
-    static py::exception<EinvalExc> PyEinvalExc(m, "EinvalExc");
-    static py::exception<EnfileExc> PyEnfileExc(m, "EnfileExc");
-    static py::exception<EmfileExc> PyEmfileExc(m, "EmfileExc");
-    static py::exception<EnottyExc> PyEnottyExc(m, "EnottyExc");
-    static py::exception<EtxtbsyExc> PyEtxtbsyExc(m, "EtxtbsyExc");
-    static py::exception<EfbigExc> PyEfbigExc(m, "EfbigExc");
-    static py::exception<EnospcExc> PyEnospcExc(m, "EnospcExc");
-    static py::exception<EspipeExc> PyEspipeExc(m, "EspipeExc");
-    static py::exception<ErofsExc> PyErofsExc(m, "ErofsExc");
-    static py::exception<EmlinkExc> PyEmlinkExc(m, "EmlinkExc");
-    static py::exception<EpipeExc> PyEpipeExc(m, "EpipeExc");
-    static py::exception<EdomExc> PyEdomExc(m, "EdomExc");
-    static py::exception<ErangeExc> PyErangeExc(m, "ErangeExc");
-    static py::exception<EnomsgExc> PyEnomsgExc(m, "EnomsgExc");
-    static py::exception<EidrmExc> PyEidrmExc(m, "EidrmExc");
-    static py::exception<EchrngExc> PyEchrngExc(m, "EchrngExc");
-    static py::exception<El2nsyncExc> PyEl2nsyncExc(m, "El2nsyncExc");
-    static py::exception<El3hltExc> PyEl3hltExc(m, "El3hltExc");
-    static py::exception<El3rstExc> PyEl3rstExc(m, "El3rstExc");
-    static py::exception<ElnrngExc> PyElnrngExc(m, "ElnrngExc");
-    static py::exception<EunatchExc> PyEunatchExc(m, "EunatchExc");
-    static py::exception<EnocsiExc> PyEnocsiExc(m, "EnocsiExc");
-    static py::exception<El2hltExc> PyEl2hltExc(m, "El2hltExc");
-    static py::exception<EdeadlkExc> PyEdeadlkExc(m, "EdeadlkExc");
-    static py::exception<EnolckExc> PyEnolckExc(m, "EnolckExc");
-    static py::exception<EbadeExc> PyEbadeExc(m, "EbadeExc");
-    static py::exception<EbadrExc> PyEbadrExc(m, "EbadrExc");
-    static py::exception<ExfullExc> PyExfullExc(m, "ExfullExc");
-    static py::exception<EnoanoExc> PyEnoanoExc(m, "EnoanoExc");
-    static py::exception<EbadrqcExc> PyEbadrqcExc(m, "EbadrqcExc");
-    static py::exception<EbadsltExc> PyEbadsltExc(m, "EbadsltExc");
-    static py::exception<EdeadlockExc> PyEdeadlockExc(m, "EdeadlockExc");
-    static py::exception<EbfontExc> PyEbfontExc(m, "EbfontExc");
-    static py::exception<EnostrExc> PyEnostrExc(m, "EnostrExc");
-    static py::exception<EnodataExc> PyEnodataExc(m, "EnodataExc");
-    static py::exception<EtimeExc> PyEtimeExc(m, "EtimeExc");
-    static py::exception<EnosrExc> PyEnosrExc(m, "EnosrExc");
-    static py::exception<EnonetExc> PyEnonetExc(m, "EnonetExc");
-    static py::exception<EnopkgExc> PyEnopkgExc(m, "EnopkgExc");
-    static py::exception<EremoteExc> PyEremoteExc(m, "EremoteExc");
-    static py::exception<EnolinkExc> PyEnolinkExc(m, "EnolinkExc");
-    static py::exception<EadvExc> PyEadvExc(m, "EadvExc");
-    static py::exception<EsrmntExc> PyEsrmntExc(m, "EsrmntExc");
-    static py::exception<EcommExc> PyEcommExc(m, "EcommExc");
-    static py::exception<EprotoExc> PyEprotoExc(m, "EprotoExc");
-    static py::exception<EmultihopExc> PyEmultihopExc(m, "EmultihopExc");
-    static py::exception<EbadmsgExc> PyEbadmsgExc(m, "EbadmsgExc");
-    static py::exception<EnametoolongExc> PyEnametoolongExc(m, "EnametoolongExc");
-    static py::exception<EoverflowExc> PyEoverflowExc(m, "EoverflowExc");
-    static py::exception<EnotuniqExc> PyEnotuniqExc(m, "EnotuniqExc");
-    static py::exception<EbadfdExc> PyEbadfdExc(m, "EbadfdExc");
-    static py::exception<EremchgExc> PyEremchgExc(m, "EremchgExc");
-    static py::exception<ElibaccExc> PyElibaccExc(m, "ElibaccExc");
-    static py::exception<ElibbadExc> PyElibbadExc(m, "ElibbadExc");
-    static py::exception<ElibscnExc> PyElibscnExc(m, "ElibscnExc");
-    static py::exception<ElibmaxExc> PyElibmaxExc(m, "ElibmaxExc");
-    static py::exception<ElibexecExc> PyElibexecExc(m, "ElibexecExc");
-    static py::exception<EilseqExc> PyEilseqExc(m, "EilseqExc");
-    static py::exception<EnosysExc> PyEnosysExc(m, "EnosysExc");
-    static py::exception<EloopExc> PyEloopExc(m, "EloopExc");
-    static py::exception<ErestartExc> PyErestartExc(m, "ErestartExc");
-    static py::exception<EstrpipeExc> PyEstrpipeExc(m, "EstrpipeExc");
-    static py::exception<EnotemptyExc> PyEnotemptyExc(m, "EnotemptyExc");
-    static py::exception<EusersExc> PyEusersExc(m, "EusersExc");
-    static py::exception<EnotsockExc> PyEnotsockExc(m, "EnotsockExc");
-    static py::exception<EdestaddrreqExc> PyEdestaddrreqExc(m, "EdestaddrreqExc");
-    static py::exception<EmsgsizeExc> PyEmsgsizeExc(m, "EmsgsizeExc");
-    static py::exception<EprototypeExc> PyEprototypeExc(m, "EprototypeExc");
-    static py::exception<EnoprotooptExc> PyEnoprotooptExc(m, "EnoprotooptExc");
-    static py::exception<EprotonosupportExc> PyEprotonosupportExc(m, "EprotonosupportExc");
-    static py::exception<EsocktnosupportExc> PyEsocktnosupportExc(m, "EsocktnosupportExc");
-    static py::exception<EopnotsuppExc> PyEopnotsuppExc(m, "EopnotsuppExc");
-    static py::exception<EpfnosupportExc> PyEpfnosupportExc(m, "EpfnosupportExc");
-    static py::exception<EafnosupportExc> PyEafnosupportExc(m, "EafnosupportExc");
-    static py::exception<EaddrinuseExc> PyEaddrinuseExc(m, "EaddrinuseExc");
-    static py::exception<EaddrnotavailExc> PyEaddrnotavailExc(m, "EaddrnotavailExc");
-    static py::exception<EnetdownExc> PyEnetdownExc(m, "EnetdownExc");
-    static py::exception<EnetunreachExc> PyEnetunreachExc(m, "EnetunreachExc");
-    static py::exception<EnetresetExc> PyEnetresetExc(m, "EnetresetExc");
-    static py::exception<EconnabortedExc> PyEconnabortedExc(m, "EconnabortedExc");
-    static py::exception<EconnresetExc> PyEconnresetExc(m, "EconnresetExc");
-    static py::exception<EnobufsExc> PyEnobufsExc(m, "EnobufsExc");
-    static py::exception<EisconnExc> PyEisconnExc(m, "EisconnExc");
-    static py::exception<EnotconnExc> PyEnotconnExc(m, "EnotconnExc");
-    static py::exception<EshutdownExc> PyEshutdownExc(m, "EshutdownExc");
-    static py::exception<EtoomanyrefsExc> PyEtoomanyrefsExc(m, "EtoomanyrefsExc");
-    static py::exception<EtimedoutExc> PyEtimedoutExc(m, "EtimedoutExc");
-    static py::exception<EconnrefusedExc> PyEconnrefusedExc(m, "EconnrefusedExc");
-    static py::exception<EhostdownExc> PyEhostdownExc(m, "EhostdownExc");
-    static py::exception<EhostunreachExc> PyEhostunreachExc(m, "EhostunreachExc");
-    static py::exception<EalreadyExc> PyEalreadyExc(m, "EalreadyExc");
-    static py::exception<EinprogressExc> PyEinprogressExc(m, "EinprogressExc");
-    static py::exception<EstaleExc> PyEstaleExc(m, "EstaleExc");
-    static py::exception<EioresidExc> PyEioresidExc(m, "EioresidExc");
-    static py::exception<EucleanExc> PyEucleanExc(m, "EucleanExc");
-    static py::exception<EnotnamExc> PyEnotnamExc(m, "EnotnamExc");
-    static py::exception<EnavailExc> PyEnavailExc(m, "EnavailExc");
-    static py::exception<EisnamExc> PyEisnamExc(m, "EisnamExc");
-    static py::exception<EremoteioExc> PyEremoteioExc(m, "EremoteioExc");
-    static py::exception<EinitExc> PyEinitExc(m, "EinitExc");
-    static py::exception<EremdevExc> PyEremdevExc(m, "EremdevExc");
-    static py::exception<EcanceledExc> PyEcanceledExc(m, "EcanceledExc");
-    static py::exception<EnolimfileExc> PyEnolimfileExc(m, "EnolimfileExc");
-    static py::exception<EproclimExc> PyEproclimExc(m, "EproclimExc");
-    static py::exception<EdisjointExc> PyEdisjointExc(m, "EdisjointExc");
-    static py::exception<EnologinExc> PyEnologinExc(m, "EnologinExc");
-    static py::exception<EloginlimExc> PyEloginlimExc(m, "EloginlimExc");
-    static py::exception<EgrouploopExc> PyEgrouploopExc(m, "EgrouploopExc");
-    static py::exception<EnoattachExc> PyEnoattachExc(m, "EnoattachExc");
-    static py::exception<EnotsupExc> PyEnotsupExc(m, "EnotsupExc");
-    static py::exception<EnoattrExc> PyEnoattrExc(m, "EnoattrExc");
-    static py::exception<EdircorruptedExc> PyEdircorruptedExc(m, "EdircorruptedExc");
-    static py::exception<EdquotExc> PyEdquotExc(m, "EdquotExc");
-    static py::exception<EnfsremoteExc> PyEnfsremoteExc(m, "EnfsremoteExc");
-    static py::exception<EcontrollerExc> PyEcontrollerExc(m, "EcontrollerExc");
-    static py::exception<EnotcontrollerExc> PyEnotcontrollerExc(m, "EnotcontrollerExc");
-    static py::exception<EenqueuedExc> PyEenqueuedExc(m, "EenqueuedExc");
-    static py::exception<EnotenqueuedExc> PyEnotenqueuedExc(m, "EnotenqueuedExc");
-    static py::exception<EjoinedExc> PyEjoinedExc(m, "EjoinedExc");
-    static py::exception<EnotjoinedExc> PyEnotjoinedExc(m, "EnotjoinedExc");
-    static py::exception<EnoprocExc> PyEnoprocExc(m, "EnoprocExc");
-    static py::exception<EmustrunExc> PyEmustrunExc(m, "EmustrunExc");
-    static py::exception<EnotstoppedExc> PyEnotstoppedExc(m, "EnotstoppedExc");
-    static py::exception<EclockcpuExc> PyEclockcpuExc(m, "EclockcpuExc");
-    static py::exception<EinvalstateExc> PyEinvalstateExc(m, "EinvalstateExc");
-    static py::exception<EnoexistExc> PyEnoexistExc(m, "EnoexistExc");
-    static py::exception<EendofminorExc> PyEendofminorExc(m, "EendofminorExc");
-    static py::exception<EbufsizeExc> PyEbufsizeExc(m, "EbufsizeExc");
-    static py::exception<EemptyExc> PyEemptyExc(m, "EemptyExc");
-    static py::exception<EnointrgroupExc> PyEnointrgroupExc(m, "EnointrgroupExc");
-    static py::exception<EinvalmodeExc> PyEinvalmodeExc(m, "EinvalmodeExc");
-    static py::exception<EcantextentExc> PyEcantextentExc(m, "EcantextentExc");
-    static py::exception<EinvaltimeExc> PyEinvaltimeExc(m, "EinvaltimeExc");
-    static py::exception<EdestroyedExc> PyEdestroyedExc(m, "EdestroyedExc");
+
+    static py::exception<ArgExc> PyArgExc(m, "ArgExc", PyBaseExc.ptr());
+    static py::exception<LogicExc> PyLogicExc(m, "LogicExc", PyBaseExc.ptr());
+    static py::exception<InputExc> PyInputExc(m, "InputExc", PyBaseExc.ptr());
+    static py::exception<IoExc> PyIoExc(m, "IoExc", PyBaseExc.ptr());
+    static py::exception<MathExc> PyMathExc(m, "MathExc", PyBaseExc.ptr());
+    static py::exception<NoImplExc> PyNoImplExc(m, "NoImplExc", PyBaseExc.ptr());
+    static py::exception<NullExc> PyNullExc(m, "NullExc", PyBaseExc.ptr());
+    static py::exception<TypeExc> PyTypeExc(m, "TypeExc", PyBaseExc.ptr());
+    static py::exception<ErrnoExc> PyErrnoExc(m, "ErrnoExc", PyBaseExc.ptr());
+
+    static py::exception<EpermExc> PyEpermExc(m, "EpermExc", PyErrnoExc.ptr());
+    static py::exception<EnoentExc> PyEnoentExc(m, "EnoentExc", PyErrnoExc.ptr());
+    static py::exception<EsrchExc> PyEsrchExc(m, "EsrchExc", PyErrnoExc.ptr());
+    static py::exception<EintrExc> PyEintrExc(m, "EintrExc", PyErrnoExc.ptr());
+    static py::exception<EioExc> PyEioExc(m, "EioExc", PyErrnoExc.ptr());
+    static py::exception<EnxioExc> PyEnxioExc(m, "EnxioExc", PyErrnoExc.ptr());
+    static py::exception<E2bigExc> PyE2bigExc(m, "E2bigExc", PyErrnoExc.ptr());
+    static py::exception<EnoexecExc> PyEnoexecExc(m, "EnoexecExc", PyErrnoExc.ptr());
+    static py::exception<EbadfExc> PyEbadfExc(m, "EbadfExc", PyErrnoExc.ptr());
+    static py::exception<EchildExc> PyEchildExc(m, "EchildExc", PyErrnoExc.ptr());
+    static py::exception<EagainExc> PyEagainExc(m, "EagainExc", PyErrnoExc.ptr());
+    static py::exception<EnomemExc> PyEnomemExc(m, "EnomemExc", PyErrnoExc.ptr());
+    static py::exception<EaccesExc> PyEaccesExc(m, "EaccesExc", PyErrnoExc.ptr());
+    static py::exception<EfaultExc> PyEfaultExc(m, "EfaultExc", PyErrnoExc.ptr());
+    static py::exception<EnotblkExc> PyEnotblkExc(m, "EnotblkExc" , PyErrnoExc.ptr());
+    static py::exception<EbusyExc> PyEbusyExc(m, "EbusyExc" , PyErrnoExc.ptr());
+    static py::exception<EexistExc> PyEexistExc(m, "EexistExc" , PyErrnoExc.ptr());
+    static py::exception<ExdevExc> PyExdevExc(m, "ExdevExc" , PyErrnoExc.ptr());
+    static py::exception<EnodevExc> PyEnodevExc(m, "EnodevExc" , PyErrnoExc.ptr());
+    static py::exception<EnotdirExc> PyEnotdirExc(m, "EnotdirExc" , PyErrnoExc.ptr());
+    static py::exception<EisdirExc> PyEisdirExc(m, "EisdirExc" , PyErrnoExc.ptr());
+    static py::exception<EinvalExc> PyEinvalExc(m, "EinvalExc" , PyErrnoExc.ptr());
+    static py::exception<EnfileExc> PyEnfileExc(m, "EnfileExc" , PyErrnoExc.ptr());
+    static py::exception<EmfileExc> PyEmfileExc(m, "EmfileExc" , PyErrnoExc.ptr());
+    static py::exception<EnottyExc> PyEnottyExc(m, "EnottyExc" , PyErrnoExc.ptr());
+    static py::exception<EtxtbsyExc> PyEtxtbsyExc(m, "EtxtbsyExc" , PyErrnoExc.ptr());
+    static py::exception<EfbigExc> PyEfbigExc(m, "EfbigExc" , PyErrnoExc.ptr());
+    static py::exception<EnospcExc> PyEnospcExc(m, "EnospcExc" , PyErrnoExc.ptr());
+    static py::exception<EspipeExc> PyEspipeExc(m, "EspipeExc" , PyErrnoExc.ptr());
+    static py::exception<ErofsExc> PyErofsExc(m, "ErofsExc" , PyErrnoExc.ptr());
+    static py::exception<EmlinkExc> PyEmlinkExc(m, "EmlinkExc" , PyErrnoExc.ptr());
+    static py::exception<EpipeExc> PyEpipeExc(m, "EpipeExc" , PyErrnoExc.ptr());
+    static py::exception<EdomExc> PyEdomExc(m, "EdomExc" , PyErrnoExc.ptr());
+    static py::exception<ErangeExc> PyErangeExc(m, "ErangeExc" , PyErrnoExc.ptr());
+    static py::exception<EnomsgExc> PyEnomsgExc(m, "EnomsgExc" , PyErrnoExc.ptr());
+    static py::exception<EidrmExc> PyEidrmExc(m, "EidrmExc" , PyErrnoExc.ptr());
+    static py::exception<EchrngExc> PyEchrngExc(m, "EchrngExc" , PyErrnoExc.ptr());
+    static py::exception<El2nsyncExc> PyEl2nsyncExc(m, "El2nsyncExc" , PyErrnoExc.ptr());
+    static py::exception<El3hltExc> PyEl3hltExc(m, "El3hltExc" , PyErrnoExc.ptr());
+    static py::exception<El3rstExc> PyEl3rstExc(m, "El3rstExc" , PyErrnoExc.ptr());
+    static py::exception<ElnrngExc> PyElnrngExc(m, "ElnrngExc" , PyErrnoExc.ptr());
+    static py::exception<EunatchExc> PyEunatchExc(m, "EunatchExc" , PyErrnoExc.ptr());
+    static py::exception<EnocsiExc> PyEnocsiExc(m, "EnocsiExc" , PyErrnoExc.ptr());
+    static py::exception<El2hltExc> PyEl2hltExc(m, "El2hltExc" , PyErrnoExc.ptr());
+    static py::exception<EdeadlkExc> PyEdeadlkExc(m, "EdeadlkExc" , PyErrnoExc.ptr());
+    static py::exception<EnolckExc> PyEnolckExc(m, "EnolckExc" , PyErrnoExc.ptr());
+    static py::exception<EbadeExc> PyEbadeExc(m, "EbadeExc" , PyErrnoExc.ptr());
+    static py::exception<EbadrExc> PyEbadrExc(m, "EbadrExc" , PyErrnoExc.ptr());
+    static py::exception<ExfullExc> PyExfullExc(m, "ExfullExc" , PyErrnoExc.ptr());
+    static py::exception<EnoanoExc> PyEnoanoExc(m, "EnoanoExc" , PyErrnoExc.ptr());
+    static py::exception<EbadrqcExc> PyEbadrqcExc(m, "EbadrqcExc" , PyErrnoExc.ptr());
+    static py::exception<EbadsltExc> PyEbadsltExc(m, "EbadsltExc" , PyErrnoExc.ptr());
+    static py::exception<EdeadlockExc> PyEdeadlockExc(m, "EdeadlockExc" , PyErrnoExc.ptr());
+    static py::exception<EbfontExc> PyEbfontExc(m, "EbfontExc" , PyErrnoExc.ptr());
+    static py::exception<EnostrExc> PyEnostrExc(m, "EnostrExc" , PyErrnoExc.ptr());
+    static py::exception<EnodataExc> PyEnodataExc(m, "EnodataExc" , PyErrnoExc.ptr());
+    static py::exception<EtimeExc> PyEtimeExc(m, "EtimeExc" , PyErrnoExc.ptr());
+    static py::exception<EnosrExc> PyEnosrExc(m, "EnosrExc" , PyErrnoExc.ptr());
+    static py::exception<EnonetExc> PyEnonetExc(m, "EnonetExc" , PyErrnoExc.ptr());
+    static py::exception<EnopkgExc> PyEnopkgExc(m, "EnopkgExc" , PyErrnoExc.ptr());
+    static py::exception<EremoteExc> PyEremoteExc(m, "EremoteExc" , PyErrnoExc.ptr());
+    static py::exception<EnolinkExc> PyEnolinkExc(m, "EnolinkExc" , PyErrnoExc.ptr());
+    static py::exception<EadvExc> PyEadvExc(m, "EadvExc" , PyErrnoExc.ptr());
+    static py::exception<EsrmntExc> PyEsrmntExc(m, "EsrmntExc" , PyErrnoExc.ptr());
+    static py::exception<EcommExc> PyEcommExc(m, "EcommExc" , PyErrnoExc.ptr());
+    static py::exception<EprotoExc> PyEprotoExc(m, "EprotoExc" , PyErrnoExc.ptr());
+    static py::exception<EmultihopExc> PyEmultihopExc(m, "EmultihopExc" , PyErrnoExc.ptr());
+    static py::exception<EbadmsgExc> PyEbadmsgExc(m, "EbadmsgExc" , PyErrnoExc.ptr());
+    static py::exception<EnametoolongExc> PyEnametoolongExc(m, "EnametoolongExc" , PyErrnoExc.ptr());
+    static py::exception<EoverflowExc> PyEoverflowExc(m, "EoverflowExc" , PyErrnoExc.ptr());
+    static py::exception<EnotuniqExc> PyEnotuniqExc(m, "EnotuniqExc" , PyErrnoExc.ptr());
+    static py::exception<EbadfdExc> PyEbadfdExc(m, "EbadfdExc" , PyErrnoExc.ptr());
+    static py::exception<EremchgExc> PyEremchgExc(m, "EremchgExc" , PyErrnoExc.ptr());
+    static py::exception<ElibaccExc> PyElibaccExc(m, "ElibaccExc" , PyErrnoExc.ptr());
+    static py::exception<ElibbadExc> PyElibbadExc(m, "ElibbadExc" , PyErrnoExc.ptr());
+    static py::exception<ElibscnExc> PyElibscnExc(m, "ElibscnExc" , PyErrnoExc.ptr());
+    static py::exception<ElibmaxExc> PyElibmaxExc(m, "ElibmaxExc" , PyErrnoExc.ptr());
+    static py::exception<ElibexecExc> PyElibexecExc(m, "ElibexecExc" , PyErrnoExc.ptr());
+    static py::exception<EilseqExc> PyEilseqExc(m, "EilseqExc" , PyErrnoExc.ptr());
+    static py::exception<EnosysExc> PyEnosysExc(m, "EnosysExc" , PyErrnoExc.ptr());
+    static py::exception<EloopExc> PyEloopExc(m, "EloopExc" , PyErrnoExc.ptr());
+    static py::exception<ErestartExc> PyErestartExc(m, "ErestartExc" , PyErrnoExc.ptr());
+    static py::exception<EstrpipeExc> PyEstrpipeExc(m, "EstrpipeExc" , PyErrnoExc.ptr());
+    static py::exception<EnotemptyExc> PyEnotemptyExc(m, "EnotemptyExc" , PyErrnoExc.ptr());
+    static py::exception<EusersExc> PyEusersExc(m, "EusersExc" , PyErrnoExc.ptr());
+    static py::exception<EnotsockExc> PyEnotsockExc(m, "EnotsockExc" , PyErrnoExc.ptr());
+    static py::exception<EdestaddrreqExc> PyEdestaddrreqExc(m, "EdestaddrreqExc" , PyErrnoExc.ptr());
+    static py::exception<EmsgsizeExc> PyEmsgsizeExc(m, "EmsgsizeExc" , PyErrnoExc.ptr());
+    static py::exception<EprototypeExc> PyEprototypeExc(m, "EprototypeExc" , PyErrnoExc.ptr());
+    static py::exception<EnoprotooptExc> PyEnoprotooptExc(m, "EnoprotooptExc" , PyErrnoExc.ptr());
+    static py::exception<EprotonosupportExc> PyEprotonosupportExc(m, "EprotonosupportExc" , PyErrnoExc.ptr());
+    static py::exception<EsocktnosupportExc> PyEsocktnosupportExc(m, "EsocktnosupportExc" , PyErrnoExc.ptr());
+    static py::exception<EopnotsuppExc> PyEopnotsuppExc(m, "EopnotsuppExc" , PyErrnoExc.ptr());
+    static py::exception<EpfnosupportExc> PyEpfnosupportExc(m, "EpfnosupportExc" , PyErrnoExc.ptr());
+    static py::exception<EafnosupportExc> PyEafnosupportExc(m, "EafnosupportExc" , PyErrnoExc.ptr());
+    static py::exception<EaddrinuseExc> PyEaddrinuseExc(m, "EaddrinuseExc" , PyErrnoExc.ptr());
+    static py::exception<EaddrnotavailExc> PyEaddrnotavailExc(m, "EaddrnotavailExc" , PyErrnoExc.ptr());
+    static py::exception<EnetdownExc> PyEnetdownExc(m, "EnetdownExc" , PyErrnoExc.ptr());
+    static py::exception<EnetunreachExc> PyEnetunreachExc(m, "EnetunreachExc" , PyErrnoExc.ptr());
+    static py::exception<EnetresetExc> PyEnetresetExc(m, "EnetresetExc" , PyErrnoExc.ptr());
+    static py::exception<EconnabortedExc> PyEconnabortedExc(m, "EconnabortedExc" , PyErrnoExc.ptr());
+    static py::exception<EconnresetExc> PyEconnresetExc(m, "EconnresetExc" , PyErrnoExc.ptr());
+    static py::exception<EnobufsExc> PyEnobufsExc(m, "EnobufsExc" , PyErrnoExc.ptr());
+    static py::exception<EisconnExc> PyEisconnExc(m, "EisconnExc" , PyErrnoExc.ptr());
+    static py::exception<EnotconnExc> PyEnotconnExc(m, "EnotconnExc" , PyErrnoExc.ptr());
+    static py::exception<EshutdownExc> PyEshutdownExc(m, "EshutdownExc" , PyErrnoExc.ptr());
+    static py::exception<EtoomanyrefsExc> PyEtoomanyrefsExc(m, "EtoomanyrefsExc" , PyErrnoExc.ptr());
+    static py::exception<EtimedoutExc> PyEtimedoutExc(m, "EtimedoutExc" , PyErrnoExc.ptr());
+    static py::exception<EconnrefusedExc> PyEconnrefusedExc(m, "EconnrefusedExc" , PyErrnoExc.ptr());
+    static py::exception<EhostdownExc> PyEhostdownExc(m, "EhostdownExc" , PyErrnoExc.ptr());
+    static py::exception<EhostunreachExc> PyEhostunreachExc(m, "EhostunreachExc" , PyErrnoExc.ptr());
+    static py::exception<EalreadyExc> PyEalreadyExc(m, "EalreadyExc" , PyErrnoExc.ptr());
+    static py::exception<EinprogressExc> PyEinprogressExc(m, "EinprogressExc" , PyErrnoExc.ptr());
+    static py::exception<EstaleExc> PyEstaleExc(m, "EstaleExc" , PyErrnoExc.ptr());
+    static py::exception<EioresidExc> PyEioresidExc(m, "EioresidExc" , PyErrnoExc.ptr());
+    static py::exception<EucleanExc> PyEucleanExc(m, "EucleanExc" , PyErrnoExc.ptr());
+    static py::exception<EnotnamExc> PyEnotnamExc(m, "EnotnamExc" , PyErrnoExc.ptr());
+    static py::exception<EnavailExc> PyEnavailExc(m, "EnavailExc" , PyErrnoExc.ptr());
+    static py::exception<EisnamExc> PyEisnamExc(m, "EisnamExc" , PyErrnoExc.ptr());
+    static py::exception<EremoteioExc> PyEremoteioExc(m, "EremoteioExc" , PyErrnoExc.ptr());
+    static py::exception<EinitExc> PyEinitExc(m, "EinitExc" , PyErrnoExc.ptr());
+    static py::exception<EremdevExc> PyEremdevExc(m, "EremdevExc" , PyErrnoExc.ptr());
+    static py::exception<EcanceledExc> PyEcanceledExc(m, "EcanceledExc" , PyErrnoExc.ptr());
+    static py::exception<EnolimfileExc> PyEnolimfileExc(m, "EnolimfileExc" , PyErrnoExc.ptr());
+    static py::exception<EproclimExc> PyEproclimExc(m, "EproclimExc" , PyErrnoExc.ptr());
+    static py::exception<EdisjointExc> PyEdisjointExc(m, "EdisjointExc" , PyErrnoExc.ptr());
+    static py::exception<EnologinExc> PyEnologinExc(m, "EnologinExc" , PyErrnoExc.ptr());
+    static py::exception<EloginlimExc> PyEloginlimExc(m, "EloginlimExc" , PyErrnoExc.ptr());
+    static py::exception<EgrouploopExc> PyEgrouploopExc(m, "EgrouploopExc" , PyErrnoExc.ptr());
+    static py::exception<EnoattachExc> PyEnoattachExc(m, "EnoattachExc" , PyErrnoExc.ptr());
+    static py::exception<EnotsupExc> PyEnotsupExc(m, "EnotsupExc" , PyErrnoExc.ptr());
+    static py::exception<EnoattrExc> PyEnoattrExc(m, "EnoattrExc" , PyErrnoExc.ptr());
+    static py::exception<EdircorruptedExc> PyEdircorruptedExc(m, "EdircorruptedExc" , PyErrnoExc.ptr());
+    static py::exception<EdquotExc> PyEdquotExc(m, "EdquotExc" , PyErrnoExc.ptr());
+    static py::exception<EnfsremoteExc> PyEnfsremoteExc(m, "EnfsremoteExc" , PyErrnoExc.ptr());
+    static py::exception<EcontrollerExc> PyEcontrollerExc(m, "EcontrollerExc" , PyErrnoExc.ptr());
+    static py::exception<EnotcontrollerExc> PyEnotcontrollerExc(m, "EnotcontrollerExc" , PyErrnoExc.ptr());
+    static py::exception<EenqueuedExc> PyEenqueuedExc(m, "EenqueuedExc" , PyErrnoExc.ptr());
+    static py::exception<EnotenqueuedExc> PyEnotenqueuedExc(m, "EnotenqueuedExc" , PyErrnoExc.ptr());
+    static py::exception<EjoinedExc> PyEjoinedExc(m, "EjoinedExc" , PyErrnoExc.ptr());
+    static py::exception<EnotjoinedExc> PyEnotjoinedExc(m, "EnotjoinedExc" , PyErrnoExc.ptr());
+    static py::exception<EnoprocExc> PyEnoprocExc(m, "EnoprocExc" , PyErrnoExc.ptr());
+    static py::exception<EmustrunExc> PyEmustrunExc(m, "EmustrunExc" , PyErrnoExc.ptr());
+    static py::exception<EnotstoppedExc> PyEnotstoppedExc(m, "EnotstoppedExc" , PyErrnoExc.ptr());
+    static py::exception<EclockcpuExc> PyEclockcpuExc(m, "EclockcpuExc" , PyErrnoExc.ptr());
+    static py::exception<EinvalstateExc> PyEinvalstateExc(m, "EinvalstateExc" , PyErrnoExc.ptr());
+    static py::exception<EnoexistExc> PyEnoexistExc(m, "EnoexistExc" , PyErrnoExc.ptr());
+    static py::exception<EendofminorExc> PyEendofminorExc(m, "EendofminorExc" , PyErrnoExc.ptr());
+    static py::exception<EbufsizeExc> PyEbufsizeExc(m, "EbufsizeExc" , PyErrnoExc.ptr());
+    static py::exception<EemptyExc> PyEemptyExc(m, "EemptyExc" , PyErrnoExc.ptr());
+    static py::exception<EnointrgroupExc> PyEnointrgroupExc(m, "EnointrgroupExc" , PyErrnoExc.ptr());
+    static py::exception<EinvalmodeExc> PyEinvalmodeExc(m, "EinvalmodeExc" , PyErrnoExc.ptr());
+    static py::exception<EcantextentExc> PyEcantextentExc(m, "EcantextentExc" , PyErrnoExc.ptr());
+    static py::exception<EinvaltimeExc> PyEinvaltimeExc(m, "EinvaltimeExc" , PyErrnoExc.ptr());
+    static py::exception<EdestroyedExc> PyEdestroyedExc(m, "EdestroyedExc" , PyErrnoExc.ptr());
 
     py::register_exception_translator([](std::exception_ptr p) {
         // translate c++ exception to python exception
