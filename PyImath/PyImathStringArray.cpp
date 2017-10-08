@@ -295,8 +295,8 @@ void register_StringArrays(py::module &m)
     py::class_<StringArray> string_array_class =
         py::class_<StringArray>(m, "StringArray");
     string_array_class
-        .def("__init__", StringArray::createDefaultArray)
-        .def("__init__", StringArray::createUniformArray)
+        .def(py::init(&StringArray::createDefaultArray))
+        .def(py::init(&StringArray::createUniformArray))
         //.def("__getitem__", &StringArray::getslice_string, return_value_policy<manage_new_object>()) 
         .def("__getitem__", &StringArray::getitem_string) 
         .def("__setitem__", &StringArray::setitem_string_scalar)
@@ -317,8 +317,8 @@ void register_StringArrays(py::module &m)
     py::class_<WstringArray> wstring_array_class =
         py::class_<WstringArray>(m, "WstringArray");
     wstring_array_class
-        .def("__init__", WstringArray::createDefaultArray)
-        .def("__init__", WstringArray::createUniformArray)
+        .def(py::init(&WstringArray::createDefaultArray))
+        .def(py::init(&WstringArray::createUniformArray))
         //.def("__getitem__", &WstringArray::getslice_string, return_value_policy<manage_new_object>()) 
         .def("__getitem__", &WstringArray::getitem_string) 
         .def("__setitem__", &WstringArray::setitem_string_scalar)

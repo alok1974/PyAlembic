@@ -566,34 +566,34 @@ register_Euler(py::module &m)
 {
     py::class_<Euler<T>, Vec3<T> > euler_class(m, EulerName<T>::value,EulerName<T>::value);
     euler_class
-        .def(py::init<Euler<T> >(/*"copy construction"*/))
-        .def(py::init<>(/*"imath Euler default construction"*/))
-        .def("__init__", eulerConstructor1<T>)
-        .def("__init__", eulerConstructor1a<T>)
-        .def("__init__", eulerConstructor1b<T>)
-        .def("__init__", eulerConstructor2<T>)
-        .def("__init__", eulerConstructor2a<T>)
-        .def("__init__", eulerConstructor2b<T>)
-        .def("__init__", eulerConstructor3<T>,
+        .def(py::init<Euler<T> >(), "copy construction")
+        .def(py::init<>(), "imath Euler default construction")
+        .def(py::init(&eulerConstructor1<T>))
+        .def(py::init(&eulerConstructor1a<T>))
+        .def(py::init(&eulerConstructor1b<T>))
+        .def(py::init(&eulerConstructor2<T>))
+        .def(py::init(&eulerConstructor2a<T>))
+        .def(py::init(&eulerConstructor2b<T>))
+        .def(py::init(&eulerConstructor3<T>),
              "Euler-from-matrix construction assumes, but does\n"
              "not verify, that the matrix includes no shear or\n"
              "non-uniform scaling.  If necessary, you can fix\n"
              "the matrix by calling the removeScalingAndShear()\n"
              "function.\n")
-        .def("__init__", eulerConstructor3a<T>)
-        .def("__init__", eulerConstructor3b<T>)
-        .def("__init__", eulerConstructor4<T>)
-        .def("__init__", eulerConstructor4a<T>)
-        .def("__init__", eulerConstructor4b<T>)
-        .def("__init__", eulerConstructor5<T>)
-        .def("__init__", eulerConstructor5a<T>)
-        .def("__init__", eulerConstructor5b<T>)
-        .def("__init__", eulerConstructor6<T>)
-        .def("__init__", eulerConstructor7<T>)
-        .def("__init__", eulerConstructor7a<T>)
-        .def("__init__", eulerConstructor7b<T>)
-        .def("__init__", eulerConversionConstructor<T, float>)
-        .def("__init__", eulerConversionConstructor<T, double>)
+        .def(py::init(&eulerConstructor3a<T>))
+        .def(py::init(&eulerConstructor3b<T>))
+        .def(py::init(&eulerConstructor4<T>))
+        .def(py::init(&eulerConstructor4a<T>))
+        .def(py::init(&eulerConstructor4b<T>))
+        .def(py::init(&eulerConstructor5<T>))
+        .def(py::init(&eulerConstructor5a<T>))
+        .def(py::init(&eulerConstructor5b<T>))
+        .def(py::init(&eulerConstructor6<T>))
+        .def(py::init(&eulerConstructor7<T>))
+        .def(py::init(&eulerConstructor7a<T>))
+        .def(py::init(&eulerConstructor7b<T>))
+        .def(py::init(&eulerConversionConstructor<T, float>))
+        .def(py::init(&eulerConversionConstructor<T, double>))
         
         .def("angleOrder", &getAngleOrder<T>, "angleOrder() set the angle order")
         
@@ -785,7 +785,7 @@ register_EulerArray(py::module &m)
         //.def_property_readonly("x",&EulerArray_get<T,1>)
         //.def_property_readonly("y",&EulerArray_get<T,2>)
         //.def_property_readonly("z",&EulerArray_get<T,3>)
-        .def("__init__", EulerArray_eulerConstructor7a<T>)
+        .def(py::init(&EulerArray_eulerConstructor7a<T>))
         ;
 
     add_comparison_functions(eulerArray_class);

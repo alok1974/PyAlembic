@@ -970,10 +970,10 @@ register_Vec2(py::module &m)
 
     py::class_<Vec2<T> > vec2_class(m, Vec2Name<T>::value, Vec2Name<T>::value);
     vec2_class
-        .def(py::init<Vec2<T> >(/*"copy construction"*/))
-        .def("__init__",Vec2_construct_default<T>,"initialize to (0,0)")
-        .def("__init__",Vec2_object_constructor1<T>)
-        .def("__init__",Vec2_object_constructor2<T>)
+        .def(py::init<Vec2<T> >(), "copy construction")
+        .def(py::init(&Vec2_construct_default<T>), "initialize to (0,0)")
+        .def(py::init(&Vec2_object_constructor1<T>))
+        .def(py::init(&Vec2_object_constructor2<T>))
         .def_readwrite("x", &Vec2<T>::x)
         .def_readwrite("y", &Vec2<T>::y)
         .def_static("baseTypeEpsilon", &Vec2<T>::baseTypeEpsilon,"baseTypeEpsilon() epsilon value of the base type of the vector")

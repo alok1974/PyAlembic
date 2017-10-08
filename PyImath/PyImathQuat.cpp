@@ -430,15 +430,15 @@ register_Quat(py::module &m)
 {
     py::class_<Quat<T> > quat_class(m, QuatName<T>::value, QuatName<T>::value);
     quat_class
-        .def(py::init<Quat<T> >(/*"copy construction"*/))
-        .def(py::init<>(/*"imath Quat initialization"*/) )
-        .def(py::init<Quat<float> >(/*"imath Quat copy initialization"*/) )
-        .def(py::init<Quat<double> >(/*"imath Quat copy initialization"*/) )
-        .def(py::init<T,T,T,T>(/*"make Quat from components"*/) )
-        .def(py::init<T, Vec3<T> >(/*"make Quat from components"*/) )
-        .def("__init__", quatConstructor1<T>)
-        .def("__init__", quatConstructor2<T>)
-        .def("__init__", quatConstructor3<T>)
+        .def(py::init<Quat<T> >(), "copy construction")
+        .def(py::init<>(), "imath Quat initialization")
+        .def(py::init<Quat<float> >(), "imath Quat copy initialization")
+        .def(py::init<Quat<double> >(), "imath Quat copy initialization")
+        .def(py::init<T,T,T,T>(), "make Quat from components")
+        .def(py::init<T, Vec3<T> >(), "make Quat from components")
+        .def(py::init(&quatConstructor1<T>))
+        .def(py::init(&quatConstructor2<T>))
+        .def(py::init(&quatConstructor3<T>))
         .def("identity",&Quat<T>::identity)
         .def("invert",&invert<T>, py::return_value_policy::reference_internal,
         	 "q.invert() -- inverts quaternion q\n"
@@ -947,7 +947,7 @@ register_QuatArray(py::module &m)
         .def("__mul__", &QuatArray_mul<T>)
         .def("__rmul__", &QuatArray_rmulVec3<T>)
         .def("__rmul__", &QuatArray_rmulVec3Array<T>)
-        .def("__init__", QuatArray_quatConstructor1<T>)
+        .def(py::init(&QuatArray_quatConstructor1<T>))
         ;
 
     add_comparison_functions(quatArray_class);

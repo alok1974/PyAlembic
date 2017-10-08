@@ -946,12 +946,12 @@ register_Matrix44(py::module &m)
 
     py::class_<Matrix44<T> > matrix44_class(m, Matrix44Name<T>::value, Matrix44Name<T>::value);
     matrix44_class
-        .def(py::init<Matrix44<T> >(/*"copy construction"*/))
-        .def(py::init<>(/*"initialize to identity"*/))
-        .def(py::init<T>(/*"initialize all entries to a single value"*/))
-        .def("__init__", Matrix4_tuple_constructor<T>,"tuple constructor1")
-        .def("__init__", Matrix4_matrix_constructor<T,float>)
-        .def("__init__", Matrix4_matrix_constructor<T,double>)
+        .def(py::init<Matrix44<T> >(), "copy construction")
+        .def(py::init<>(), "initialize to identity")
+        .def(py::init<T>(), "initialize all entries to a single value")
+        .def(py::init(&Matrix4_tuple_constructor<T>),"tuple constructor1")
+        .def(py::init(&Matrix4_matrix_constructor<T,float>))
+        .def(py::init(&Matrix4_matrix_constructor<T,double>))
         
         .def(py::init<T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T>(/*"make from components"*/))
 	//.def_readwrite("x00", &Matrix44<T>::x[0][0])

@@ -162,9 +162,9 @@ register_Rand32(py::module &m)
     
     py::class_< IMATH_NAMESPACE::Rand32 > rand32_class(m, "Rand32");
     rand32_class
-        .def(py::init<>(/*"default construction"*/))
-        .def("__init__", Rand_constructor1<IMATH_NAMESPACE::Rand32>)
-        .def("__init__", Rand_constructor2<IMATH_NAMESPACE::Rand32>)
+        .def(py::init<>(), "default construction")
+        .def(py::init(&Rand_constructor1<IMATH_NAMESPACE::Rand32>))
+        .def(py::init(&Rand_constructor2<IMATH_NAMESPACE::Rand32>))
         .def("init", &IMATH_NAMESPACE::Rand32::init,
              "r.init(i) -- initialize with integer "
 			 "seed i")
@@ -260,9 +260,9 @@ register_Rand48(py::module &m)
    
     py::class_< IMATH_NAMESPACE::Rand48 > rand48_class(m, "Rand48");
     rand48_class
-        .def(py::init<>(/*"default construction"*/))
-        .def("__init__", Rand_constructor1<IMATH_NAMESPACE::Rand48>)
-        .def("__init__", Rand_constructor2<IMATH_NAMESPACE::Rand48>)
+        .def(py::init<>(), "default construction")
+        .def(py::init(&Rand_constructor1<IMATH_NAMESPACE::Rand48>))
+        .def(py::init(&Rand_constructor2<IMATH_NAMESPACE::Rand48>))
         .def("init", &IMATH_NAMESPACE::Rand48::init,
              "r.init(i) -- initialize with integer "
 			 "seed i")

@@ -916,9 +916,9 @@ register_Vec4(py::module &m)
     py::class_<Vec4<T> > vec4_class(m, Vec4Name<T>::value(), Vec4Name<T>::value());
     vec4_class
         .def(py::init<Vec4<T> >(/*"copy construction"*/))
-        .def("__init__",Vec4_construct_default<T>,"initialize to (0,0,0,0)")
-        .def("__init__",Vec4_object_constructor1<T>)
-        .def("__init__",Vec4_object_constructor2<T>)
+        .def(py::init(&Vec4_construct_default<T>),"initialize to (0,0,0,0)")
+        .def(py::init(&Vec4_object_constructor1<T>))
+        .def(py::init(&Vec4_object_constructor2<T>))
         .def_readwrite("x", &Vec4<T>::x)
         .def_readwrite("y", &Vec4<T>::y)
         .def_readwrite("z", &Vec4<T>::z)

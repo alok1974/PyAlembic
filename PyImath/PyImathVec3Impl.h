@@ -931,10 +931,10 @@ register_Vec3(py::module &m)
 
     py::class_<Vec3<T> > vec3_class(m, Vec3Name<T>::value(), Vec3Name<T>::value());
     vec3_class
-        .def(py::init<Vec3<T> >(/*"copy construction"*/))
-        .def("__init__",Vec3_construct_default<T>,"initialize to (0,0,0)")
-        .def("__init__",Vec3_object_constructor1<T>)
-        .def("__init__",Vec3_object_constructor2<T>)
+        .def(py::init<Vec3<T> >(), "copy construction")
+        .def(py::init(&Vec3_construct_default<T>),"initialize to (0,0,0)")
+        .def(py::init(&Vec3_object_constructor1<T>))
+        .def(py::init(&Vec3_object_constructor2<T>))
         .def_readwrite("x", &Vec3<T>::x)
         .def_readwrite("y", &Vec3<T>::y)
         .def_readwrite("z", &Vec3<T>::z)

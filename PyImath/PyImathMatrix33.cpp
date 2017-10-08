@@ -858,13 +858,13 @@ register_Matrix33(py::module &m)
     MatrixRow<T,3>::register_class(m);
     py::class_<Matrix33<T> > matrix33_class(m, Matrix33Name<T>::value, Matrix33Name<T>::value);
     matrix33_class
-        .def(py::init<Matrix33<T> >(/*"copy construction"*/))
-        .def(py::init<>(/*"initialize to identity"*/))
-        .def(py::init<T>(/*"initialize all entries to a single value"*/))
-        .def(py::init<T,T,T,T,T,T,T,T,T>(/*"make from components"*/))
-        .def("__init__", Matrix3_tuple_constructor<T>)
-        .def("__init__", Matrix3_matrix_constructor<T,float>)
-        .def("__init__", Matrix3_matrix_constructor<T,double>)
+        .def(py::init<Matrix33<T> >(), "copy construction")
+        .def(py::init<>(), "initialize to identity")
+        .def(py::init<T>(), "initialize all entries to a single value")
+        .def(py::init<T,T,T,T,T,T,T,T,T>(), "make from components")
+        .def(py::init(&Matrix3_tuple_constructor<T>))
+        .def(py::init(&Matrix3_matrix_constructor<T,float>))
+        .def(py::init(&Matrix3_matrix_constructor<T,double>))
         
 	//.def_readwrite("x00", &Matrix33<T>::x[0][0])
 	//.def_readwrite("x01", &Matrix33<T>::x[0][1])

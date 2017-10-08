@@ -466,12 +466,12 @@ register_Line(py::module &m)
     
     py::class_<Line3<T> > line_class(m, name);
     line_class
-        .def("__init__", Line3_construct_default<T>, "initialize point to (0,0,0) and direction to (1,0,0)")
-        .def("__init__", Line3_tuple_construct<T>)
-        .def("__init__", Line3_line_construct<T,float>)
-        .def("__init__", Line3_line_construct<T,double>)
-        .def(py::init<const Vec3<float> &, const Vec3<float> &>(/*"Line3(point1, point2) construction"*/))
-        .def(py::init<const Vec3<double> &, const Vec3<double> &>(/*"Line3(point1, point2) construction"*/))
+        .def(py::init(&Line3_construct_default<T>), "initialize point to (0,0,0) and direction to (1,0,0)")
+        .def(py::init(&Line3_tuple_construct<T>))
+        .def(py::init(&Line3_line_construct<T,float>))
+        .def(py::init(&Line3_line_construct<T,double>))
+        .def(py::init<const Vec3<float> &, const Vec3<float> &>(), "Line3(point1, point2) construction")
+        .def(py::init<const Vec3<double> &, const Vec3<double> &>(), "Line3(point1, point2) construction")
         //.def(self * Matrix44<T>())
         .def("__eq__", &equal<T>)
         .def("__ne__", &notequal<T>)
