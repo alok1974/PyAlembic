@@ -655,21 +655,21 @@ register_Euler(py::module &m)
              "angles in e to v[0], v[1], v[2]")
         .def("setXYZVector", &setXYZTuple<T>)
         
-        .def("py::cast", &extract1<T>,
+        .def("extract", &extract1<T>,
              "e.extract(m) -- extracts the rotation component\n"
              "from 3x3 matrix m and stores the result in e.\n"
              "Assumes that m does not contain shear or non-\n"
              "uniform scaling.  If necessary, you can fix m\n"
              "by calling m.removeScalingAndShear().")
         
-        .def("py::cast", &extract2<T>,
+        .def("extract", &extract2<T>,
              "e.extract(m) -- extracts the rotation component\n"
              "from 4x4 matrix m and stores the result in e.\n"
              "Assumes that m does not contain shear or non-\n"
              "uniform scaling.  If necessary, you can fix m\n"
              "by calling m.removeScalingAndShear().")
         
-        .def("py::cast", &extract3<T>,
+        .def("extract", &extract3<T>,
              "e.extract(q) -- extracts the rotation component\n"
              "from quaternion q and stores the result in e")            
         

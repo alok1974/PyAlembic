@@ -61,33 +61,27 @@ template <class T>
 static Plane3<T> *Plane3_plane_construct(const py::object &planeObj)
 {
     MATH_EXC_ON;
-    //extract < Plane3<float> > ef (planeObj);
-    //extract < Plane3<double> > ed (planeObj);
+    py_extract < Plane3<float> > ef (planeObj);
+    py_extract < Plane3<double> > ed (planeObj);
 
     auto p = new Plane3<T>();
 
-    //if (ef.check())
+    if (ef.check())
     {
-        Plane3<T> efp = py::cast<Plane3<T>>(planeObj);
-        //p = new Plane3<float>;
+        Plane3<float> efp = ef();
         p->normal = efp.normal;
         p->distance = efp.distance;
     }
-
-    /*
     else if (ed.check())
     {
         Plane3<double> edp = ed();
-        p = new Plane3<T>;
         p->normal = edp.normal;
         p->distance = edp.distance;
     }
-
     else
     {
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameter passed to Plane constructor");
     }
-    */
     
     return p;
 }
@@ -494,10 +488,10 @@ register_Plane(py::module &m)
     py::class_< Plane3<T> > plane_class(m, name);
     plane_class
         .def(py::init(&Plane3_construct_default<T>),"initialize normal to  (1,0,0), distance to 0")
+        .def(py::init(&Plane3_plane_construct<T>))
         .def(py::init(&Plane3_tuple_constructor1<T>))
         .def(py::init(&Plane3_tuple_constructor2<T>))
         .def(py::init(&Plane3_tuple_constructor3<T>))
-        .def(py::init(&Plane3_plane_construct<T>))
         .def(py::init<const Vec3<T> &, T>(), "Plane3(normal, distance) construction")
         .def(py::init<const Vec3<T> &, const Vec3<T> &>(), "Plane3(point, normal) construction")
         .def(py::init<const Vec3<T> &, const Vec3<T> &, const Vec3<T> &>(), "Plane3(point1, point2, point3) construction")
@@ -507,18 +501,16 @@ register_Plane(py::module &m)
         .def("__neg__", &negate<T>)
         .def("__str__", &Plane3_str<T>)
         .def("__repr__", &Plane3_repr<T>)
-        
+        /*
         .def_readwrite("normal", &Plane3<T>::normal)
         .def_readwrite("distance", &Plane3<T>::distance)
-        
-        /*
+        */
         .def("normal", &normal<T>, "normal()",
              "pl.normal() -- returns the normal of plane pl")
              
         .def("distance", &distance<T>, "distance()",
         	 "pl.distance() -- returns the signed distance\n"
 			 "of plane pl from the coordinate origin")
-        */
 
         .def("setNormal", &setNormal<T>, "setNormal()",
         	 "pl.setNormal(n) -- sets the normal of plane\n"

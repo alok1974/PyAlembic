@@ -55,7 +55,6 @@
 #include <PyImathRandom.h>
 #include <PyImathShear.h>
 #include <PyImathMathExc.h>
-//#include <PyImathAutovectorize.h>
 #include <PyImathStringArrayRegister.h>
 
 
@@ -75,30 +74,30 @@ computeBoundingBox(const PyImath::FixedArray<IMATH_NAMESPACE::Vec3<T> >& positio
 }
 
 IMATH_NAMESPACE::M44d
-procrustes1(PyObject* from_input,
-    PyObject* to_input,
-    PyObject* weights_input = 0,
+procrustes1(py::object from_input,
+    py::object to_input,
+    py::object weights_input = py::cast(0),
     bool doScale = false)
 {
     // Verify the sequences:
-    if (!PySequence_Check(from_input))
+    if (!PySequence_Check(from_input.ptr()))
     {
         PyErr_SetString(PyExc_TypeError, "Expected a sequence type for 'from'");
         throw py::error_already_set();
     }
 
-    if (!PySequence_Check(to_input))
+    if (!PySequence_Check(to_input.ptr()))
     {
         PyErr_SetString(PyExc_TypeError, "Expected a sequence type for 'to'");
         throw py::error_already_set();
     }
 
-    bool useWeights = PySequence_Check(weights_input);
+    bool useWeights = PySequence_Check(weights_input.ptr());
 
     // Now verify the lengths:
-    const size_t n = PySequence_Length(from_input);
-    if (n != PySequence_Length(to_input) ||
-        (useWeights && n != PySequence_Length(weights_input)))
+    const size_t n = PySequence_Length(from_input.ptr());
+    if (n != PySequence_Length(to_input.ptr()) ||
+        (useWeights && n != PySequence_Length(weights_input.ptr())))
     {
         PyErr_SetString(PyExc_TypeError, "'from, 'to', and 'weights' should all have the same lengths.");
         throw py::error_already_set();
@@ -110,11 +109,11 @@ procrustes1(PyObject* from_input,
 
     for (size_t i = 0; i < n; ++i)
     {
-        PyObject* f = PySequence_GetItem(from_input, i);
-        PyObject* t = PySequence_GetItem(to_input, i);
+        PyObject* f = PySequence_GetItem(from_input.ptr(), i);
+        PyObject* t = PySequence_GetItem(to_input.ptr(), i);
         PyObject* w = 0;
         if (useWeights)
-            w = PySequence_GetItem(weights_input, i);
+            w = PySequence_GetItem(weights_input.ptr(), i);
 
         if (f == 0 || t == 0 || (useWeights && w == 0))
         {
@@ -386,13 +385,17 @@ PYBIND11_MODULE(imath, m)
     register_functions(m);
 
     m.def("procrustesRotationAndTranslation", procrustes1,
-        //py::args("fromPts", "toPts", "weights", "doScale"),  // Can't use 'from' and 'to' because 'from' is a reserved keywork in Python
         "Computes the orthogonal transform (consisting only of rotation and translation) mapping the "
         "'fromPts' points as close as possible to the 'toPts' points in the least squares norm.  The 'fromPts' and "
         "'toPts' lists must be the same length or the function will error out.  If weights "
         "are provided, then the points are weighted (that is, some points are considered more important "
         "than others while computing the transform).  If the 'doScale' parameter is True, then "
-        "the resulting matrix is also allowed to have a uniform scale.");
+        "the resulting matrix is also allowed to have a uniform scale."
+        , py::arg("from_input")
+        , py::arg("to_input")
+        , py::arg("weights_input") = 0
+        , py::arg("doScale") = false
+    );
 
     //
     // Rand
@@ -449,11 +452,12 @@ PYBIND11_MODULE(imath, m)
     //
     // Register Exceptions
     //
-    static py::exception<IMATH_NAMESPACE::NullVecExc> PyNullVecExc(m, "NullVecExc");
-    static py::exception<IMATH_NAMESPACE::NullQuatExc> PyNullQuatExc(m, "NullQuatExc");
-    static py::exception<IMATH_NAMESPACE::SingMatrixExc> PySingMatrixExc(m, "SingMatrixExc");
-    static py::exception<IMATH_NAMESPACE::ZeroScaleExc> PyZeroScaleExc(m, "ZeroScaleExc");
-    static py::exception<IMATH_NAMESPACE::IntVecNormalizeExc> PyIntVecNormalizeExc(m, "IntVecNormalizeExc");
+    auto mathExc = iex.attr("MathExc").ptr();
+    static py::exception<IMATH_NAMESPACE::NullVecExc> PyNullVecExc(m, "NullVecExc", mathExc);
+    static py::exception<IMATH_NAMESPACE::NullQuatExc> PyNullQuatExc(m, "NullQuatExc", mathExc);
+    static py::exception<IMATH_NAMESPACE::SingMatrixExc> PySingMatrixExc(m, "SingMatrixExc", mathExc);
+    static py::exception<IMATH_NAMESPACE::ZeroScaleExc> PyZeroScaleExc(m, "ZeroScaleExc", mathExc);
+    static py::exception<IMATH_NAMESPACE::IntVecNormalizeExc> PyIntVecNormalizeExc(m, "IntVecNormalizeExc", mathExc);
     py::register_exception_translator([](std::exception_ptr p) {
         // translate c++ exception to python exception
         try {

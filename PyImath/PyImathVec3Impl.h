@@ -67,22 +67,21 @@ static Vec3<T> * Vec3_construct_default()
 template <class T>
 static Vec3<T> * Vec3_object_constructor1(const py::object &obj)
 {
-    Vec3<T> w = py::cast<Vec3<T>>(obj);
-    /*
-    py::cast<Vec3<int> >     e1(obj);
-    py::cast<Vec3<float> >   e2(obj);
-    py::cast<Vec3<double> >  e3(obj);
-    py::cast<tuple>          e4(obj);
-    py::cast<double>         e5(obj);
-    py::cast<list>           e6(obj);
+    Vec3<T> w;
+    py_extract<Vec3<int> >     e1(obj);
+    py_extract<Vec3<float> >   e2(obj);
+    py_extract<Vec3<double> >  e3(obj);
+    py_extract<py::tuple>          e4(obj);
+    py_extract<double>         e5(obj);
+    py_extract<py::list>           e6(obj);
     
     if(e1.check())      { w = e1(); }
     else if(e2.check()) { w = e2(); }
     else if(e3.check()) { w = e3(); }
     else if(e4.check())
     {
-        tuple t = e4();
-        if(t.attr("__len__")() == 3)
+        auto t = e4();
+        if(py::cast<int>(t.attr("__len__")()) == 3)
         {
             w.x = py::cast<T>(t[0]);
             w.y = py::cast<T>(t[1]);
@@ -95,8 +94,8 @@ static Vec3<T> * Vec3_object_constructor1(const py::object &obj)
     else if(e5.check()) { T a = e5(); w.setValue(a, a, a); }
     else if(e6.check())
     {
-        list l = e6();
-        if(l.attr("__len__")() == 3)
+        auto l = e6();
+        if(py::cast<int>(l.attr("__len__")()) == 3)
         {
             w.x = py::cast<T>(l[0]);
             w.y = py::cast<T>(l[1]);
@@ -107,7 +106,6 @@ static Vec3<T> * Vec3_object_constructor1(const py::object &obj)
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to Vec3 constructor");
-    */
     Vec3<T> *v = new Vec3<T>;
     *v = w;
     
@@ -118,13 +116,10 @@ static Vec3<T> * Vec3_object_constructor1(const py::object &obj)
 template <class T>
 static Vec3<T> * Vec3_object_constructor2(const py::object &obj1, const py::object &obj2, const py::object &obj3)
 {
-    /*
-    py::cast<double>    e1(obj1);
-    py::cast<double>    e2(obj2);
-    py::cast<double>    e3(obj3);
-    */
+    py_extract<double>    e1(obj1);
+    py_extract<double>    e2(obj2);
+    py_extract<double>    e3(obj3);
     Vec3<T> *v = new Vec3<T>; 
-    /*
     if(e1.check()) { v->x = e1();}
     else { THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to Vec3 constructor"); }
     
@@ -133,13 +128,8 @@ static Vec3<T> * Vec3_object_constructor2(const py::object &obj1, const py::obje
 
     if(e3.check()) { v->z = e3();}
     else { THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to Vec3 constructor"); } 
-    */
-    v->x = py::cast<double>(obj1);
-    v->y = py::cast<double>(obj2);
-    v->z = py::cast<double>(obj3);
     return v;
 }
-
 
 
 // Implementations of str and repr are same here,
@@ -425,22 +415,19 @@ Vec3_idivObj(IMATH_NAMESPACE::Vec3<T> &v, const py::object &o)
 { 
     MATH_EXC_ON;
     Vec3<T> v2;
-    return v /= py::cast<double>(o);
-    /*
-    if (PyImath::V3<T>::convert (o.ptr(), &v2))
+    if (PyImath::V3<T>::convert (o, &v2))
     {
         return v /= v2;
     }
     else
     {
-        py::cast<double> e(o);
+        py_extract<double> e(o);
         if (e.check())
             return v /= e();
         else
             THROW (IEX_NAMESPACE::ArgExc, "V3 division expects an argument"
                    "convertible to a V3");
     }
-    */
 }
 
 template <class T>
@@ -685,19 +672,16 @@ template <class T>
 static bool
 lessThan(const Vec3<T> &v, const py::object &obj)
 {
-    /*
-    py::cast<Vec3<T> > e1(obj);
-    py::cast<tuple> e2(obj);
-    */
-    Vec3<T> w = py::cast<Vec3<T>>(obj);
-    /*
+    py_extract<Vec3<T> > e1(obj);
+    py_extract<py::tuple> e2(obj);
+    Vec3<T> w;
     if(e1.check())
     {
         w = e1();
     }
     else if(e2.check())
     {
-        tuple t = e2();
+        auto t = e2();
         T x = py::cast<T>(t[0]);
         T y = py::cast<T>(t[1]);
         T z = py::cast<T>(t[2]);
@@ -705,7 +689,6 @@ lessThan(const Vec3<T> &v, const py::object &obj)
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to operator <");
-    */
     bool isLessThan = (v.x <= w.x && v.y <= w.y && v.z <= w.z)
                     && v != w;
     
@@ -716,19 +699,16 @@ template <class T>
 static bool
 greaterThan(const Vec3<T> &v, const py::object &obj)
 {
-    /*
-    py::cast<Vec3<T> > e1(obj);
-    py::cast<tuple> e2(obj);
-    */
-    Vec3<T> w = py::cast<Vec3<T>>(obj);
-    /*
+    py_extract<Vec3<T> > e1(obj);
+    py_extract<py::tuple> e2(obj);
+    Vec3<T> w;
     if(e1.check())
     {
         w = e1();
     }
     else if(e2.check())
     {
-        tuple t = e2();
+        auto t = e2();
         T x = py::cast<T>(t[0]);
         T y = py::cast<T>(t[1]);
         T z = py::cast<T>(t[2]);
@@ -736,7 +716,6 @@ greaterThan(const Vec3<T> &v, const py::object &obj)
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to operator >");
-    */
     bool isGreaterThan = (v.x >= w.x && v.y >= w.y && v.z >= w.z)
                        && v != w;
 
@@ -747,19 +726,16 @@ template <class T>
 static bool
 lessThanEqual(const Vec3<T> &v, const py::object &obj)
 {
-    /*
-    py::cast<Vec3<T> > e1(obj);
-    py::cast<tuple> e2(obj);
-    */
-    Vec3<T> w = py::cast<Vec3<T>>(obj);
-    /*
+    py_extract<Vec3<T> > e1(obj);
+    py_extract<py::tuple> e2(obj);
+    Vec3<T> w;
     if(e1.check())
     {
         w = e1();
     }
     else if(e2.check())
     {
-        tuple t = e2();
+        auto t = e2();
         T x = py::cast<T>(t[0]);
         T y = py::cast<T>(t[1]);
         T z = py::cast<T>(t[2]);
@@ -767,7 +743,6 @@ lessThanEqual(const Vec3<T> &v, const py::object &obj)
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to operator <=");
-    */
     bool isLessThanEqual = (v.x <= w.x && v.y <= w.y && v.z <= w.z);
                    
     return isLessThanEqual;
@@ -777,19 +752,16 @@ template <class T>
 static bool
 greaterThanEqual(const Vec3<T> &v, const py::object &obj)
 {
-    /*
-    py::cast<Vec3<T> > e1(obj);
-    py::cast<tuple> e2(obj);
-    */
-    Vec3<T> w = py::cast<Vec3<T>>(obj);
-    /*
+    py_extract<Vec3<T> > e1(obj);
+    py_extract<py::tuple> e2(obj);
+    Vec3<T> w;
     if(e1.check())
     {
         w = e1();
     }
     else if(e2.check())
     {
-        tuple t = e2();
+        auto t = e2();
         T x = py::cast<T>(t[0]);
         T y = py::cast<T>(t[1]);
         T z = py::cast<T>(t[2]);
@@ -797,7 +769,6 @@ greaterThanEqual(const Vec3<T> &v, const py::object &obj)
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to operator >=");
-    */
     bool isGreaterThanEqual = (v.x >= w.x && v.y >= w.y && v.z >= w.z);
 
     return isGreaterThanEqual;
@@ -808,23 +779,20 @@ template <class T>
 static bool
 equalWithAbsErrorObj(const Vec3<T> &v, const py::object &obj1, const py::object &obj2)
 {    
-    /*
-    py::cast<Vec3<int> >    e1(obj1);
-    py::cast<Vec3<float> >  e2(obj1);
-    py::cast<Vec3<double> > e3(obj1);
+    py_extract<Vec3<int> >    e1(obj1);
+    py_extract<Vec3<float> >  e2(obj1);
+    py_extract<Vec3<double> > e3(obj1);
     
-    py::cast<tuple>         e4(obj1);
-    py::cast<double>        e5(obj2);
-    */
-    Vec3<T> w = py::cast<Vec3<T>>(obj1);
-    /*
+    py_extract<py::tuple>         e4(obj1);
+    py_extract<double>        e5(obj2);
+    Vec3<T> w;
     if(e1.check())      { w = e1(); }
     else if(e2.check()) { w = e2(); }
     else if(e3.check()) { w = e3(); }
     else if(e4.check())
     {    
-        tuple t = e4();
-        if(t.attr("__len__")() == 3)
+        auto t = e4();
+        if(py::cast<int>(t.attr("__len__")()) == 3)
         {
             w.x = py::cast<T>(t[0]);
             w.y = py::cast<T>(t[1]);
@@ -837,36 +805,30 @@ equalWithAbsErrorObj(const Vec3<T> &v, const py::object &obj1, const py::object 
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to equalWithAbsError");
     
     if(e5.check())      { 
-    */
-    return v.equalWithAbsError(w, py::cast<double>(obj2)); 
-    /*
+        return v.equalWithAbsError(w, py::cast<double>(obj2)); 
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to equalWithAbsError");
-    */
 }
 
 template <class T>
 static bool
 equalWithRelErrorObj(const Vec3<T> &v, const py::object &obj1, const py::object &obj2)
 {    
-    /*
-    py::cast<Vec3<int> >    e1(obj1);
-    py::cast<Vec3<float> >  e2(obj1);
-    py::cast<Vec3<double> > e3(obj1);
+    py_extract<Vec3<int> >    e1(obj1);
+    py_extract<Vec3<float> >  e2(obj1);
+    py_extract<Vec3<double> > e3(obj1);
     
-    py::cast<tuple>         e4(obj1);    
-    py::cast<double>        e5(obj2);
-    */
-    Vec3<T> w = py::cast<Vec3<T>>(obj1);
-    /*
+    py_extract<py::tuple>         e4(obj1);
+    py_extract<double>        e5(obj2);
+    Vec3<T> w;
     if(e1.check())      { w = e1(); }
     else if(e2.check()) { w = e2(); }
     else if(e3.check()) { w = e3(); }
     else if(e4.check())
     {    
-        tuple t = e4();
-        if(t.attr("__len__")() == 3)
+        auto t = e4();
+        if(py::cast<int>(t.attr("__len__")()) == 3)
         {
             w.x = py::cast<T>(t[0]);
             w.y = py::cast<T>(t[1]);
@@ -879,13 +841,10 @@ equalWithRelErrorObj(const Vec3<T> &v, const py::object &obj1, const py::object 
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to equalWithRelError");
     
     if(e5.check())      { 
-    */
-    return v.equalWithRelError(w, py::cast<double>(obj2)); 
-    /*
+        return v.equalWithRelError(w, py::cast<double>(obj2)); 
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to equalWithRelError");    
-    */
 }
 
 
@@ -1018,10 +977,8 @@ register_Vec3(py::module &m)
         .def("__itruediv__", &Vec3_idivObj<T>,py::return_value_policy::reference_internal)
         .def("__xor__", &Vec3_dot<T>)
         .def("__mod__", &Vec3_cross<T>)
-        /*
-        .def(self == self)
-        .def(self != self)
-        */
+        .def(py::self == py::self)
+        .def(py::self != py::self)
         .def("__add__", &Vec3_add<T>)
         .def("__add__", &Vec3_addV<T, int>)
         .def("__add__", &Vec3_addV<T, float>)

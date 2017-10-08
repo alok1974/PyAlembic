@@ -508,8 +508,8 @@ rotationMatrix44(Matrix44<T> &mat, const py::object &fromObj, const py::object &
 {
     MATH_EXC_ON;
     Vec3<T> from, to;
-    if (PyImath::V3<T>::convert (fromObj.ptr(), &from) &&
-        PyImath::V3<T>::convert (toObj.ptr(), &to))
+    if (PyImath::V3<T>::convert (fromObj, &from) &&
+        PyImath::V3<T>::convert (toObj, &to))
     {
         Matrix44<T> rot = IMATH_NAMESPACE::rotationMatrix(from, to);
         return mat.setValue(rot);
@@ -527,9 +527,9 @@ rotationMatrixWithUp44(Matrix44<T> &mat, const py::object &fromObj, const py::ob
 {
     MATH_EXC_ON;
     Vec3<T> from, to, up;
-    if (PyImath::V3<T>::convert (fromObj.ptr(), &from) &&
-        PyImath::V3<T>::convert (toObj.ptr(), &to) &
-        PyImath::V3<T>::convert (upObj.ptr(), &up))
+    if (PyImath::V3<T>::convert (fromObj, &from) &&
+        PyImath::V3<T>::convert (toObj, &to) &
+        PyImath::V3<T>::convert (upObj, &up))
     {
         Matrix44<T> rot = IMATH_NAMESPACE::rotationMatrixWithUpDir(from, to, up);
         return mat.setValue(rot);
@@ -654,7 +654,7 @@ setTranslation44Obj(Matrix44<T> &mat, const py::object &o)
 {
     MATH_EXC_ON;
     Vec3<T> v;
-    if (PyImath::V3<T>::convert (o.ptr(), &v))
+    if (PyImath::V3<T>::convert (o, &v))
     {
         return mat.setTranslation(v);
     }
@@ -726,7 +726,7 @@ translate44(Matrix44<T> &mat, const py::object &t)
 {
     MATH_EXC_ON;
     Vec3<T> v;
-    if (PyImath::V3<T>::convert (t.ptr(), &v))
+    if (PyImath::V3<T>::convert (t, &v))
     {
         return mat.translate(v);
     }
@@ -970,102 +970,125 @@ register_Matrix44(py::module &m)
 	//.def_readwrite("x31", &Matrix44<T>::x[3][1])
 	//.def_readwrite("x32", &Matrix44<T>::x[3][2])
 	//.def_readwrite("x33", &Matrix44<T>::x[3][3])
-        .def_static("baseTypeEpsilon", &Matrix44<T>::baseTypeEpsilon,"baseTypeEpsilon() epsilon value of the base type of the vector")
-        .def_static("baseTypeMax", &Matrix44<T>::baseTypeMax,"baseTypeMax() max value of the base type of the vector")
-        .def_static("baseTypeMin", &Matrix44<T>::baseTypeMin,"baseTypeMin() min value of the base type of the vector")
-        .def_static("baseTypeSmallest", &Matrix44<T>::baseTypeSmallest,"baseTypeSmallest() smallest value of the base type of the vector")
-        .def("equalWithAbsError", &Matrix44<T>::equalWithAbsError,
-             "m1.equalWithAbsError(m2,e) true if the elements "
-             "of v1 and v2 are the same with an absolute error of no more than e, "
-             "i.e., abs(m1[i] - m2[i]) <= e")
-         
-        .def("equalWithRelError", &Matrix44<T>::equalWithRelError,
-             "m1.equalWithAbsError(m2,e) true if the elements "
-             "of m1 and m2 are the same with an absolute error of no more than e, "
-             "i.e., abs(m1[i] - m2[i]) <= e * abs(m1[i])")
-         
-        // need a different version for matrix data access
-        .def("__len__", Matrix44_helper::len)
-        .def("__getitem__", Matrix44_helper::getitem)
-	//.def("__setitem__", Matrix44_helper::setitem)
-        .def("makeIdentity",&Matrix44<T>::makeIdentity,"makeIdentity() make this matrix the identity matrix")
-        .def("transpose",&Matrix44<T>::transpose, py::return_value_policy::reference_internal, "transpose() transpose this matrix")
-        .def("transposed",&Matrix44<T>::transposed,"transposed() return a transposed copy of this matrix")
-        .def("minorOf",&Matrix44<T>::minorOf,"minorOf() return matrix minor of the (row,col) element of this matrix")
-        .def("fastMinor",&Matrix44<T>::fastMinor,"fastMinor() return matrix minor using the specified rows and columns of this matrix")
-        .def("determinant",&Matrix44<T>::determinant,"determinant() return the determinant of this matrix")
-        .def("invert",&invert44<T>, py::return_value_policy::reference_internal/*,invert44_overloads("invert() invert this matrix")[py::return_value_policy::reference_internal]*/)
-        .def("inverse",&inverse44<T>/*,inverse44_overloads("inverse() return a inverted copy of this matrix")*/)
-        .def("gjInvert",&gjInvert44<T>, py::return_value_policy::reference_internal/*,gjInvert44_overloads("gjInvert() invert this matrix")[py::return_value_policy::reference_internal]*/)
-        .def("gjInverse",&gjInverse44<T>/*,gjInverse44_overloads("gjInverse() return a inverted copy of this matrix")*/)
-        /*
-        .def(self == self)
-        .def(self != self)
-        */
-        .def("__iadd__", &iadd44<T, float>,py::return_value_policy::reference_internal)
-        .def("__iadd__", &iadd44<T, double>,py::return_value_policy::reference_internal)
-        .def("__iadd__", &iadd44T<T>,py::return_value_policy::reference_internal)
-        .def("__add__", &add44<T>)
-        .def("__isub__", &isub44<T, float>,py::return_value_policy::reference_internal)
-        .def("__isub__", &isub44<T, double>,py::return_value_policy::reference_internal)
-        .def("__isub__", &isub44T<T>,py::return_value_policy::reference_internal)
-        .def("__sub__", &sub44<T>)
-        .def("negate",&negate44<T>,py::return_value_policy::reference_internal,"negate() negate all entries in this matrix")
-        .def("__neg__", &neg44<T>)
-        .def("__imul__", &imul44T<T>,py::return_value_policy::reference_internal)
-        .def("__mul__", &mul44T<T>)
-        .def("__rmul__", &rmul44T<T>)
-        .def("__idiv__", &idiv44T<T>,py::return_value_policy::reference_internal)
-        .def("__itruediv__", &idiv44T<T>,py::return_value_policy::reference_internal)
-        .def("__div__", &div44T<T>)
-        .def("__truediv__", &div44T<T>)
-        .def("__add__", &add44T<T>)
-        .def("__radd__", &add44T<T>)
-        .def("__sub__", &subtractTL44<T>)
-        .def("__rsub__", &subtractTR44<T>)
-        .def("__mul__", &mul44<float, T>)
-        .def("__mul__", &mul44<double, T>)
-        .def("__rmul__", &rmul44<float, T>)
-        .def("__rmul__", &rmul44<double, T>)
-        .def("__imul__", &imul44<float, T>,py::return_value_policy::reference_internal)
-        .def("__imul__", &imul44<double, T>,py::return_value_policy::reference_internal)
-        .def("__lt__", &lessThan44<T>)
-        .def("__gt__", &greaterThan44<T>)
-        .def("__le__", &lessThanEqual44<T>)
-        .def("__ge__", &greaterThanEqual44<T>)
-	//.def(self_ns::str(self))
-	    .def("__repr__",&Matrix44_repr<T>)
-    
-        .def("extractAndRemoveScalingAndShear", &extractAndRemoveScalingAndShear44<T>/*, 
-             extractAndRemoveScalingAndShear44_overloads(				
-             "M.extractAndRemoveScalingAndShear(scl, shr, "
-             "[exc]) -- extracts the scaling component of "
-             "M into scl and the shearing component of M "
-             "into shr.  Also removes the scaling and "
-             "shearing components from M.  "
-             "Returns 1 unless the scaling component is "
-             "nearly 0, in which case 0 is returned. "
-             "If optional arg. exc == 1, then if the "
-             "scaling component is nearly 0, then MathExc "
-             "is thrown.")*/)
-             
-        .def("extractEulerXYZ", &extractEulerXYZ<T>, "py::cast Euler")          
-        .def("extractEulerZYX", &extractEulerZYX<T>, "py::cast Euler")
-          
-        .def("extractSHRT", &extractSHRT44<T>/*, extractSHRT44_overloads(
-             "M.extractSHRT(Vs, Vh, Vr, Vt, [exc]) -- "
-	         "extracts the scaling component of M into Vs, "
-			 "the shearing component of M in Vh (as XY, "
-	         "XZ, YZ shear factors), the rotation of M "
-	         "into Vr (as Euler angles in the order XYZ), "
-	         "and the translaation of M into Vt. "
-			 "If optional arg. exc == 1, then if the "
-             "scaling component is nearly 0, then MathExc "
-             "is thrown. ")*/)
-                
-        .def("extractScaling", &extractScaling44<T>/*, extractScaling44_overloads("py::cast scaling")*/)
-        .def("extractScalingAndShear", &extractScalingAndShear44<T>/*, extractScalingAndShear44_overloads("py::cast scaling")*/)
-        .def("singularValueDecomposition", &singularValueDecomposition44<T>, 
+.def_static("baseTypeEpsilon", &Matrix44<T>::baseTypeEpsilon, "baseTypeEpsilon() epsilon value of the base type of the vector")
+.def_static("baseTypeMax", &Matrix44<T>::baseTypeMax, "baseTypeMax() max value of the base type of the vector")
+.def_static("baseTypeMin", &Matrix44<T>::baseTypeMin, "baseTypeMin() min value of the base type of the vector")
+.def_static("baseTypeSmallest", &Matrix44<T>::baseTypeSmallest, "baseTypeSmallest() smallest value of the base type of the vector")
+.def("equalWithAbsError", &Matrix44<T>::equalWithAbsError,
+    "m1.equalWithAbsError(m2,e) true if the elements "
+    "of v1 and v2 are the same with an absolute error of no more than e, "
+    "i.e., abs(m1[i] - m2[i]) <= e")
+
+    .def("equalWithRelError", &Matrix44<T>::equalWithRelError,
+        "m1.equalWithAbsError(m2,e) true if the elements "
+        "of m1 and m2 are the same with an absolute error of no more than e, "
+        "i.e., abs(m1[i] - m2[i]) <= e * abs(m1[i])")
+
+    // need a different version for matrix data access
+    .def("__len__", Matrix44_helper::len)
+    .def("__getitem__", Matrix44_helper::getitem)
+    //.def("__setitem__", Matrix44_helper::setitem)
+    .def("makeIdentity", &Matrix44<T>::makeIdentity, "makeIdentity() make this matrix the identity matrix")
+.def("transpose", &Matrix44<T>::transpose, py::return_value_policy::reference_internal, "transpose() transpose this matrix")
+.def("transposed", &Matrix44<T>::transposed, "transposed() return a transposed copy of this matrix")
+.def("minorOf", &Matrix44<T>::minorOf, "minorOf() return matrix minor of the (row,col) element of this matrix")
+.def("fastMinor", &Matrix44<T>::fastMinor, "fastMinor() return matrix minor using the specified rows and columns of this matrix")
+.def("determinant", &Matrix44<T>::determinant, "determinant() return the determinant of this matrix")
+.def("invert", &invert44<T>, py::return_value_policy::reference_internal
+    , py::arg("singExc") = true
+/*,invert44_overloads("invert() invert this matrix")[py::return_value_policy::reference_internal]*/)
+.def("inverse", &inverse44<T>
+    , py::arg("singExc") = true
+/*,inverse44_overloads("inverse() return a inverted copy of this matrix")*/)
+.def("gjInvert", &gjInvert44<T>, py::return_value_policy::reference_internal
+    , py::arg("singExc") = true
+/*,gjInvert44_overloads("gjInvert() invert this matrix")[py::return_value_policy::reference_internal]*/)
+.def("gjInverse", &gjInverse44<T>
+    , py::arg("singExc") = true
+/*,gjInverse44_overloads("gjInverse() return a inverted copy of this matrix")*/)
+.def(py::self == py::self)
+.def(py::self != py::self)
+.def("__iadd__", &iadd44<T, float>, py::return_value_policy::reference_internal)
+.def("__iadd__", &iadd44<T, double>, py::return_value_policy::reference_internal)
+.def("__iadd__", &iadd44T<T>, py::return_value_policy::reference_internal)
+.def("__add__", &add44<T>)
+.def("__isub__", &isub44<T, float>, py::return_value_policy::reference_internal)
+.def("__isub__", &isub44<T, double>, py::return_value_policy::reference_internal)
+.def("__isub__", &isub44T<T>, py::return_value_policy::reference_internal)
+.def("__sub__", &sub44<T>)
+.def("negate", &negate44<T>, py::return_value_policy::reference_internal, "negate() negate all entries in this matrix")
+.def("__neg__", &neg44<T>)
+.def("__imul__", &imul44T<T>, py::return_value_policy::reference_internal)
+.def("__mul__", &mul44T<T>)
+.def("__rmul__", &rmul44T<T>)
+.def("__idiv__", &idiv44T<T>, py::return_value_policy::reference_internal)
+.def("__itruediv__", &idiv44T<T>, py::return_value_policy::reference_internal)
+.def("__div__", &div44T<T>)
+.def("__truediv__", &div44T<T>)
+.def("__add__", &add44T<T>)
+.def("__radd__", &add44T<T>)
+.def("__sub__", &subtractTL44<T>)
+.def("__rsub__", &subtractTR44<T>)
+.def("__mul__", &mul44<float, T>)
+.def("__mul__", &mul44<double, T>)
+.def("__rmul__", &rmul44<float, T>)
+.def("__rmul__", &rmul44<double, T>)
+.def("__imul__", &imul44<float, T>, py::return_value_policy::reference_internal)
+.def("__imul__", &imul44<double, T>, py::return_value_policy::reference_internal)
+.def("__lt__", &lessThan44<T>)
+.def("__gt__", &greaterThan44<T>)
+.def("__le__", &lessThanEqual44<T>)
+.def("__ge__", &greaterThanEqual44<T>)
+//.def(self_ns::str(self))
+.def("__repr__", &Matrix44_repr<T>)
+
+.def("extractAndRemoveScalingAndShear", &extractAndRemoveScalingAndShear44<T>
+    , py::arg("dstScl")
+    , py::arg("dstShr")
+    , py::arg("exc") = 1
+    /*,
+     extractAndRemoveScalingAndShear44_overloads(
+     "M.extractAndRemoveScalingAndShear(scl, shr, "
+     "[exc]) -- extracts the scaling component of "
+     "M into scl and the shearing component of M "
+     "into shr.  Also removes the scaling and "
+     "shearing components from M.  "
+     "Returns 1 unless the scaling component is "
+     "nearly 0, in which case 0 is returned. "
+     "If optional arg. exc == 1, then if the "
+     "scaling component is nearly 0, then MathExc "
+     "is thrown.")*/)
+
+    .def("extractEulerXYZ", &extractEulerXYZ<T>, "py::cast Euler")
+    .def("extractEulerZYX", &extractEulerZYX<T>, "py::cast Euler")
+
+    .def("extractSHRT", &extractSHRT44<T>
+        , py::arg("s")
+        , py::arg("h")
+        , py::arg("r")
+        , py::arg("t")
+        , py::arg("exc") = 1
+        /*, extractSHRT44_overloads(
+         "M.extractSHRT(Vs, Vh, Vr, Vt, [exc]) -- "
+         "extracts the scaling component of M into Vs, "
+         "the shearing component of M in Vh (as XY, "
+         "XZ, YZ shear factors), the rotation of M "
+         "into Vr (as Euler angles in the order XYZ), "
+         "and the translaation of M into Vt. "
+         "If optional arg. exc == 1, then if the "
+         "scaling component is nearly 0, then MathExc "
+         "is thrown. ")*/)
+
+    .def("extractScaling", &extractScaling44<T>
+        , py::arg("dst")
+        , py::arg("exc") = 1
+    /*, extractScaling44_overloads("py::cast scaling")*/)
+    .def("extractScalingAndShear", &extractScalingAndShear44<T>
+        , py::arg("dstScl")
+        , py::arg("dstShr")
+        , py::arg("exc") = 1
+    /*, extractScalingAndShear44_overloads("py::cast scaling")*/)
+    .def("singularValueDecomposition", &singularValueDecomposition44<T>,
              "Decomposes the matrix using the singular value decomposition (SVD) into three\n"
              "matrices U, S, and V which have the following properties: \n"
              "  1. U and V are both orthonormal matrices, \n"
@@ -1083,7 +1106,9 @@ register_Matrix44(py::module &m)
              "\n"
              "Our SVD implementation uses two-sided Jacobi rotations to iteratively\n"
              "diagonalize the matrix, which should be quite robust and significantly faster\n"
-             "than the more general SVD solver in LAPACK.  \n"/*,
+             "than the more general SVD solver in LAPACK.  \n"
+        , py::arg("forcePositiveDeterminant") = false
+        /*,
              args("matrix", "forcePositiveDeterminant")*/)
         .def("symmetricEigensolve", &PyImath::jacobiEigensolve<IMATH_NAMESPACE::Matrix44<T> >, 
              "Decomposes the matrix A using a symmetric eigensolver into matrices Q and S \n"
@@ -1114,10 +1139,18 @@ register_Matrix44(py::module &m)
         .def("multVecMatrix", &multVecMatrix44<float,T>, "mult matrix")
         .def("multVecMatrix", &multVecMatrix44_return_value<float,T>, "mult matrix")
         .def("multVecMatrix", &multVecMatrix44_array<float,T>, "mult matrix")
-        .def("removeScaling", &removeScaling44<T>/*, removeScaling44_overloads("remove scaling")*/)
-        .def("removeScalingAndShear", &removeScalingAndShear44<T>/*, removeScalingAndShear44_overloads("remove scaling")*/)
-        .def("sansScaling", &sansScaling44<T>/*, sansScaling44_overloads("sans scaling")*/)
-        .def("sansScalingAndShear", &sansScalingAndShear44<T>/*, sansScalingAndShear44_overloads("sans scaling and shear")*/)
+        .def("removeScaling", &removeScaling44<T>
+            , py::arg("exc") = 1
+            /*, removeScaling44_overloads("remove scaling")*/)
+        .def("removeScalingAndShear", &removeScalingAndShear44<T>
+            , py::arg("exc") = 1
+            /*, removeScalingAndShear44_overloads("remove scaling")*/)
+        .def("sansScaling", &sansScaling44<T>
+            , py::arg("exc") = 1
+            /*, sansScaling44_overloads("sans scaling")*/)
+        .def("sansScalingAndShear", &sansScalingAndShear44<T>
+            , py::arg("exc") = 1
+            /*, sansScalingAndShear44_overloads("sans scaling and shear")*/)
         .def("scale", &scaleSc44<T>, py::return_value_policy::reference_internal, "scale matrix")
         .def("scale", &scaleV44<T>, py::return_value_policy::reference_internal, "scale matrix")
         .def("scale", &scale44Tuple<T>, py::return_value_policy::reference_internal, "scale matrix")

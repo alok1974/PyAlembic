@@ -171,7 +171,7 @@ projectPointToScreenObj(Frustum<T> &f, const py::object &o)
 {
     MATH_EXC_ON;
     Vec3<T> v;
-    if (PyImath::V3<T>::convert (o.ptr(), &v))
+    if (PyImath::V3<T>::convert (o, &v))
         return f.projectPointToScreen(v);
     else
         THROW(IEX_NAMESPACE::LogicExc, "projectPointToScreen expects tuple of length 3");
@@ -307,10 +307,8 @@ register_Frustum(py::module &m)
         .def(py::init<>(/*"Frustum() default construction"*/))
         .def(py::init<T,T,T,T,T,T,bool>(/*"Frustum(nearPlane,farPlane,left,right,top,bottom,ortho) construction"*/))
         .def(py::init<T,T,T,T,T>(/*"Frustum(nearPlane,farPlane,fovx,fovy,aspect) construction"*/))
-        /*
-        .def(self == self)
-        .def(self != self)
-        */
+        .def(py::self == py::self)
+        .def(py::self != py::self)
         .def("__repr__",&Frustum_repr<T>)
         .def("set", set1,
         	 "F.set(nearPlane, farPlane, left, right, top, bottom, "

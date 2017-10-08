@@ -2,8 +2,8 @@ SET(PROJECT_NAME imath)
 FILE(GLOB SRCS *.h *.cpp
     )
 LIST(REMOVE_ITEM SRCS 
-    ${CMAKE_CURRENT_LIST_DIR}/PyImathAutovectorize.h
-    ${CMAKE_CURRENT_LIST_DIR}/PyImathAutovectorize.cpp
+    #${CMAKE_CURRENT_LIST_DIR}/PyImathAutovectorize.h
+    #${CMAKE_CURRENT_LIST_DIR}/PyImathAutovectorize.cpp
     ${CMAKE_CURRENT_LIST_DIR}/PyImathM44Array.h
     ${CMAKE_CURRENT_LIST_DIR}/PyImathM44Array.cpp
     )

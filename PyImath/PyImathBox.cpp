@@ -76,8 +76,8 @@ static Box<T> * box2TupleConstructor1(const py::tuple &t)
         // Box2f ((V2f(1,2), V2f(3,4))) or
         // Box2f (((1,2), (3,4)))
 
-        PyObject *t0Obj = py::cast<py::object> (t[0])().ptr();
-        PyObject *t1Obj = py::cast<py::object> (t[1])().ptr();
+        auto t0Obj = t[0];
+        auto t1Obj = t[1];
         T t0, t1;
         if (V2<typename T::BaseType>::convert (t0Obj, &t0) &&
             V2<typename T::BaseType>::convert (t1Obj, &t1))
@@ -146,8 +146,8 @@ static Box<T> * box3TupleConstructor1(const py::tuple &t)
         // Box3f ((V3f(1,2,3), V3f(4,5,6))) or
         // Box3f (((1,2,3), (4,5,6)))
 
-        PyObject *t0Obj = py::cast <py::object> (t[0])().ptr();
-        PyObject *t1Obj = py::cast <py::object> (t[1])().ptr();
+        auto t0Obj = t[0];
+        auto t1Obj = t[1];
         T t0, t1;
         if (V3<typename T::BaseType>::convert (t0Obj, &t0) &&
             V3<typename T::BaseType>::convert (t1Obj, &t1))
@@ -337,14 +337,14 @@ register_Box2(py::module &m)
         .def(py::init(&boxConstructor<T, IMATH_NAMESPACE::V2f>))
         .def(py::init(&boxConstructor<T, IMATH_NAMESPACE::V2d>))
         .def(py::init(&boxConstructor<T, IMATH_NAMESPACE::V2i>))
+        /*
         .def_readwrite("min",&Box<T>::min)
         .def_readwrite("max",&Box<T>::max)
-        /*
+        */
         .def("min", &boxMin<T>)
         .def("max", &boxMax<T>)
-        .def(self == self)
-        .def(self != self)
-        */
+        .def(py::self == py::self)
+        .def(py::self != py::self)
         .def("__repr__", &Box2_repr<T>)
         .def("makeEmpty",&Box<T>::makeEmpty,"makeEmpty() make the box empty")
         .def("makeInfinite",&Box<T>::makeInfinite,"makeInfinite() make the box cover all space")
@@ -401,14 +401,14 @@ register_Box3(py::module &m)
         .def(py::init(&boxConstructor<T, IMATH_NAMESPACE::V3f>))
         .def(py::init(&boxConstructor<T, IMATH_NAMESPACE::V3d>))
         .def(py::init(&boxConstructor<T, IMATH_NAMESPACE::V3i>))
+        /*
         .def_readwrite("min",&Box<T>::min)
         .def_readwrite("max",&Box<T>::max)
-        /*
+        */
         .def("min", &boxMin<T>)
         .def("max", &boxMax<T>)
-        .def(self == self)
-        .def(self != self)
-        */
+        .def(py::self == py::self)
+        .def(py::self != py::self)
         .def("__mul__", &mulM44<T, float>)
         .def("__mul__", &mulM44<T, double>)
         .def("__imul__", &imulM44<T, float>, py::return_value_policy::reference_internal)

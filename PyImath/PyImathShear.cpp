@@ -531,10 +531,8 @@ register_Shear(py::module &m)
         .def("__div__",&divT<T>)
         .def("__truediv__",&div<T>)
         .def("__truediv__",&divT<T>)
-        /*
-        .def(self == self)
-        .def(self != self)
-        */
+        .def(py::self == py::self)
+        .def(py::self != py::self)
         .def("__str__",&Shear_str<T>)
         .def("__repr__",&Shear_repr<T>)
         .def("setValue", setValue1)

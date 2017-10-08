@@ -208,56 +208,55 @@ namespace PyImath {
 template <class T>
 class V2 {
   public:
-    //static PyObject *	wrap (const IMATH_NAMESPACE::Vec2<T> &v);
-    static int		convert (PyObject *p, IMATH_NAMESPACE::Vec2<T> *v);
+    static py::object	wrap (const IMATH_NAMESPACE::Vec2<T> &v);
+    static int		convert (py::object p, IMATH_NAMESPACE::Vec2<T> *v);
 };
 
 template <class T>
 class V3 {
   public:
-    //static PyObject *	wrap (const IMATH_NAMESPACE::Vec3<T> &v);
-    static int		convert (PyObject *p, IMATH_NAMESPACE::Vec3<T> *v);
+    static py::object 	wrap (const IMATH_NAMESPACE::Vec3<T> &v);
+    static int		convert (py::object p, IMATH_NAMESPACE::Vec3<T> *v);
 };
 
 template <class T>
 class V4 {
   public:
-    //static PyObject *	wrap (const IMATH_NAMESPACE::Vec4<T> &v);
-    static int		convert (PyObject *p, IMATH_NAMESPACE::Vec4<T> *v);
+    static py::object 	wrap (const IMATH_NAMESPACE::Vec4<T> &v);
+    static int		convert (py::object p, IMATH_NAMESPACE::Vec4<T> *v);
 };
 
-#if 0
+
 template <class T>
-PyObject *
+py::object 
 V2<T>::wrap (const IMATH_NAMESPACE::Vec2<T> &v)
 {
     typename py::return_by_value::apply < IMATH_NAMESPACE::Vec2<T> >::type converter;
-    PyObject *p = converter (v);
+    py::object p = converter (v);
     return p;
 }
 
 template <class T>
-PyObject *
+py::object 
 V3<T>::wrap (const IMATH_NAMESPACE::Vec3<T> &v)
 {
     typename py::return_by_value::apply < IMATH_NAMESPACE::Vec3<T> >::type converter;
-    PyObject *p = converter (v);
+    py::object p = converter (v);
     return p;
 }
 
 template <class T>
-PyObject *
+py::object 
 V4<T>::wrap (const IMATH_NAMESPACE::Vec4<T> &v)
 {
     typename py::return_by_value::apply < IMATH_NAMESPACE::Vec4<T> >::type converter;
-    PyObject *p = converter (v);
+    py::object p = converter (v);
     return p;
 }
-#endif
 
 template <class T>
 int
-V2<T>::convert (PyObject *p, IMATH_NAMESPACE::Vec2<T> *v)
+V2<T>::convert (py::object p, IMATH_NAMESPACE::Vec2<T> *v)
 {
     py_extract <IMATH_NAMESPACE::V2i> extractorV2i (p);
     if (extractorV2i.check())
@@ -322,7 +321,7 @@ V2<T>::convert (PyObject *p, IMATH_NAMESPACE::Vec2<T> *v)
 
 template <class T>
 int
-V3<T>::convert (PyObject *p, IMATH_NAMESPACE::Vec3<T> *v)
+V3<T>::convert (py::object p, IMATH_NAMESPACE::Vec3<T> *v)
 {
     py_extract <IMATH_NAMESPACE::V3i> extractorV3i (p);
     if (extractorV3i.check())
@@ -385,7 +384,7 @@ V3<T>::convert (PyObject *p, IMATH_NAMESPACE::Vec3<T> *v)
 
 template <class T>
 int
-V4<T>::convert (PyObject *p, IMATH_NAMESPACE::Vec4<T> *v)
+V4<T>::convert (py::object p, IMATH_NAMESPACE::Vec4<T> *v)
 {
     py_extract <IMATH_NAMESPACE::V4i> extractorV4i (p);
     if (extractorV4i.check())

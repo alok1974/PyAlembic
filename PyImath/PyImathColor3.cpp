@@ -592,10 +592,8 @@ register_Color3(py::module &m)
         .def_readwrite("b", &Color3<T>::z)
         .def("__str__", &color3_str<T>)
         .def("__repr__", &color3_repr<T>)
-        /*
-        .def(self == self)
-        .def(self != self)
-        */
+        .def(py::self == py::self)
+        .def(py::self != py::self)
         .def("__iadd__", &iadd<T>, py::return_value_policy::reference_internal)
         .def("__add__", &add<T>)
         .def("__add__", &addTuple<T>)

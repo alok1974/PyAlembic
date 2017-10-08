@@ -579,7 +579,7 @@ setTranslation33Obj(Matrix33<T> &mat, const py::object &o)
 {
     MATH_EXC_ON;
     Vec2<T> v;
-    if (PyImath::V2<T>::convert (o.ptr(), &v))
+    if (PyImath::V2<T>::convert (o, &v))
     {
         return mat.setTranslation(v);
     }
@@ -639,7 +639,7 @@ translate33(Matrix33<T> &mat, const py::object &t)
 {
     MATH_EXC_ON;
     Vec2<T> v;
-    if (PyImath::V2<T>::convert (t.ptr(), &v))
+    if (PyImath::V2<T>::convert (t, &v))
     {
         return mat.translate(v);
     }
@@ -861,63 +861,69 @@ register_Matrix33(py::module &m)
         .def(py::init<Matrix33<T> >(), "copy construction")
         .def(py::init<>(), "initialize to identity")
         .def(py::init<T>(), "initialize all entries to a single value")
-        .def(py::init<T,T,T,T,T,T,T,T,T>(), "make from components")
+        .def(py::init<T, T, T, T, T, T, T, T, T>(), "make from components")
         .def(py::init(&Matrix3_tuple_constructor<T>))
-        .def(py::init(&Matrix3_matrix_constructor<T,float>))
-        .def(py::init(&Matrix3_matrix_constructor<T,double>))
-        
-	//.def_readwrite("x00", &Matrix33<T>::x[0][0])
-	//.def_readwrite("x01", &Matrix33<T>::x[0][1])
-	//.def_readwrite("x02", &Matrix33<T>::x[0][2])
-	//.def_readwrite("x10", &Matrix33<T>::x[1][0])
-	//.def_readwrite("x11", &Matrix33<T>::x[1][1])
-	//.def_readwrite("x12", &Matrix33<T>::x[1][2])
-	//.def_readwrite("x20", &Matrix33<T>::x[2][0])
-	//.def_readwrite("x21", &Matrix33<T>::x[2][1])
-	//.def_readwrite("x22", &Matrix33<T>::x[2][2])
-        .def_static("baseTypeEpsilon", &Matrix33<T>::baseTypeEpsilon,"baseTypeEpsilon() epsilon value of the base type of the vector")
-        .def_static("baseTypeMax", &Matrix33<T>::baseTypeMax,"baseTypeMax() max value of the base type of the vector")
-        .def_static("baseTypeMin", &Matrix33<T>::baseTypeMin,"baseTypeMin() min value of the base type of the vector")
-        .def_static("baseTypeSmallest", &Matrix33<T>::baseTypeSmallest,"baseTypeSmallest() smallest value of the base type of the vector")
-        .def("equalWithAbsError", &Matrix33<T>::equalWithAbsError,"m1.equalWithAbsError(m2,e) true if the elements "
-             "of v1 and v2 are the same with an absolute error of no more than e, "
-             "i.e., abs(m1[i] - m2[i]) <= e")
-        .def("equalWithRelError", &Matrix33<T>::equalWithRelError,"m1.equalWithAbsError(m2,e) true if the elements "
-             "of m1 and m2 are the same with an absolute error of no more than e, "
-             "i.e., abs(m1[i] - m2[i]) <= e * abs(m1[i])")
+        .def(py::init(&Matrix3_matrix_constructor<T, float>))
+        .def(py::init(&Matrix3_matrix_constructor<T, double>))
+
+        //.def_readwrite("x00", &Matrix33<T>::x[0][0])
+        //.def_readwrite("x01", &Matrix33<T>::x[0][1])
+        //.def_readwrite("x02", &Matrix33<T>::x[0][2])
+        //.def_readwrite("x10", &Matrix33<T>::x[1][0])
+        //.def_readwrite("x11", &Matrix33<T>::x[1][1])
+        //.def_readwrite("x12", &Matrix33<T>::x[1][2])
+        //.def_readwrite("x20", &Matrix33<T>::x[2][0])
+        //.def_readwrite("x21", &Matrix33<T>::x[2][1])
+        //.def_readwrite("x22", &Matrix33<T>::x[2][2])
+        .def_static("baseTypeEpsilon", &Matrix33<T>::baseTypeEpsilon, "baseTypeEpsilon() epsilon value of the base type of the vector")
+        .def_static("baseTypeMax", &Matrix33<T>::baseTypeMax, "baseTypeMax() max value of the base type of the vector")
+        .def_static("baseTypeMin", &Matrix33<T>::baseTypeMin, "baseTypeMin() min value of the base type of the vector")
+        .def_static("baseTypeSmallest", &Matrix33<T>::baseTypeSmallest, "baseTypeSmallest() smallest value of the base type of the vector")
+        .def("equalWithAbsError", &Matrix33<T>::equalWithAbsError, "m1.equalWithAbsError(m2,e) true if the elements "
+            "of v1 and v2 are the same with an absolute error of no more than e, "
+            "i.e., abs(m1[i] - m2[i]) <= e")
+        .def("equalWithRelError", &Matrix33<T>::equalWithRelError, "m1.equalWithAbsError(m2,e) true if the elements "
+            "of m1 and m2 are the same with an absolute error of no more than e, "
+            "i.e., abs(m1[i] - m2[i]) <= e * abs(m1[i])")
         // need a different version for matrix data access
         .def("__len__", Matrix33_helper::len)
         .def("__getitem__", Matrix33_helper::getitem)
-	//.def("__setitem__", Matrix33_helper::setitem)
-        .def("makeIdentity",&Matrix33<T>::makeIdentity,"makeIdentity() make this matrix the identity matrix")
-        .def("transpose",&Matrix33<T>::transpose, py::return_value_policy::reference_internal,"transpose() transpose this matrix")
-        .def("transposed",&Matrix33<T>::transposed,"transposed() return a transposed copy of this matrix")
-        .def("invert",&invert33<T>, py::return_value_policy::reference_internal/* invert33_overloads("invert() invert this matrix")[py::return_value_policy::reference_internal]*/)
-        .def("inverse",&inverse33<T>, py::return_value_policy::reference_internal/* inverse33_overloads("inverse() return a inverted copy of this matrix")*/)
-        .def("gjInvert",&gjInvert33<T>, py::return_value_policy::reference_internal/* gjInvert33_overloads("gjInvert() invert this matrix")[py::return_value_policy::reference_internal]*/)
-        .def("gjInverse",&gjInverse33<T>/*,gjInverse33_overloads("gjInverse() return a inverted copy of this matrix")*/)
-        .def("minorOf",&Matrix33<T>::minorOf,"minorOf() return the matrix minor of the (row,col) element of this matrix")
-        .def("fastMinor",&Matrix33<T>::fastMinor,"fastMinor() return the matrix minor using the specified rows and columns of this matrix")
-        .def("determinant",&Matrix33<T>::determinant,"determinant() return the determinant of this matrix")
-        /*
-        .def(self == self)
-        .def(self != self)
-        */
-        .def("__iadd__", &iadd33<T, float>,py::return_value_policy::reference_internal)
-        .def("__iadd__", &iadd33<T, double>,py::return_value_policy::reference_internal)
-        .def("__iadd__", &iadd33T<T>,py::return_value_policy::reference_internal)
+        //.def("__setitem__", Matrix33_helper::setitem)
+        .def("makeIdentity", &Matrix33<T>::makeIdentity, "makeIdentity() make this matrix the identity matrix")
+        .def("transpose", &Matrix33<T>::transpose, py::return_value_policy::reference_internal, "transpose() transpose this matrix")
+        .def("transposed", &Matrix33<T>::transposed, "transposed() return a transposed copy of this matrix")
+        .def("invert", &invert33<T>, py::return_value_policy::reference_internal,
+            py::arg("singExc") = true
+        /* invert33_overloads("invert() invert this matrix")[py::return_value_policy::reference_internal]*/)
+        .def("inverse", &inverse33<T>, py::return_value_policy::reference_internal, "",
+            py::arg("singExc") = true
+        /* inverse33_overloads("inverse() return a inverted copy of this matrix")*/)
+        .def("gjInvert", &gjInvert33<T>, py::return_value_policy::reference_internal, "",
+            py::arg("singExc") = true
+        /* gjInvert33_overloads("gjInvert() invert this matrix")[py::return_value_policy::reference_internal]*/)
+        .def("gjInverse", &gjInverse33<T>,
+            py::arg("singExc") = true
+        /*,gjInverse33_overloads("gjInverse() return a inverted copy of this matrix")*/)
+        .def("minorOf", &Matrix33<T>::minorOf, "minorOf() return the matrix minor of the (row,col) element of this matrix")
+        .def("fastMinor", &Matrix33<T>::fastMinor, "fastMinor() return the matrix minor using the specified rows and columns of this matrix")
+        .def("determinant", &Matrix33<T>::determinant, "determinant() return the determinant of this matrix")
+        .def(py::self == py::self)
+        .def(py::self != py::self)
+        .def("__iadd__", &iadd33<T, float>, py::return_value_policy::reference_internal)
+        .def("__iadd__", &iadd33<T, double>, py::return_value_policy::reference_internal)
+        .def("__iadd__", &iadd33T<T>, py::return_value_policy::reference_internal)
         .def("__add__", &add33<T>)
-        .def("__isub__", &isub33<T, float>,py::return_value_policy::reference_internal)
-        .def("__isub__", &isub33<T, double>,py::return_value_policy::reference_internal)
-        .def("__isub__", &isub33T<T>,py::return_value_policy::reference_internal)
+        .def("__isub__", &isub33<T, float>, py::return_value_policy::reference_internal)
+        .def("__isub__", &isub33<T, double>, py::return_value_policy::reference_internal)
+        .def("__isub__", &isub33T<T>, py::return_value_policy::reference_internal)
         .def("__sub__", &sub33<T>)
-        .def("negate",&negate33<T>,py::return_value_policy::reference_internal,"negate() negate all entries in this matrix")
+        .def("negate", &negate33<T>, py::return_value_policy::reference_internal, "negate() negate all entries in this matrix")
         .def("__neg__", &neg33<T>)
-        .def("__imul__", &imul33T<T>,py::return_value_policy::reference_internal)
+        .def("__imul__", &imul33T<T>, py::return_value_policy::reference_internal)
         .def("__mul__", &mul33T<T>)
         .def("__rmul__", &rmul33T<T>)
-        .def("__idiv__", &idiv33T<T>,py::return_value_policy::reference_internal)
-        .def("__itruediv__", &idiv33T<T>,py::return_value_policy::reference_internal)
+        .def("__idiv__", &idiv33T<T>, py::return_value_policy::reference_internal)
+        .def("__itruediv__", &idiv33T<T>, py::return_value_policy::reference_internal)
         .def("__div__", &div33T<T>)
         .def("__truediv__", &div33T<T>)
         .def("__add__", &add33T<T>)
@@ -928,16 +934,20 @@ register_Matrix33(py::module &m)
         .def("__mul__", &mul33<double, T>)
         .def("__rmul__", &rmul33<float, T>)
         .def("__rmul__", &rmul33<double, T>)
-        .def("__imul__", &imul33<float, T>,py::return_value_policy::reference_internal)
-        .def("__imul__", &imul33<double, T>,py::return_value_policy::reference_internal)
+        .def("__imul__", &imul33<float, T>, py::return_value_policy::reference_internal)
+        .def("__imul__", &imul33<double, T>, py::return_value_policy::reference_internal)
         .def("__lt__", &lessThan33<T>)
         .def("__le__", &lessThanEqual33<T>)
         .def("__gt__", &greaterThan33<T>)
         .def("__ge__", &greaterThanEqual33<T>)
-	//.def(self_ns::str(self))
-        .def("__str__",&Matrix33_str<T>)
-        .def("__repr__",&Matrix33_repr<T>)
-        .def("extractAndRemoveScalingAndShear", &extractAndRemoveScalingAndShear33<T>/*, 
+        //.def(self_ns::str(self))
+        .def("__str__", &Matrix33_str<T>)
+        .def("__repr__", &Matrix33_repr<T>)
+        .def("extractAndRemoveScalingAndShear", &extractAndRemoveScalingAndShear33<T>
+            , py::arg("dstScl")
+            , py::arg("dstShr")
+            , py::arg("exc") = 1
+            /*, 
               extractAndRemoveScalingAndShear33_overloads(
               "M.extractAndRemoveScalingAndShear(scl, shr, "
               "[exc]) -- extracts the scaling component of "
@@ -957,7 +967,13 @@ register_Matrix33(py::module &m)
               "non-uniform scaling; results are "
               "meaningless if it does.")
               
-         .def("extractSHRT", &extractSHRT33<T>/*, extractSHRT33_overloads(				
+         .def("extractSHRT", &extractSHRT33<T>
+             , py::arg("s")
+             , py::arg("h")
+             , py::arg("r")
+             , py::arg("t")
+             , py::arg("exc") = 1
+             /*, extractSHRT33_overloads(				
               "M.extractSHRT(Vs, Vh, Vr, Vt, [exc]) -- "
 	          "extracts the scaling component of M into Vs, "
 			  "the shearing component of M in Vh (as XY, "
@@ -968,12 +984,19 @@ register_Matrix33(py::module &m)
 			  "scaling component is nearly 0, then MathExc "
 			  "is thrown. ")*/)
               
-         .def("extractScaling", &extractScaling33<T>/*, extractScaling33_overloads("py::cast scaling")*/)
+         .def("extractScaling", &extractScaling33<T>,
+             py::arg("dst"),
+             py::arg("exc")=1
+            /*, extractScaling33_overloads("py::cast scaling")*/)
          .def("outerProduct", &outerProduct33<T>/*, outerProduct33_overloads(
               "M.outerProduct(Va,Vb) -- "
                   "Performs the outer product, or tensor product, of two 3D vectors, Va and Vb")*/)
 
-         .def("extractScalingAndShear", &extractScalingAndShear33<T>/*, extractScalingAndShear33_overloads("py::cast scaling")*/)
+         .def("extractScalingAndShear", &extractScalingAndShear33<T>
+             , py::arg("dstScl")
+             , py::arg("dstShr")
+             , py::arg("exc") = 1
+             /*, extractScalingAndShear33_overloads("py::cast scaling")*/)
         .def("singularValueDecomposition", &singularValueDecomposition33<T>, 
              "Decomposes the matrix using the singular value decomposition (SVD) into three\n"
              "matrices U, S, and V which have the following properties: \n"
@@ -1023,13 +1046,20 @@ register_Matrix33(py::module &m)
          .def("multVecMatrix", &multVecMatrix33<float,T>, "mult matrix")
          .def("multVecMatrix", &multVecMatrix33_return_value<float,T>, "mult matrix")
          .def("multVecMatrix", &multVecMatrix33_array<float,T>, "mult matrix")
-         .def("removeScaling", &removeScaling33<T>/*, removeScaling33_overloads("remove scaling")*/)
-
-         .def("removeScalingAndShear", &removeScalingAndShear33<T>/*, removeScalingAndShear33_overloads("remove scaling")*/)
-         .def("sansScaling", &sansScaling33<T>/*, sansScaling33_overloads("sans scaling")*/)
+         .def("removeScaling", &removeScaling33<T>,
+             py::arg("exc")=1
+             /*, removeScaling33_overloads("remove scaling")*/)
+         .def("removeScalingAndShear", &removeScalingAndShear33<T>,
+             py::arg("exc") = 1
+             /*, removeScalingAndShear33_overloads("remove scaling")*/)
+         .def("sansScaling", &sansScaling33<T>,
+             py::arg("exc")=true
+             /*, sansScaling33_overloads("sans scaling")*/)
          .def("rotate", &rotate33<T>, py::return_value_policy::reference_internal,"rotate matrix")
 
-         .def("sansScalingAndShear", &sansScalingAndShear33<T>/*, sansScalingAndShear33_overloads("sans scaling and shear")*/)
+         .def("sansScalingAndShear", &sansScalingAndShear33<T>,
+             py::arg("exc")=true
+             /*, sansScalingAndShear33_overloads("sans scaling and shear")*/)
          .def("scale", &scaleSc33<T>, py::return_value_policy::reference_internal,"scale matrix")
          .def("scale", &scaleV33<T>, py::return_value_policy::reference_internal,"scale matrix")
          .def("scale", &scale33Tuple<T>, py::return_value_policy::reference_internal,"scale matrix")

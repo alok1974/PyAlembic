@@ -7,6 +7,7 @@
 #include <Python.h>
 #endif
 #include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
 namespace py = pybind11;
 
 
@@ -34,9 +35,9 @@ constexpr py::return_value_policy const_call_policy()
 template<typename T>
 class py_extract
 {
-    PyObject *m_p;
+    py::object m_p;
 public:
-    py_extract(PyObject *p)
+    py_extract(py::object p)
         : m_p(p)
     {
     }
@@ -71,11 +72,13 @@ boost::is_class<T>,
     py::default_call_policies>::type const_call_policy;
 */
 
+#if 1
 namespace PyImath {
 
     template<typename F>
     void generate_bindings(py::module &m, F f, const char *name, const char *doc)
     {
+        m.def(name, f, doc);
     }
 
     template<typename C, typename F>
@@ -83,3 +86,6 @@ namespace PyImath {
     {
     }
 }
+#else
+#include "PyImathAutovectorize.h"
+#endif

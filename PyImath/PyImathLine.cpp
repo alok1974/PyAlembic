@@ -351,7 +351,7 @@ intersect2(Line3<T> &line, const Vec3<T> &v0, const Vec3<T> &v1, const Vec3<T> &
     }
     else
     {
-        return py::object();
+        return py::none();
     }
 }
 
@@ -467,25 +467,23 @@ register_Line(py::module &m)
     py::class_<Line3<T> > line_class(m, name);
     line_class
         .def(py::init(&Line3_construct_default<T>), "initialize point to (0,0,0) and direction to (1,0,0)")
-        .def(py::init(&Line3_tuple_construct<T>))
         .def(py::init(&Line3_line_construct<T,float>))
         .def(py::init(&Line3_line_construct<T,double>))
+        .def(py::init(&Line3_tuple_construct<T>))
         .def(py::init<const Vec3<float> &, const Vec3<float> &>(), "Line3(point1, point2) construction")
         .def(py::init<const Vec3<double> &, const Vec3<double> &>(), "Line3(point1, point2) construction")
-        //.def(self * Matrix44<T>())
+        .def(py::self * Matrix44<T>())
         .def("__eq__", &equal<T>)
         .def("__ne__", &notequal<T>)
-        
+        /*
         .def_readwrite("pos", &Line3<T>::pos)
         .def_readwrite("dir", &Line3<T>::dir)
-
-        /*
+        */
         .def("pos", &getPosition<T>, 
         "l.pos() -- returns the start point of line l")
         
         .def("dir", &getDirection<T>, 
         "l.dir() -- returns the direction of line l\n")
-        */
 
         .def("setPos", &setPosition<T>, 
         "l.setPos(p) -- sets the start point of line l to p")

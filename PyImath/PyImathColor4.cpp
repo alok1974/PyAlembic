@@ -591,10 +591,8 @@ register_Color4(py::module &m)
         .def_readwrite("a", &Color4<T>::a)
         .def("__str__", &color4_str<T>)
         .def("__repr__", &color4_repr<T>)
-        /*
-        .def(self == self)
-        .def(self != self)
-        */
+        .def(py::self == py::self)
+        .def(py::self != py::self)
         .def("__iadd__", &iadd<T>,py::return_value_policy::reference_internal)
         .def("__add__", &add<T>)
         .def("__add__", &addTuple<T>)
