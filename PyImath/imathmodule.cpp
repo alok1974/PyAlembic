@@ -157,10 +157,11 @@ FixedArray2D<int> rangeY(int sizeX, int sizeY)
 
 PYBIND11_MODULE(imath, m)
 {
+    // import iex module
     py::handle iex(PyImport_ImportModule("iex"));
     if (PyErr_Occurred()) throw py::error_already_set();
+    m.attr("iex") = iex;
 
-    m["iex"] = iex;
     m.doc() = "Imath module";
 
     register_basicTypes(m);
