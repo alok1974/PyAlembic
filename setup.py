@@ -20,6 +20,10 @@ iex = Extension('iex',
                     ],
                 libraries=[
                     'Iex-2_2',
+                    ],
+                extra_compile_args=[
+                    '/wd4275',
+                    '/EHsc',
                     ]
                 )
 
