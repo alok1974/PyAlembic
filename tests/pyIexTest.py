@@ -19,7 +19,7 @@ def raise_class(klass, what):
     return _raise_class
 
 
-class Test(unittest.TestCase):
+class IexTest(unittest.TestCase):
 
     def test_BaseExc(self):
         e = iex.BaseExc('test')
@@ -61,3 +61,4 @@ class Test(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
