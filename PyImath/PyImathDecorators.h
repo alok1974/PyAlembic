@@ -35,7 +35,7 @@
 #ifndef INCLUDED_PYIMATH_DECORATORS_H
 #define INCLUDED_PYIMATH_DECORATORS_H
 
-#include <boost/python.hpp>
+#include "python_include.h"
 
 namespace PyImath
 {
@@ -54,14 +54,14 @@ copy(const T& x)
 
 template <class T>
 static T
-deepcopy(const T& x, boost::python::dict&)
+deepcopy(const T& x, py::dict&)
 {
     return copy(x);
 }
 
-template <class T, class X1, class X2, class X3>
-boost::python::class_<T,X1,X2,X3>&
-decoratecopy(boost::python::class_<T,X1,X2,X3>& cls)
+template <class T, class ...ARGS>
+py::class_<T, ARGS...>&
+decoratecopy(py::class_<T,ARGS...>& cls)
 {
     cls.def("__copy__",&copy<T>);
     cls.def("__deepcopy__",&deepcopy<T>);

@@ -32,12 +32,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
+#include "python_include.h"
 #include <PyImathColor.h>
 #include "PyImathDecorators.h"
 #include "PyImathExport.h"
-#include <Python.h>
-#include <boost/python.hpp>
-#include <boost/python/make_constructor.hpp>
 #include <boost/format.hpp>
 #include <PyImath.h>
 #include <PyImathMathExc.h>
@@ -51,7 +49,7 @@ namespace PyImath {
 template <> const char *PyImath::C4cArray::name() { return "C4cArray"; }
 template <> const char *PyImath::C4fArray::name() { return "C4fArray"; }
 
-using namespace boost::python;
+
 using namespace IMATH_NAMESPACE;
 
 template <class T> struct Color4Name { static const char *value; };
@@ -121,30 +119,30 @@ static Color4<T> * Color4_color_construct(const Color4<S> &c)
 }
 
 template <class T>
-static Color4<T> * Color4_construct_tuple(const tuple &t)
+static Color4<T> * Color4_construct_tuple(const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 4)
+    if(py::cast<int>(t.attr("__len__")()) == 4)
     {
-        return new Color4<T>(extract<T>(t[0]), 
-                             extract<T>(t[1]), 
-                             extract<T>(t[2]),
-                             extract<T>(t[3]));
+        return new Color4<T>(py::cast<T>(t[0]), 
+                             py::cast<T>(t[1]), 
+                             py::cast<T>(t[2]),
+                             py::cast<T>(t[3]));
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "Color4 expects tuple of length 4");
 }
 
 template <class T>
-static Color4<T> * Color4_construct_list(const list &l)
+static Color4<T> * Color4_construct_list(const py::list &l)
 {
     MATH_EXC_ON;
-    if(l.attr("__len__")() == 4)
+    if(py::cast<int>(l.attr("__len__")()) == 4)
     {
-        return new Color4<T>(extract<T>(l[0]), 
-                             extract<T>(l[1]), 
-                             extract<T>(l[2]),
-                             extract<T>(l[3]));
+        return new Color4<T>(py::cast<T>(l[0]), 
+                             py::cast<T>(l[1]), 
+                             py::cast<T>(l[2]),
+                             py::cast<T>(l[3]));
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "Color4 expects list of length 4");
@@ -202,16 +200,16 @@ hsv2rgb(Color4<T> &color)
 
 template <class T>
 static Color4<T>
-hsv2rgbTuple(const tuple &t)
+hsv2rgbTuple(const py::tuple &t)
 {
     MATH_EXC_ON;
     Color4<T> color;
     if(t.attr("__len__")() == 4)
     {
-        color.r = extract<T>(t[0]);
-        color.g = extract<T>(t[1]);
-        color.b = extract<T>(t[2]);
-        color.a = extract<T>(t[3]);
+        color.r = py::cast<T>(t[0]);
+        color.g = py::cast<T>(t[1]);
+        color.b = py::cast<T>(t[2]);
+        color.a = py::cast<T>(t[3]);
         
         return IMATH_NAMESPACE::hsv2rgb(color);
     }
@@ -229,16 +227,16 @@ rgb2hsv(Color4<T> &color)
 
 template <class T>
 static Color4<T>
-rgb2hsvTuple(const tuple &t)
+rgb2hsvTuple(const py::tuple &t)
 {
     MATH_EXC_ON;
     Color4<T> color;
-    if(t.attr("__len__")() == 4)
+    if(py::cast<int>(t.attr("__len__")()) == 4)
     {
-        color.r = extract<T>(t[0]);
-        color.g = extract<T>(t[1]);
-        color.b = extract<T>(t[2]);
-        color.a = extract<T>(t[3]);
+        color.r = py::cast<T>(t[0]);
+        color.g = py::cast<T>(t[1]);
+        color.b = py::cast<T>(t[2]);
+        color.a = py::cast<T>(t[3]);
         
         return IMATH_NAMESPACE::rgb2hsv(color);
     }
@@ -265,16 +263,16 @@ setValue2(Color4<T> &color, const Color4<T> &v)
 
 template <class T>
 static void
-setValueTuple(Color4<T> &color, const tuple &t)
+setValueTuple(Color4<T> &color, const py::tuple &t)
 {
     MATH_EXC_ON;
     Color4<T> v;
-    if(t.attr("__len__")() == 4)
+    if(py::cast<int>(t.attr("__len__")()) == 4)
     {
-        v.r = extract<T>(t[0]);
-        v.g = extract<T>(t[1]);
-        v.b = extract<T>(t[2]);
-        v.a = extract<T>(t[3]);
+        v.r = py::cast<T>(t[0]);
+        v.g = py::cast<T>(t[1]);
+        v.b = py::cast<T>(t[2]);
+        v.a = py::cast<T>(t[3]);
         
         color.setValue(v);
     }
@@ -300,14 +298,14 @@ add(Color4<T> &color, const Color4<T> &color2)
 
 template <class T>
 static Color4<T>
-addTuple(Color4<T> &color, const tuple &t)
+addTuple(Color4<T> &color, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 4)
-        return Color4<T>(color.r + extract<T>(t[0]), 
-                         color.g + extract<T>(t[1]), 
-                         color.b + extract<T>(t[2]),
-                         color.a + extract<T>(t[3]));
+    if(py::cast<int>(t.attr("__len__")()) == 4)
+        return Color4<T>(color.r + py::cast<T>(t[0]), 
+                         color.g + py::cast<T>(t[1]), 
+                         color.b + py::cast<T>(t[2]),
+                         color.a + py::cast<T>(t[3]));
     else
         THROW(IEX_NAMESPACE::LogicExc, "Color4 expects tuple of length 4");
 }
@@ -339,28 +337,28 @@ sub(Color4<T> &color, const Color4<T> &color2)
 
 template <class T>
 static Color4<T>
-subtractL(Color4<T> &color, const tuple &t)
+subtractL(Color4<T> &color, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 4)
-        return Color4<T>(color.r - extract<T>(t[0]), 
-                         color.g - extract<T>(t[1]), 
-                         color.b - extract<T>(t[2]),
-                         color.a - extract<T>(t[3]));
+    if(py::cast<int>(t.attr("__len__")()) == 4)
+        return Color4<T>(color.r - py::cast<T>(t[0]), 
+                         color.g - py::cast<T>(t[1]), 
+                         color.b - py::cast<T>(t[2]),
+                         color.a - py::cast<T>(t[3]));
     else
         THROW(IEX_NAMESPACE::LogicExc, "Color4 expects tuple of length 4");
 }
 
 template <class T>
 static Color4<T>
-subtractR(Color4<T> &color, const tuple &t)
+subtractR(Color4<T> &color, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 4)
-        return Color4<T>(extract<T>(t[0]) - color.r, 
-                         extract<T>(t[1]) - color.g, 
-                         extract<T>(t[2]) - color.b,
-                         extract<T>(t[3]) - color.a);
+    if(py::cast<int>(t.attr("__len__")()) == 4)
+        return Color4<T>(py::cast<T>(t[0]) - color.r, 
+                         py::cast<T>(t[1]) - color.g, 
+                         py::cast<T>(t[2]) - color.b,
+                         py::cast<T>(t[3]) - color.a);
     else
         THROW(IEX_NAMESPACE::LogicExc, "Color4 expects tuple of length 4");
 }
@@ -445,14 +443,14 @@ rmulT(Color4<T> &color, const T &t)
 
 template <class T>
 static Color4<T>
-mulTuple(Color4<T> &color, const tuple &t)
+mulTuple(Color4<T> &color, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 4)
-        return Color4<T>(color.r * extract<T>(t[0]), 
-                         color.g * extract<T>(t[1]), 
-                         color.b * extract<T>(t[2]),
-                         color.a * extract<T>(t[3]));
+    if(py::cast<int>(t.attr("__len__")()) == 4)
+        return Color4<T>(color.r * py::cast<T>(t[0]), 
+                         color.g * py::cast<T>(t[1]), 
+                         color.b * py::cast<T>(t[2]),
+                         color.a * py::cast<T>(t[3]));
     else
         THROW(IEX_NAMESPACE::LogicExc, "Color4 expects tuple of length 4");
 }
@@ -491,28 +489,28 @@ divT(Color4<T> &color, const T &t)
 
 template <class T>
 static Color4<T>
-divTupleL(Color4<T> &color, const tuple &t)
+divTupleL(Color4<T> &color, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 4)
-        return Color4<T>(color.r / extract<T>(t[0]), 
-                         color.g / extract<T>(t[1]), 
-                         color.b / extract<T>(t[2]),
-                         color.a / extract<T>(t[3]));
+    if(py::cast<int>(t.attr("__len__")()) == 4)
+        return Color4<T>(color.r / py::cast<T>(t[0]), 
+                         color.g / py::cast<T>(t[1]), 
+                         color.b / py::cast<T>(t[2]),
+                         color.a / py::cast<T>(t[3]));
     else
         THROW(IEX_NAMESPACE::LogicExc, "Color4 expects tuple of length 4");    
 }
 
 template <class T>
 static Color4<T>
-divTupleR(Color4<T> &color, const tuple &t)
+divTupleR(Color4<T> &color, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 4)
-        return Color4<T>(extract<T>(t[0]) / color.r, 
-                         extract<T>(t[1]) / color.g, 
-                         extract<T>(t[2]) / color.b,
-                         extract<T>(t[3]) / color.a);
+    if(py::cast<int>(t.attr("__len__")()) == 4)
+        return Color4<T>(py::cast<T>(t[0]) / color.r, 
+                         py::cast<T>(t[1]) / color.g, 
+                         py::cast<T>(t[2]) / color.b,
+                         py::cast<T>(t[3]) / color.a);
     else
         THROW(IEX_NAMESPACE::LogicExc, "Color4 expects tuple of length 4");    
 }
@@ -567,58 +565,61 @@ greaterThanEqual(Color4<T> &v, const Color4<T> &w)
 }
 
 template <class T>
-class_<Color4<T> >
-register_Color4()
+py::class_<Color4<T> >
+register_Color4(py::module &m)
 {
     typedef PyImath::StaticFixedArray<Color4<T>,T,4> Color4_helper;
     void (IMATH_NAMESPACE::Color4<T>::*getValue1)(Color4<T> &) const = &IMATH_NAMESPACE::Color4<T>::getValue;
     void (IMATH_NAMESPACE::Color4<T>::*getValue2)(T &, T &, T &, T &) const = &IMATH_NAMESPACE::Color4<T>::getValue;
 
-    class_<Color4<T> > color4_class(Color4Name<T>::value, Color4Name<T>::value,init<Color4<T> >("copy construction"));
+    py::class_<Color4<T> > color4_class(m, Color4Name<T>::value, Color4Name<T>::value);
     color4_class
-        .def("__init__",make_constructor(Color4_construct_default<T>),"initialize to (0,0,0,0)")
-        .def("__init__",make_constructor(Color4_construct_tuple<T>), "initialize to (r,g,b,a) with a python tuple")
-        .def("__init__",make_constructor(Color4_construct_list<T>), "initialize to (r,g,b,a) with a python list")
-        .def("__init__",make_constructor(Color4_component_construct1<T,float>))
-        .def("__init__",make_constructor(Color4_component_construct1<T,int>))
-        .def("__init__",make_constructor(Color4_component_construct2<T,float>))
-        .def("__init__",make_constructor(Color4_component_construct2<T,int>))
-        .def("__init__",make_constructor(Color4_color_construct<T,float>))
-        .def("__init__",make_constructor(Color4_color_construct<T,int>))
-        .def("__init__",make_constructor(Color4_color_construct<T,unsigned char>))
+        .def(py::init<Color4<T> >(/*"copy construction"*/))
+        .def("__init__",Color4_construct_default<T>,"initialize to (0,0,0,0)")
+        .def("__init__",Color4_construct_tuple<T>, "initialize to (r,g,b,a) with a python tuple")
+        .def("__init__",Color4_construct_list<T>, "initialize to (r,g,b,a) with a python list")
+        .def("__init__",Color4_component_construct1<T,float>)
+        .def("__init__",Color4_component_construct1<T,int>)
+        .def("__init__",Color4_component_construct2<T,float>)
+        .def("__init__",Color4_component_construct2<T,int>)
+        .def("__init__",Color4_color_construct<T,float>)
+        .def("__init__",Color4_color_construct<T,int>)
+        .def("__init__",Color4_color_construct<T,unsigned char>)
         .def_readwrite("r", &Color4<T>::r)
         .def_readwrite("g", &Color4<T>::g)
         .def_readwrite("b", &Color4<T>::b)
         .def_readwrite("a", &Color4<T>::a)
         .def("__str__", &color4_str<T>)
         .def("__repr__", &color4_repr<T>)
+        /*
         .def(self == self)
         .def(self != self)
-        .def("__iadd__", &iadd<T>,return_internal_reference<>())
+        */
+        .def("__iadd__", &iadd<T>,py::return_value_policy::reference_internal)
         .def("__add__", &add<T>)
         .def("__add__", &addTuple<T>)
         .def("__add__", &addT<T>)
         .def("__radd__", &addTuple<T>)
         .def("__radd__", &addT<T>)
-        .def("__isub__", &isub<T>,return_internal_reference<>())
+        .def("__isub__", &isub<T>,py::return_value_policy::reference_internal)
         .def("__sub__", &sub<T>)
         .def("__sub__", &subtractL<T>)
         .def("__sub__", &subtractLT<T>)
         .def("__rsub__", &subtractR<T>)
         .def("__rsub__", &subtractRT<T>)
         .def("__neg__", &neg<T>)
-        .def("negate",&negate<T>,return_internal_reference<>(),"component-wise multiplication by -1")
-        .def("__imul__", &imul<T>,return_internal_reference<>())
-        .def("__imul__", &imulT<T>,return_internal_reference<>())
+        .def("negate",&negate<T>,py::return_value_policy::reference_internal,"component-wise multiplication by -1")
+        .def("__imul__", &imul<T>,py::return_value_policy::reference_internal)
+        .def("__imul__", &imulT<T>,py::return_value_policy::reference_internal)
         .def("__mul__", &mul<T>)
         .def("__mul__", &mulT<T>)
         .def("__rmul__", &mulT<T>)
         .def("__mul__", &mulTuple<T>)
         .def("__rmul__", &mulTuple<T>)
-        .def("__idiv__", &idiv<T>,return_internal_reference<>())
-        .def("__idiv__", &idivT<T>,return_internal_reference<>())
-        .def("__itruediv__", &idiv<T>,return_internal_reference<>())
-        .def("__itruediv__", &idivT<T>,return_internal_reference<>())
+        .def("__idiv__", &idiv<T>,py::return_value_policy::reference_internal)
+        .def("__idiv__", &idivT<T>,py::return_value_policy::reference_internal)
+        .def("__itruediv__", &idiv<T>,py::return_value_policy::reference_internal)
+        .def("__itruediv__", &idivT<T>,py::return_value_policy::reference_internal)
         .def("__div__", &div<T>)
         .def("__div__", &divT<T>)
         .def("__div__", &divTupleL<T>)
@@ -632,18 +633,13 @@ register_Color4()
         .def("__le__", &lessThanEqual<T>)
         .def("__ge__", &greaterThanEqual<T>)
         .def("__len__", Color4_helper::len)
-        .def("__getitem__", Color4_helper::getitem,return_value_policy<copy_non_const_reference>())
+        .def("__getitem__", Color4_helper::getitem, py::return_value_policy::copy)
         .def("__setitem__", Color4_helper::setitem)
-	    .def("dimensions", &Color4<T>::dimensions,"dimensions() number of dimensions in the color")
-        .staticmethod("dimensions")
-        .def("baseTypeEpsilon", &Color4<T>::baseTypeEpsilon,"baseTypeEpsilon() epsilon value of the base type of the color")
-        .staticmethod("baseTypeEpsilon")
-        .def("baseTypeMax", &Color4<T>::baseTypeMax,"baseTypeMax() max value of the base type of the color")
-        .staticmethod("baseTypeMax")
-        .def("baseTypeMin", &Color4<T>::baseTypeMin,"baseTypeMin() min value of the base type of the color")
-        .staticmethod("baseTypeMin")
-        .def("baseTypeSmallest", &Color4<T>::baseTypeSmallest,"baseTypeSmallest() smallest value of the base type of the color")
-        .staticmethod("baseTypeSmallest")
+	    .def_static("dimensions", &Color4<T>::dimensions,"dimensions() number of dimensions in the color")
+        .def_static("baseTypeEpsilon", &Color4<T>::baseTypeEpsilon,"baseTypeEpsilon() epsilon value of the base type of the color")
+        .def_static("baseTypeMax", &Color4<T>::baseTypeMax,"baseTypeMax() max value of the base type of the color")
+        .def_static("baseTypeMin", &Color4<T>::baseTypeMin,"baseTypeMin() min value of the base type of the color")
+        .def_static("baseTypeSmallest", &Color4<T>::baseTypeSmallest,"baseTypeSmallest() smallest value of the base type of the color")
         .def("__repr__",&color4_repr<T>)
         .def("hsv2rgb", &hsv2rgb<T>, 
     	     "C.hsv2rgb() -- returns a new color which "
@@ -671,12 +667,12 @@ register_Color4()
     return color4_class;
 }
 
-template PYIMATH_EXPORT class_<Color4<float> > register_Color4<float>();
-template PYIMATH_EXPORT class_<Color4<unsigned char> > register_Color4<unsigned char>();
-template PYIMATH_EXPORT class_<FixedArray<Color4<float> > > register_Color4Array<float>();
-template PYIMATH_EXPORT class_<FixedArray<Color4<unsigned char> > > register_Color4Array<unsigned char>();
-template PYIMATH_EXPORT class_<FixedArray2D<Color4<float> > > register_Color4Array2D<float>();
-template PYIMATH_EXPORT class_<FixedArray2D<Color4<unsigned char> > > register_Color4Array2D<unsigned char>();
+template PYIMATH_EXPORT py::class_<Color4<float> > register_Color4<float>(py::module &m);
+template PYIMATH_EXPORT py::class_<Color4<unsigned char> > register_Color4<unsigned char>(py::module &m);
+template PYIMATH_EXPORT py::class_<FixedArray<Color4<float> > > register_Color4Array<float>(py::module &m);
+template PYIMATH_EXPORT py::class_<FixedArray<Color4<unsigned char> > > register_Color4Array<unsigned char>(py::module &m);
+template PYIMATH_EXPORT py::class_<FixedArray2D<Color4<float> > > register_Color4Array2D<float>(py::module &m);
+template PYIMATH_EXPORT py::class_<FixedArray2D<Color4<unsigned char> > > register_Color4Array2D<unsigned char>(py::module &m);
 
 template<> PYIMATH_EXPORT IMATH_NAMESPACE::Color4<float> PyImath::FixedArrayDefaultValue<IMATH_NAMESPACE::Color4<float> >::value()
 { return IMATH_NAMESPACE::Color4<float>(0,0,0, 0); }

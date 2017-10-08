@@ -35,8 +35,7 @@
 #ifndef _PyImathMatrix_h_
 #define _PyImathMatrix_h_
 
-#include <Python.h>
-#include <boost/python.hpp>
+#include "python_include.h"
 #include <PyImath.h>
 #include <ImathMatrix.h>
 #include <ImathMatrixAlgo.h>
@@ -44,10 +43,10 @@
 
 namespace PyImath {
 
-template <class T> boost::python::class_<IMATH_NAMESPACE::Matrix33<T> > register_Matrix33();
-template <class T> boost::python::class_<IMATH_NAMESPACE::Matrix44<T> > register_Matrix44();
-template <class T> boost::python::class_<FixedArray<IMATH_NAMESPACE::Matrix44<T> > > register_M44Array();
-template <class T> boost::python::class_<FixedArray<IMATH_NAMESPACE::Matrix33<T> > > register_M33Array();
+template <class T> py::class_<IMATH_NAMESPACE::Matrix33<T> > register_Matrix33(py::module &m);
+template <class T> py::class_<IMATH_NAMESPACE::Matrix44<T> > register_Matrix44(py::module &m);
+template <class T> py::class_<FixedArray<IMATH_NAMESPACE::Matrix44<T> > > register_M44Array(py::module &m);
+template <class T> py::class_<FixedArray<IMATH_NAMESPACE::Matrix33<T> > > register_M33Array(py::module &m);
 typedef FixedArray<IMATH_NAMESPACE::Matrix33<float> >  M33fArray;
 typedef FixedArray<IMATH_NAMESPACE::Matrix33<double> >  M33dArray;
 typedef FixedArray<IMATH_NAMESPACE::Matrix44<float> >  M44fArray;
@@ -80,7 +79,7 @@ template <class T>
 PyObject *
 M33<T>::wrap (const IMATH_NAMESPACE::Matrix33<T> &m)
 {
-    typename boost::python::return_by_value::apply < IMATH_NAMESPACE::Matrix33<T> >::type converter;
+    typename py::return_by_value::apply < IMATH_NAMESPACE::Matrix33<T> >::type converter;
     PyObject *p = converter (m);
     return p;
 }
@@ -89,7 +88,7 @@ template <class T>
 PyObject *
 M44<T>::wrap (const IMATH_NAMESPACE::Matrix44<T> &m)
 {
-    typename boost::python::return_by_value::apply < IMATH_NAMESPACE::Matrix44<T> >::type converter;
+    typename py::return_by_value::apply < IMATH_NAMESPACE::Matrix44<T> >::type converter;
     PyObject *p = converter (m);
     return p;
 }
@@ -98,7 +97,7 @@ template <class T>
 int
 M33<T>::convert (PyObject *p, IMATH_NAMESPACE::Matrix33<T> *m)
 {
-    boost::python::extract <IMATH_NAMESPACE::M33f> extractorMf (p);
+    py::py::cast <IMATH_NAMESPACE::M33f> extractorMf (p);
     if (extractorMf.check())
     {
         IMATH_NAMESPACE::M33f e = extractorMf();
@@ -106,7 +105,7 @@ M33<T>::convert (PyObject *p, IMATH_NAMESPACE::Matrix33<T> *m)
         return 1;
     }
 
-    boost::python::extract <IMATH_NAMESPACE::M33d> extractorMd (p);
+    py::py::cast <IMATH_NAMESPACE::M33d> extractorMd (p);
     if (extractorMd.check())
     {
         IMATH_NAMESPACE::M33d e = extractorMd();
@@ -121,7 +120,7 @@ template <class T>
 int
 M44<T>::convert (PyObject *p, IMATH_NAMESPACE::Matrix44<T> *m)
 {
-    boost::python::extract <IMATH_NAMESPACE::M44f> extractorMf (p);
+    py::py::cast <IMATH_NAMESPACE::M44f> extractorMf (p);
     if (extractorMf.check())
     {
         IMATH_NAMESPACE::M44f e = extractorMf();
@@ -129,7 +128,7 @@ M44<T>::convert (PyObject *p, IMATH_NAMESPACE::Matrix44<T> *m)
         return 1;
     }
 
-    boost::python::extract <IMATH_NAMESPACE::M44d> extractorMd (p);
+    py::py::cast <IMATH_NAMESPACE::M44d> extractorMd (p);
     if (extractorMd.check())
     {
         IMATH_NAMESPACE::M44d e = extractorMd();
@@ -141,7 +140,7 @@ M44<T>::convert (PyObject *p, IMATH_NAMESPACE::Matrix44<T> *m)
 }
 
 template <class Matrix>
-boost::python::tuple
+py::tuple
 jacobiEigensolve(const Matrix& m)
 {
     typedef typename Matrix::BaseType T;
@@ -172,7 +171,7 @@ jacobiEigensolve(const Matrix& m)
     Matrix Q;
     Vec S;
     IMATH_NAMESPACE::jacobiEigenSolver (tmp, S, Q);
-    return boost::python::make_tuple (Q, S);
+    return py::make_tuple (Q, S);
 }
 
 

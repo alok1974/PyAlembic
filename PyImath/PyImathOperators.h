@@ -36,7 +36,8 @@
 #define _PyImathOperators_h_
 
 #include <PyImathFixedArray.h>
-#include <PyImathAutovectorize.h>
+//#include <PyImathAutovectorize.h>
+
 
 namespace PyImath {
 
@@ -240,89 +241,81 @@ static T fa_max(const FixedArray<T> &a) {
 }
 
 template <class T>
-static void add_arithmetic_math_functions(boost::python::class_<FixedArray<T> > &c) {
-    using boost::mpl::true_;
-    using boost::mpl::false_;
-    generate_member_bindings<op_add<T>, true_ >(c,"__add__", "self+x", boost::python::args("x"));
-    generate_member_bindings<op_add<T>, false_>(c,"__radd__","x+self", boost::python::args("x"));
-    generate_member_bindings<op_sub<T>, true_ >(c,"__sub__", "self-x", boost::python::args("x"));
-    generate_member_bindings<op_rsub<T>,false_>(c,"__rsub__","x-self", boost::python::args("x"));
-    generate_member_bindings<op_mul<T>, true_ >(c,"__mul__", "self*x", boost::python::args("x"));
-    generate_member_bindings<op_mul<T>, false_>(c,"__rmul__","x*self", boost::python::args("x"));
-    generate_member_bindings<op_div<T>, true_ >(c,"__div__", "self/x", boost::python::args("x"));
-    generate_member_bindings<op_div<T>, true_ >(c,"__truediv__", "self/x", boost::python::args("x"));
-    generate_member_bindings<op_neg<T> >(c,"__neg__", "-x");
-    generate_member_bindings<op_iadd<T>,true_ >(c,"__iadd__","self+=x",boost::python::args("x"));
-    generate_member_bindings<op_isub<T>,true_ >(c,"__isub__","self-=x",boost::python::args("x"));
-    generate_member_bindings<op_imul<T>,true_ >(c,"__imul__","self*=x",boost::python::args("x"));
-    generate_member_bindings<op_idiv<T>,true_ >(c,"__idiv__","self/=x",boost::python::args("x"));
-    generate_member_bindings<op_idiv<T>,true_ >(c,"__itruediv__","self/=x",boost::python::args("x"));
+static void add_arithmetic_math_functions(py::class_<FixedArray<T> > &c) {
+    generate_member_bindings(c, &op_add<T>::apply, "__add__", "self+x");
+    generate_member_bindings(c, &op_add<T>::apply, "__radd__","x+self");
+    generate_member_bindings(c, &op_sub<T>::apply, "__sub__", "self-x");
+    generate_member_bindings(c, &op_rsub<T>::apply, "__rsub__","x-self");
+    generate_member_bindings(c, &op_mul<T>::apply, "__mul__", "self*x");
+    generate_member_bindings(c, &op_mul<T>::apply, "__rmul__","x*self");
+    generate_member_bindings(c, &op_div<T>::apply, "__div__", "self/x");
+    generate_member_bindings(c, &op_div<T>::apply, "__truediv__", "self/x");
+    generate_member_bindings(c, &op_neg<T>::apply, "__neg__", "-x");
+    generate_member_bindings(c, &op_iadd<T>::apply, "__iadd__","self+=x");
+    generate_member_bindings(c, &op_isub<T>::apply, "__isub__","self-=x");
+    generate_member_bindings(c, &op_imul<T>::apply, "__imul__","self*=x");
+    generate_member_bindings(c, &op_idiv<T>::apply, "__idiv__","self/=x");
+    generate_member_bindings(c, &op_idiv<T>::apply, "__itruediv__","self/=x");
 
     c.def("reduce",&fa_reduce<T>);
 }
 
 template <class T>
-static void add_reduction_functions(boost::python::class_<FixedArray<T> > &c) {
+static void add_reduction_functions(py::class_<FixedArray<T> > &c) {
     c.def("min",&fa_min<T>);
     c.def("max",&fa_max<T>);
 }
 
 template <class T>
-static void add_pow_math_functions(boost::python::class_<FixedArray<T> > &c) {
-    using boost::mpl::true_;
-    using boost::mpl::false_;
-    generate_member_bindings<op_pow<T>, true_ >(c,"__pow__", "self**x", boost::python::args("x"));
-    generate_member_bindings<op_rpow<T>,false_>(c,"__rpow__","x**self", boost::python::args("x"));
-    generate_member_bindings<op_ipow<T>,true_ >(c,"__ipow__","x**=self",boost::python::args("x"));
+static void add_pow_math_functions(py::class_<FixedArray<T> > &c) {
+    generate_member_bindings(c, &op_pow<T>::apply, "__pow__", "self**x");
+    generate_member_bindings(c, &op_rpow<T>::apply, "__rpow__","x**self");
+    generate_member_bindings(c, &op_ipow<T>::apply, "__ipow__","x**=self");
 }
 
 template <class T>
-static void add_mod_math_functions(boost::python::class_<FixedArray<T> > &c) {
-    using boost::mpl::true_;
-    generate_member_bindings<op_mod<T>, true_>(c,"__mod__", "self%x", boost::python::args("x"));
-    generate_member_bindings<op_imod<T>,true_>(c,"__imod__","self%=x",boost::python::args("x"));
+static void add_mod_math_functions(py::class_<FixedArray<T> > &c) {
+    generate_member_bindings(c, &op_mod<T>::apply, "__mod__", "self%x");
+    generate_member_bindings(c, &op_imod<T>::apply, "__imod__","self%=x");
 }
 
 template <class T>
-static void add_shift_math_functions(boost::python::class_<FixedArray<T> > &c) {
-    using boost::mpl::true_;
-    generate_member_bindings<op_lshift<T>, true_>(c,"__lshift__", "self<<x", boost::python::args("x"));
-    generate_member_bindings<op_ilshift<T>,true_>(c,"__ilshift__","self<<=x",boost::python::args("x"));
-    generate_member_bindings<op_rshift<T>, true_>(c,"__rshift__", "self>>x", boost::python::args("x"));
-    generate_member_bindings<op_irshift<T>,true_>(c,"__irshift__","self>>=x",boost::python::args("x"));
+static void add_shift_math_functions(py::class_<FixedArray<T> > &c) {
+    generate_member_bindings(c, &op_lshift<T>::apply, "__lshift__", "self<<x");
+    generate_member_bindings(c, &op_ilshift<T>::apply, "__ilshift__","self<<=x");
+    generate_member_bindings(c, &op_rshift<T>::apply, "__rshift__", "self>>x");
+    generate_member_bindings(c, &op_irshift<T>::apply, "__irshift__","self>>=x");
 }
 
 template <class T>
-static void add_bitwise_math_functions(boost::python::class_<FixedArray<T> > &c) {
+static void add_bitwise_math_functions(py::class_<FixedArray<T> > &c) {
     using boost::mpl::true_;
-    generate_member_bindings<op_bitand<T>, true_>(c,"__and__", "self&x", boost::python::args("x"));
-    generate_member_bindings<op_ibitand<T>,true_>(c,"__iand__","self&=x",boost::python::args("x"));
-    generate_member_bindings<op_bitor<T>,  true_>(c,"__or__",  "self|x", boost::python::args("x"));
-    generate_member_bindings<op_ibitor<T>, true_>(c,"__ior__", "self|=x",boost::python::args("x"));
-    generate_member_bindings<op_xor<T>,    true_>(c,"__xor__", "self^x", boost::python::args("x"));
-    generate_member_bindings<op_ixor<T>,   true_>(c,"__ixor__","self^=x",boost::python::args("x"));
+    generate_member_bindings(c, &op_bitand<T>::apply, "__and__", "self&x");
+    generate_member_bindings(c, &op_ibitand<T>::apply,"__iand__","self&=x");
+    generate_member_bindings(c, &op_bitor<T>::apply,  "__or__",  "self|x");
+    generate_member_bindings(c, &op_ibitor<T>::apply, "__ior__", "self|=x");
+    generate_member_bindings(c, &op_xor<T>::apply,    "__xor__", "self^x");
+    generate_member_bindings(c, &op_ixor<T>::apply,   "__ixor__","self^=x");
 }
 
 template <class T>
-static void add_comparison_functions(boost::python::class_<FixedArray<T> > &c) {
-    using boost::mpl::true_;
-    generate_member_bindings<op_eq<T>, true_>(c,"__eq__","self==x",boost::python::args("x"));
-    generate_member_bindings<op_ne<T>, true_>(c,"__ne__","self!=x",boost::python::args("x"));
+static void add_comparison_functions(py::class_<FixedArray<T> > &c) {
+    generate_member_bindings(c, &op_eq<T>::apply, "__eq__","self==x");
+    generate_member_bindings(c, &op_ne<T>::apply, "__ne__","self!=x");
 }
 
 template <class T>
-static void add_ordered_comparison_functions(boost::python::class_<FixedArray<T> > &c) {
-    using boost::mpl::true_;
-    generate_member_bindings<op_lt<T>, true_>(c,"__lt__","self<x", boost::python::args("x"));
-    generate_member_bindings<op_le<T>, true_>(c,"__le__","self<=x",boost::python::args("x"));
-    generate_member_bindings<op_gt<T>, true_>(c,"__gt__","self>x", boost::python::args("x"));
-    generate_member_bindings<op_ge<T>, true_>(c,"__ge__","self>=x",boost::python::args("x"));
+static void add_ordered_comparison_functions(py::class_<FixedArray<T> > &c) {
+    generate_member_bindings(c, &op_lt<T>::apply, "__lt__","self<x");
+    generate_member_bindings(c, &op_le<T>::apply, "__le__","self<=x");
+    generate_member_bindings(c, &op_gt<T>::apply, "__gt__","self>x");
+    generate_member_bindings(c, &op_ge<T>::apply, "__ge__","self>=x");
 }
 
 template <class S,class T>
-static void add_explicit_construction_from_type(boost::python::class_<FixedArray<T> > &c) {
-    using namespace boost::python;
-    c.def(init<FixedArray<S> >("copy contents of other array into this one"));
+static void add_explicit_construction_from_type(py::class_<FixedArray<T> > &c) {
+    
+    c.def(py::init<FixedArray<S> >(/*"copy contents of other array into this one"*/));
 }
 
 }

@@ -34,16 +34,11 @@
 
 #define BOOST_PYTHON_MAX_ARITY 17
 
+#include "python_include.h"
 #include <PyImathMatrix.h>
 #include "PyImathExport.h"
 #include "PyImathDecorators.h"
-#include <Python.h>
-#include <boost/python.hpp>
-#include <boost/python/make_constructor.hpp>
 #include <boost/format.hpp>
-#include <boost/python/tuple.hpp>
-#include <boost/python/dict.hpp>
-#include <boost/python/raw_function.hpp>
 #include <PyImath.h>
 #include <PyImathVec.h>
 #include <PyImathMathExc.h>
@@ -56,7 +51,7 @@ namespace PyImath {
 template<> const char *PyImath::M33fArray::name() { return "M33fArray"; }
 template<> const char *PyImath::M33dArray::name() { return "M33dArray"; }
 
-using namespace boost::python;
+
 using namespace IMATH_NAMESPACE;
 
 template <class T, int len>
@@ -66,13 +61,13 @@ struct MatrixRow {
     T *_data;
 
     static const char *name;
-    static void register_class()
+    static void register_class(py::module &m)
     {
         typedef PyImath::StaticFixedArray<MatrixRow,T,len> MatrixRow_helper;
-        class_<MatrixRow> matrixRow_class(name,no_init);
+        py::class_<MatrixRow> matrixRow_class(m, name);
         matrixRow_class
             .def("__len__", MatrixRow_helper::len)
-            .def("__getitem__", MatrixRow_helper::getitem,return_value_policy<copy_non_const_reference>())
+            .def("__getitem__", MatrixRow_helper::getitem, py::return_value_policy::copy)
             .def("__setitem__", MatrixRow_helper::setitem)
             ;
     }
@@ -462,14 +457,14 @@ scaleV33(Matrix33<T> &mat, const Vec2<T> &s)
 
 template <class T>
 static const Matrix33<T> &
-scale33Tuple(Matrix33<T> &mat, const tuple &t)
+scale33Tuple(Matrix33<T> &mat, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 2)
+    if(py::cast<int>(t.attr("__len__")()) == 2)
     {
         Vec2<T> s;
-        s.x = extract<T>(t[0]);
-        s.y = extract<T>(t[1]);
+        s.x = py::cast<T>(t[0]);
+        s.y = py::cast<T>(t[1]);
         
         return mat.scale(s);
     }
@@ -504,14 +499,14 @@ setScaleV33(Matrix33<T> &mat, const Vec2<T> &s)
 
 template <class T>
 static const Matrix33<T> &
-setScale33Tuple(Matrix33<T> &mat, const tuple &t)
+setScale33Tuple(Matrix33<T> &mat, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 2)
+    if(py::cast<int>(t.attr("__len__")()) == 2)
     {
         Vec2<T> s;
-        s.x = extract<T>(t[0]);
-        s.y = extract<T>(t[1]);
+        s.x = py::cast<T>(t[0]);
+        s.y = py::cast<T>(t[1]);
         
         return mat.setScale(s);
     }
@@ -538,14 +533,14 @@ setShearV33(Matrix33<T> &mat, const Vec2<T> &h)
 
 template <class T>
 static const Matrix33<T> &
-setShear33Tuple(Matrix33<T> &mat, const tuple &t)
+setShear33Tuple(Matrix33<T> &mat, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 2)
+    if(py::cast<int>(t.attr("__len__")()) == 2)
     {
         Vec2<T> h;
-        h.x = extract<T>(t[0]);
-        h.y = extract<T>(t[1]);
+        h.x = py::cast<T>(t[0]);
+        h.y = py::cast<T>(t[1]);
         
         return mat.setShear(h);
     }
@@ -563,14 +558,14 @@ setTranslation33(Matrix33<T> &mat, const Vec2<T> &t)
 
 template <class T>
 static const Matrix33<T> &
-setTranslation33Tuple(Matrix33<T> &mat, const tuple &t)
+setTranslation33Tuple(Matrix33<T> &mat, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 2)
+    if(py::cast<int>(t.attr("__len__")()) == 2)
     {
         Vec2<T> trans;
-        trans.x = extract<T>(t[0]);
-        trans.y = extract<T>(t[1]);
+        trans.x = py::cast<T>(t[0]);
+        trans.y = py::cast<T>(t[1]);
         
         return mat.setTranslation(trans);
     }
@@ -580,7 +575,7 @@ setTranslation33Tuple(Matrix33<T> &mat, const tuple &t)
 
 template <class T>
 static const Matrix33<T> &
-setTranslation33Obj(Matrix33<T> &mat, const object &o)
+setTranslation33Obj(Matrix33<T> &mat, const py::object &o)
 {
     MATH_EXC_ON;
     Vec2<T> v;
@@ -623,14 +618,14 @@ shearV33(Matrix33<T> &mat, const Vec2<T> &h)
 
 template <class T>
 static const Matrix33<T> &
-shear33Tuple(Matrix33<T> &mat, const tuple &t)
+shear33Tuple(Matrix33<T> &mat, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 2)
+    if(py::cast<int>(t.attr("__len__")()) == 2)
     {
         Vec2<T> h;
-        h.x = extract<T>(t[0]);
-        h.y = extract<T>(t[1]);
+        h.x = py::cast<T>(t[0]);
+        h.y = py::cast<T>(t[1]);
         
         return mat.shear(h);
     }
@@ -640,7 +635,7 @@ shear33Tuple(Matrix33<T> &mat, const tuple &t)
 
 template <class T>
 static const Matrix33<T> &
-translate33(Matrix33<T> &mat, const object &t)
+translate33(Matrix33<T> &mat, const py::object &t)
 {
     MATH_EXC_ON;
     Vec2<T> v;
@@ -657,14 +652,14 @@ translate33(Matrix33<T> &mat, const object &t)
 
 template <class T>
 static const Matrix33<T> &
-translate33Tuple(Matrix33<T> &mat, const tuple &t)
+translate33Tuple(Matrix33<T> &mat, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 2)
+    if(py::cast<int>(t.attr("__len__")()) == 2)
     {
         Vec2<T> trans;
-        trans.x = extract<T>(t[0]);
-        trans.y = extract<T>(t[1]);
+        trans.x = py::cast<T>(t[0]);
+        trans.y = py::cast<T>(t[1]);
         
         return mat.translate(trans);
     }
@@ -804,15 +799,16 @@ greaterThanEqual33(Matrix33<T> &mat1, const Matrix33<T> &mat2)
 }
 
 template <class T>
-static tuple
+static py::tuple
 singularValueDecomposition33(const Matrix33<T>& m, bool forcePositiveDeterminant = false)
 {
     IMATH_NAMESPACE::Matrix33<T> U, V;
     IMATH_NAMESPACE::Vec3<T> S;
     IMATH_NAMESPACE::jacobiSVD (m, U, S, V, IMATH_NAMESPACE::limits<T>::epsilon(), forcePositiveDeterminant);
-    return make_tuple (U, S, V);
+    return py::make_tuple (U, S, V);
 }
 
+#if 0
 BOOST_PYTHON_FUNCTION_OVERLOADS(invert33_overloads, invert33, 1, 2);
 BOOST_PYTHON_FUNCTION_OVERLOADS(inverse33_overloads, inverse33, 1, 2);
 BOOST_PYTHON_FUNCTION_OVERLOADS(gjInvert33_overloads, gjInvert33, 1, 2);
@@ -826,15 +822,16 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(removeScalingAndShear33_overloads, removeScaling
 BOOST_PYTHON_FUNCTION_OVERLOADS(sansScaling33_overloads, sansScaling33, 1, 2)
 BOOST_PYTHON_FUNCTION_OVERLOADS(sansScalingAndShear33_overloads, sansScalingAndShear33, 1, 2)
 BOOST_PYTHON_FUNCTION_OVERLOADS(outerProduct33_overloads, outerProduct33, 3, 3);
+#endif
 
 template <class T>
-static Matrix33<T> * Matrix3_tuple_constructor(const tuple &t0, const tuple &t1, const tuple &t2)
+static Matrix33<T> * Matrix3_tuple_constructor(const py::tuple &t0, const py::tuple &t1, const py::tuple &t2)
 {
-  if(t0.attr("__len__")() == 3 && t1.attr("__len__")() == 3 && t2.attr("__len__")() == 3)
+  if(py::cast<int>(t0.attr("__len__")()) == 3 && py::cast<int>(t1.attr("__len__")()) == 3 && py::cast<int>(t2.attr("__len__")()) == 3)
   {
-      return new Matrix33<T>(extract<T>(t0[0]),  extract<T>(t0[1]),  extract<T>(t0[2]),
-                             extract<T>(t1[0]),  extract<T>(t1[1]),  extract<T>(t1[2]),
-                             extract<T>(t2[0]),  extract<T>(t2[1]),  extract<T>(t2[2]));
+      return new Matrix33<T>(py::cast<T>(t0[0]),  py::cast<T>(t0[1]),  py::cast<T>(t0[2]),
+                             py::cast<T>(t1[0]),  py::cast<T>(t1[1]),  py::cast<T>(t1[2]),
+                             py::cast<T>(t2[0]),  py::cast<T>(t2[1]),  py::cast<T>(t2[2]));
   }
   else
       THROW(IEX_NAMESPACE::LogicExc, "Matrix33 takes 3 tuples of length 3");
@@ -853,20 +850,21 @@ static Matrix33<T> *Matrix3_matrix_constructor(const Matrix33<S> &mat)
 }
 
 template <class T>
-class_<Matrix33<T> >
-register_Matrix33()
+py::class_<Matrix33<T> >
+register_Matrix33(py::module &m)
 {
     typedef PyImath::StaticFixedArray<Matrix33<T>,T,3,IndexAccessMatrixRow<Matrix33<T>,T,3> > Matrix33_helper;
 
-    MatrixRow<T,3>::register_class();
-    class_<Matrix33<T> > matrix33_class(Matrix33Name<T>::value, Matrix33Name<T>::value,init<Matrix33<T> >("copy construction"));
+    MatrixRow<T,3>::register_class(m);
+    py::class_<Matrix33<T> > matrix33_class(m, Matrix33Name<T>::value, Matrix33Name<T>::value);
     matrix33_class
-        .def(init<>("initialize to identity"))
-        .def(init<T>("initialize all entries to a single value"))
-        .def(init<T,T,T,T,T,T,T,T,T>("make from components"))
-        .def("__init__", make_constructor(Matrix3_tuple_constructor<T>))
-        .def("__init__", make_constructor(Matrix3_matrix_constructor<T,float>))
-        .def("__init__", make_constructor(Matrix3_matrix_constructor<T,double>))
+        .def(py::init<Matrix33<T> >(/*"copy construction"*/))
+        .def(py::init<>(/*"initialize to identity"*/))
+        .def(py::init<T>(/*"initialize all entries to a single value"*/))
+        .def(py::init<T,T,T,T,T,T,T,T,T>(/*"make from components"*/))
+        .def("__init__", Matrix3_tuple_constructor<T>)
+        .def("__init__", Matrix3_matrix_constructor<T,float>)
+        .def("__init__", Matrix3_matrix_constructor<T,double>)
         
 	//.def_readwrite("x00", &Matrix33<T>::x[0][0])
 	//.def_readwrite("x01", &Matrix33<T>::x[0][1])
@@ -877,14 +875,10 @@ register_Matrix33()
 	//.def_readwrite("x20", &Matrix33<T>::x[2][0])
 	//.def_readwrite("x21", &Matrix33<T>::x[2][1])
 	//.def_readwrite("x22", &Matrix33<T>::x[2][2])
-        .def("baseTypeEpsilon", &Matrix33<T>::baseTypeEpsilon,"baseTypeEpsilon() epsilon value of the base type of the vector")
-        .staticmethod("baseTypeEpsilon")
-        .def("baseTypeMax", &Matrix33<T>::baseTypeMax,"baseTypeMax() max value of the base type of the vector")
-        .staticmethod("baseTypeMax")
-        .def("baseTypeMin", &Matrix33<T>::baseTypeMin,"baseTypeMin() min value of the base type of the vector")
-        .staticmethod("baseTypeMin")
-        .def("baseTypeSmallest", &Matrix33<T>::baseTypeSmallest,"baseTypeSmallest() smallest value of the base type of the vector")
-        .staticmethod("baseTypeSmallest")
+        .def_static("baseTypeEpsilon", &Matrix33<T>::baseTypeEpsilon,"baseTypeEpsilon() epsilon value of the base type of the vector")
+        .def_static("baseTypeMax", &Matrix33<T>::baseTypeMax,"baseTypeMax() max value of the base type of the vector")
+        .def_static("baseTypeMin", &Matrix33<T>::baseTypeMin,"baseTypeMin() min value of the base type of the vector")
+        .def_static("baseTypeSmallest", &Matrix33<T>::baseTypeSmallest,"baseTypeSmallest() smallest value of the base type of the vector")
         .def("equalWithAbsError", &Matrix33<T>::equalWithAbsError,"m1.equalWithAbsError(m2,e) true if the elements "
              "of v1 and v2 are the same with an absolute error of no more than e, "
              "i.e., abs(m1[i] - m2[i]) <= e")
@@ -896,32 +890,34 @@ register_Matrix33()
         .def("__getitem__", Matrix33_helper::getitem)
 	//.def("__setitem__", Matrix33_helper::setitem)
         .def("makeIdentity",&Matrix33<T>::makeIdentity,"makeIdentity() make this matrix the identity matrix")
-        .def("transpose",&Matrix33<T>::transpose,return_internal_reference<>(),"transpose() transpose this matrix")
+        .def("transpose",&Matrix33<T>::transpose, py::return_value_policy::reference_internal,"transpose() transpose this matrix")
         .def("transposed",&Matrix33<T>::transposed,"transposed() return a transposed copy of this matrix")
-        .def("invert",&invert33<T>,invert33_overloads("invert() invert this matrix")[return_internal_reference<>()])
-        .def("inverse",&inverse33<T>,inverse33_overloads("inverse() return a inverted copy of this matrix"))
-        .def("gjInvert",&gjInvert33<T>,gjInvert33_overloads("gjInvert() invert this matrix")[return_internal_reference<>()])
-        .def("gjInverse",&gjInverse33<T>,gjInverse33_overloads("gjInverse() return a inverted copy of this matrix"))
+        .def("invert",&invert33<T>, py::return_value_policy::reference_internal/* invert33_overloads("invert() invert this matrix")[py::return_value_policy::reference_internal]*/)
+        .def("inverse",&inverse33<T>, py::return_value_policy::reference_internal/* inverse33_overloads("inverse() return a inverted copy of this matrix")*/)
+        .def("gjInvert",&gjInvert33<T>, py::return_value_policy::reference_internal/* gjInvert33_overloads("gjInvert() invert this matrix")[py::return_value_policy::reference_internal]*/)
+        .def("gjInverse",&gjInverse33<T>/*,gjInverse33_overloads("gjInverse() return a inverted copy of this matrix")*/)
         .def("minorOf",&Matrix33<T>::minorOf,"minorOf() return the matrix minor of the (row,col) element of this matrix")
         .def("fastMinor",&Matrix33<T>::fastMinor,"fastMinor() return the matrix minor using the specified rows and columns of this matrix")
         .def("determinant",&Matrix33<T>::determinant,"determinant() return the determinant of this matrix")
+        /*
         .def(self == self)
         .def(self != self)
-        .def("__iadd__", &iadd33<T, float>,return_internal_reference<>())
-        .def("__iadd__", &iadd33<T, double>,return_internal_reference<>())
-        .def("__iadd__", &iadd33T<T>,return_internal_reference<>())
+        */
+        .def("__iadd__", &iadd33<T, float>,py::return_value_policy::reference_internal)
+        .def("__iadd__", &iadd33<T, double>,py::return_value_policy::reference_internal)
+        .def("__iadd__", &iadd33T<T>,py::return_value_policy::reference_internal)
         .def("__add__", &add33<T>)
-        .def("__isub__", &isub33<T, float>,return_internal_reference<>())
-        .def("__isub__", &isub33<T, double>,return_internal_reference<>())
-        .def("__isub__", &isub33T<T>,return_internal_reference<>())
+        .def("__isub__", &isub33<T, float>,py::return_value_policy::reference_internal)
+        .def("__isub__", &isub33<T, double>,py::return_value_policy::reference_internal)
+        .def("__isub__", &isub33T<T>,py::return_value_policy::reference_internal)
         .def("__sub__", &sub33<T>)
-        .def("negate",&negate33<T>,return_internal_reference<>(),"negate() negate all entries in this matrix")
+        .def("negate",&negate33<T>,py::return_value_policy::reference_internal,"negate() negate all entries in this matrix")
         .def("__neg__", &neg33<T>)
-        .def("__imul__", &imul33T<T>,return_internal_reference<>())
+        .def("__imul__", &imul33T<T>,py::return_value_policy::reference_internal)
         .def("__mul__", &mul33T<T>)
         .def("__rmul__", &rmul33T<T>)
-        .def("__idiv__", &idiv33T<T>,return_internal_reference<>())
-        .def("__itruediv__", &idiv33T<T>,return_internal_reference<>())
+        .def("__idiv__", &idiv33T<T>,py::return_value_policy::reference_internal)
+        .def("__itruediv__", &idiv33T<T>,py::return_value_policy::reference_internal)
         .def("__div__", &div33T<T>)
         .def("__truediv__", &div33T<T>)
         .def("__add__", &add33T<T>)
@@ -932,8 +928,8 @@ register_Matrix33()
         .def("__mul__", &mul33<double, T>)
         .def("__rmul__", &rmul33<float, T>)
         .def("__rmul__", &rmul33<double, T>)
-        .def("__imul__", &imul33<float, T>,return_internal_reference<>())
-        .def("__imul__", &imul33<double, T>,return_internal_reference<>())
+        .def("__imul__", &imul33<float, T>,py::return_value_policy::reference_internal)
+        .def("__imul__", &imul33<double, T>,py::return_value_policy::reference_internal)
         .def("__lt__", &lessThan33<T>)
         .def("__le__", &lessThanEqual33<T>)
         .def("__gt__", &greaterThan33<T>)
@@ -941,7 +937,7 @@ register_Matrix33()
 	//.def(self_ns::str(self))
         .def("__str__",&Matrix33_str<T>)
         .def("__repr__",&Matrix33_repr<T>)
-        .def("extractAndRemoveScalingAndShear", &extractAndRemoveScalingAndShear33<T>, 
+        .def("extractAndRemoveScalingAndShear", &extractAndRemoveScalingAndShear33<T>/*, 
               extractAndRemoveScalingAndShear33_overloads(
               "M.extractAndRemoveScalingAndShear(scl, shr, "
               "[exc]) -- extracts the scaling component of "
@@ -952,7 +948,7 @@ register_Matrix33()
               "nearly 0, in which case 0 is returned. "
               "If optional arg. exc == 1, then if the "
               "scaling component is nearly 0, then MathExc "
-              "is thrown. "))
+              "is thrown. ")*/)
              
          .def("extractEuler", &extractEuler<T>, 				
               "M.extractEulerZYX(r) -- extracts the "
@@ -961,7 +957,7 @@ register_Matrix33()
               "non-uniform scaling; results are "
               "meaningless if it does.")
               
-         .def("extractSHRT", &extractSHRT33<T>, extractSHRT33_overloads(				
+         .def("extractSHRT", &extractSHRT33<T>/*, extractSHRT33_overloads(				
               "M.extractSHRT(Vs, Vh, Vr, Vt, [exc]) -- "
 	          "extracts the scaling component of M into Vs, "
 			  "the shearing component of M in Vh (as XY, "
@@ -970,14 +966,14 @@ register_Matrix33()
 	          "and the translaation of M into Vt. "
 			  "If optional arg. exc == 1, then if the "
 			  "scaling component is nearly 0, then MathExc "
-			  "is thrown. "))
+			  "is thrown. ")*/)
               
-         .def("extractScaling", &extractScaling33<T>, extractScaling33_overloads("extract scaling"))
-         .def("outerProduct", &outerProduct33<T>, outerProduct33_overloads(
+         .def("extractScaling", &extractScaling33<T>/*, extractScaling33_overloads("py::cast scaling")*/)
+         .def("outerProduct", &outerProduct33<T>/*, outerProduct33_overloads(
               "M.outerProduct(Va,Vb) -- "
-                  "Performs the outer product, or tensor product, of two 3D vectors, Va and Vb"))
+                  "Performs the outer product, or tensor product, of two 3D vectors, Va and Vb")*/)
 
-         .def("extractScalingAndShear", &extractScalingAndShear33<T>, extractScalingAndShear33_overloads("extract scaling"))
+         .def("extractScalingAndShear", &extractScalingAndShear33<T>/*, extractScalingAndShear33_overloads("py::cast scaling")*/)
         .def("singularValueDecomposition", &singularValueDecomposition33<T>, 
              "Decomposes the matrix using the singular value decomposition (SVD) into three\n"
              "matrices U, S, and V which have the following properties: \n"
@@ -996,8 +992,8 @@ register_Matrix33()
              "\n"
              "Our SVD implementation uses two-sided Jacobi rotations to iteratively\n"
              "diagonalize the matrix, which should be quite robust and significantly faster\n"
-             "than the more general SVD solver in LAPACK.  \n",
-             args("matrix", "forcePositiveDeterminant"))
+             "than the more general SVD solver in LAPACK.  \n"/*,
+             args("matrix", "forcePositiveDeterminant")*/)
         .def("symmetricEigensolve", &PyImath::jacobiEigensolve<IMATH_NAMESPACE::Matrix33<T> >, 
              "Decomposes the matrix A using a symmetric eigensolver into matrices Q and S \n"
              "which have the following properties: \n"
@@ -1027,35 +1023,35 @@ register_Matrix33()
          .def("multVecMatrix", &multVecMatrix33<float,T>, "mult matrix")
          .def("multVecMatrix", &multVecMatrix33_return_value<float,T>, "mult matrix")
          .def("multVecMatrix", &multVecMatrix33_array<float,T>, "mult matrix")
-         .def("removeScaling", &removeScaling33<T>, removeScaling33_overloads("remove scaling"))
+         .def("removeScaling", &removeScaling33<T>/*, removeScaling33_overloads("remove scaling")*/)
 
-         .def("removeScalingAndShear", &removeScalingAndShear33<T>, removeScalingAndShear33_overloads("remove scaling"))
-         .def("sansScaling", &sansScaling33<T>, sansScaling33_overloads("sans scaling"))
-         .def("rotate", &rotate33<T>, return_internal_reference<>(),"rotate matrix")
+         .def("removeScalingAndShear", &removeScalingAndShear33<T>/*, removeScalingAndShear33_overloads("remove scaling")*/)
+         .def("sansScaling", &sansScaling33<T>/*, sansScaling33_overloads("sans scaling")*/)
+         .def("rotate", &rotate33<T>, py::return_value_policy::reference_internal,"rotate matrix")
 
-         .def("sansScalingAndShear", &sansScalingAndShear33<T>, sansScalingAndShear33_overloads("sans scaling and shear"))
-         .def("scale", &scaleSc33<T>, return_internal_reference<>(),"scale matrix")
-         .def("scale", &scaleV33<T>, return_internal_reference<>(),"scale matrix")
-         .def("scale", &scale33Tuple<T>, return_internal_reference<>(),"scale matrix")
+         .def("sansScalingAndShear", &sansScalingAndShear33<T>/*, sansScalingAndShear33_overloads("sans scaling and shear")*/)
+         .def("scale", &scaleSc33<T>, py::return_value_policy::reference_internal,"scale matrix")
+         .def("scale", &scaleV33<T>, py::return_value_policy::reference_internal,"scale matrix")
+         .def("scale", &scale33Tuple<T>, py::return_value_policy::reference_internal,"scale matrix")
 
-         .def("setRotation", &setRotation33<T>, return_internal_reference<>(),"setRotation()")
-         .def("setScale", &setScaleSc33<T>, return_internal_reference<>(),"setScale()")
-         .def("setScale", &setScaleV33<T>, return_internal_reference<>(),"setScale()")
-         .def("setScale", &setScale33Tuple<T>, return_internal_reference<>(),"setScale()")
+         .def("setRotation", &setRotation33<T>, py::return_value_policy::reference_internal,"setRotation()")
+         .def("setScale", &setScaleSc33<T>, py::return_value_policy::reference_internal,"setScale()")
+         .def("setScale", &setScaleV33<T>, py::return_value_policy::reference_internal,"setScale()")
+         .def("setScale", &setScale33Tuple<T>, py::return_value_policy::reference_internal,"setScale()")
 
-         .def("setShear", &setShearSc33<T>, return_internal_reference<>(),"setShear()")
-         .def("setShear", &setShearV33<T>, return_internal_reference<>(),"setShear()")
-         .def("setShear", &setShear33Tuple<T>, return_internal_reference<>(),"setShear()")
+         .def("setShear", &setShearSc33<T>, py::return_value_policy::reference_internal,"setShear()")
+         .def("setShear", &setShearV33<T>, py::return_value_policy::reference_internal,"setShear()")
+         .def("setShear", &setShear33Tuple<T>, py::return_value_policy::reference_internal,"setShear()")
          
-         .def("setTranslation", &setTranslation33<T>, return_internal_reference<>(),"setTranslation()")
-         .def("setTranslation", &setTranslation33Tuple<T>, return_internal_reference<>(),"setTranslation()")
-         .def("setTranslation", &setTranslation33Obj<T>, return_internal_reference<>(),"setTranslation()")
+         .def("setTranslation", &setTranslation33<T>, py::return_value_policy::reference_internal,"setTranslation()")
+         .def("setTranslation", &setTranslation33Tuple<T>, py::return_value_policy::reference_internal,"setTranslation()")
+         .def("setTranslation", &setTranslation33Obj<T>, py::return_value_policy::reference_internal,"setTranslation()")
          .def("setValue", &setValue33<T>, "setValue()")
-         .def("shear", &shearSc33<T>, return_internal_reference<>(),"shear()")
-         .def("shear", &shearV33<T>, return_internal_reference<>(),"shear()")
-         .def("shear", &shear33Tuple<T>, return_internal_reference<>(),"shear()")
-         .def("translate", &translate33<T>, return_internal_reference<>(),"translate()")
-         .def("translate", &translate33Tuple<T>, return_internal_reference<>(),"translate()")
+         .def("shear", &shearSc33<T>, py::return_value_policy::reference_internal,"shear()")
+         .def("shear", &shearV33<T>, py::return_value_policy::reference_internal,"shear()")
+         .def("shear", &shear33Tuple<T>, py::return_value_policy::reference_internal,"shear()")
+         .def("translate", &translate33<T>, py::return_value_policy::reference_internal,"translate()")
+         .def("translate", &translate33Tuple<T>, py::return_value_policy::reference_internal,"translate()")
          .def("translation", &Matrix33<T>::translation, "translation()")
          ;
 
@@ -1097,21 +1093,21 @@ setM33ArrayItem(FixedArray<IMATH_NAMESPACE::Matrix33<T> > &ma,
 }
 
 template <class T>
-class_<FixedArray<IMATH_NAMESPACE::Matrix33<T> > >
-register_M33Array()
+py::class_<FixedArray<IMATH_NAMESPACE::Matrix33<T> > >
+register_M33Array(py::module &m)
 {
-    class_<FixedArray<IMATH_NAMESPACE::Matrix33<T> > > matrixArray_class = FixedArray<IMATH_NAMESPACE::Matrix33<T> >::register_("Fixed length array of IMATH_NAMESPACE::Matrix33");
+    py::class_<FixedArray<IMATH_NAMESPACE::Matrix33<T> > > matrixArray_class = FixedArray<IMATH_NAMESPACE::Matrix33<T> >::register_(m, "Fixed length array of IMATH_NAMESPACE::Matrix33");
     matrixArray_class
          .def("__setitem__", &setM33ArrayItem<T>)
         ;
     return matrixArray_class;
 }
 
-template PYIMATH_EXPORT class_<IMATH_NAMESPACE::Matrix33<float> > register_Matrix33<float>();
-template PYIMATH_EXPORT class_<IMATH_NAMESPACE::Matrix33<double> > register_Matrix33<double>();
+template PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Matrix33<float> > register_Matrix33<float>(py::module &m);
+template PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Matrix33<double> > register_Matrix33<double>(py::module &m);
 
-template PYIMATH_EXPORT class_<FixedArray<IMATH_NAMESPACE::Matrix33<float> > > register_M33Array<float>();
-template PYIMATH_EXPORT class_<FixedArray<IMATH_NAMESPACE::Matrix33<double> > > register_M33Array<double>();
+template PYIMATH_EXPORT py::class_<FixedArray<IMATH_NAMESPACE::Matrix33<float> > > register_M33Array<float>(py::module &m);
+template PYIMATH_EXPORT py::class_<FixedArray<IMATH_NAMESPACE::Matrix33<double> > > register_M33Array<double>(py::module &m);
 
 
 template<> PYIMATH_EXPORT IMATH_NAMESPACE::Matrix33<float> FixedArrayDefaultValue<IMATH_NAMESPACE::Matrix33<float> >::value() { return IMATH_NAMESPACE::Matrix33<float>(); }

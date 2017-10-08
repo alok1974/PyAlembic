@@ -39,7 +39,7 @@
 
 namespace PyImath {
 
-PYIMATH_EXPORT void register_functions();
+PYIMATH_EXPORT void register_functions(py::module &m);
 
 }
 

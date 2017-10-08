@@ -35,7 +35,8 @@
 #ifndef _PyImathFixedArray_h_
 #define _PyImathFixedArray_h_
 
-#include <boost/python.hpp>
+#include "python_include.h"
+#include <boost/type_traits.hpp>
 #include <boost/operators.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/any.hpp>
@@ -232,7 +233,7 @@ class FixedArray
         if (index < 0) index += _length;
         if (index >= _length || index < 0) {
             PyErr_SetString(PyExc_IndexError, "Index out of range");
-            boost::python::throw_error_already_set();
+            throw py::error_already_set();
         }
         return index; // still a virtual index if this is a masked reference array
     }
@@ -243,7 +244,7 @@ class FixedArray
             PySliceObject *slice = reinterpret_cast<PySliceObject *>(index);
             Py_ssize_t s,e,sl;
             if (PySlice_GetIndicesEx(slice,_length,&s,&e,&step,&sl) == -1) {
-                boost::python::throw_error_already_set();
+                throw py::error_already_set();
             }
             // e can be -1 if the iteration is backwards with a negative slice operator [::-n] (n > 0).
             if (s < 0 || e < -1 || sl < 0) {
@@ -257,7 +258,7 @@ class FixedArray
             start = i; end = i+1; step = 1; slicelength = 1;
         } else {
             PyErr_SetString(PyExc_TypeError, "Object is not a slice");
-	    boost::python::throw_error_already_set();
+	    throw py::error_already_set();
         }
     }
 
@@ -338,7 +339,7 @@ class FixedArray
         // we have a valid range of indices
         if (data.len() != slicelength) {
             PyErr_SetString(PyExc_IndexError, "Dimensions of source do not match destination");
-	    boost::python::throw_error_already_set();
+	    throw py::error_already_set();
         }
 
         if (_indices)
@@ -434,34 +435,22 @@ class FixedArray
         return _indices[i];
     }
 
-    static boost::python::class_<FixedArray<T> > register_(const char *doc)
+    static py::class_<FixedArray<T> > register_(py::module &m, const char *doc)
     {
-        // a little tricky, but here we go - class types return internal references
-        // but fundemental types just get copied.  this typedef sets up the appropriate
-        // call policy for each type.
-        typedef typename boost::mpl::if_<
-            boost::is_class<T>,
-            boost::python::return_internal_reference<>,
-            boost::python::default_call_policies>::type call_policy;
-
-        typedef typename boost::mpl::if_<
-            boost::is_class<T>,
-            boost::python::return_value_policy<boost::python::copy_const_reference>,
-            boost::python::default_call_policies>::type const_call_policy;
-
         //typename FixedArray<T>::get_type (FixedArray<T>::*nonconst_getitem)(Py_ssize_t)= &FixedArray<T>::getitem;
         //typename FixedArray<T>::get_type_const (FixedArray<T>::*const_getitem)(Py_ssize_t) = &FixedArray<T>::getitem;
         typename FixedArray<T>::get_type (FixedArray<T>::*nonconst_getitem)(Py_ssize_t)= &FixedArray<T>::getitem;
         typename FixedArray<T>::get_type_const (FixedArray<T>::*const_getitem)(Py_ssize_t) const = &FixedArray<T>::getitem;
 
-        boost::python::class_<FixedArray<T> > c(name(),doc, boost::python::init<size_t>("construct an array of the specified length initialized to the default value for the type"));
+        py::class_<FixedArray<T> > c(m, name(), doc);
         c
-            .def(boost::python::init<const FixedArray<T> &>("construct an array with the same values as the given array"))
-            .def(boost::python::init<const T &,size_t>("construct an array of the specified length initialized to the specified default value"))
+            .def(py::init<Py_ssize_t>(/*"construct an array of the specified length initialized to the default value for the type"*/))
+            .def(py::init<const FixedArray<T> &>(/*"construct an array with the same values as the given array"*/))
+            .def(py::init<const T &, Py_ssize_t>(/*"construct an array of the specified length initialized to the specified default value"*/))
             .def("__getitem__", &FixedArray<T>::getslice)
             .def("__getitem__", &FixedArray<T>::getslice_mask)
-            .def("__getitem__", const_getitem, const_call_policy())
-            .def("__getitem__", nonconst_getitem, call_policy()) 
+            .def("__getitem__", const_getitem, const_call_policy<T>())
+            .def("__getitem__", nonconst_getitem, call_policy<T>()) 
             .def("__setitem__", &FixedArray<T>::setitem_scalar)
             .def("__setitem__", &FixedArray<T>::setitem_scalar_mask)
             .def("__setitem__", &FixedArray<T>::setitem_vector)
@@ -537,7 +526,7 @@ struct StaticFixedArray
         if (index < 0) index += Length;
         if (index < 0 || index >= Length) {
             PyErr_SetString(PyExc_IndexError, "Index out of range");
-            boost::python::throw_error_already_set();
+            throw py::error_already_set();
         }
         return index;
     }

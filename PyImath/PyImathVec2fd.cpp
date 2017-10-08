@@ -40,7 +40,7 @@ namespace PyImath {
 template <> const char *PyImath::V2fArray::name() { return "V2fArray"; }
 template <> const char *PyImath::V2dArray::name() { return "V2dArray"; }
 
-using namespace boost::python;
+
 using namespace IMATH_NAMESPACE;
 
 template<> const char *Vec2Name<float>::value  = "V2f";
@@ -62,11 +62,11 @@ std::string Vec2_repr(const Vec2<double> &v)
                         % Vec2Name<double>::value % v.x % v.y).str();
 }
 
-template PYIMATH_EXPORT class_<IMATH_NAMESPACE::Vec2<float> > register_Vec2<float>();
-template PYIMATH_EXPORT class_<IMATH_NAMESPACE::Vec2<double> > register_Vec2<double>();
+template PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Vec2<float> > register_Vec2<float>(py::module &m);
+template PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Vec2<double> > register_Vec2<double>(py::module &m);
 		 
-template PYIMATH_EXPORT class_<FixedArray<IMATH_NAMESPACE::Vec2<float> > > register_Vec2Array<float>();
-template PYIMATH_EXPORT class_<FixedArray<IMATH_NAMESPACE::Vec2<double> > > register_Vec2Array<double>();
+template PYIMATH_EXPORT py::class_<FixedArray<IMATH_NAMESPACE::Vec2<float> > > register_Vec2Array<float>(py::module &m);
+template PYIMATH_EXPORT py::class_<FixedArray<IMATH_NAMESPACE::Vec2<double> > > register_Vec2Array<double>(py::module &m);
 
 template<> IMATH_NAMESPACE::Vec2<float> PYIMATH_EXPORT FixedArrayDefaultValue<IMATH_NAMESPACE::Vec2<float> >::value() { return IMATH_NAMESPACE::Vec2<float>(0,0); }
 template<> IMATH_NAMESPACE::Vec2<double> PYIMATH_EXPORT FixedArrayDefaultValue<IMATH_NAMESPACE::Vec2<double> >::value() { return IMATH_NAMESPACE::Vec2<double>(0,0); }

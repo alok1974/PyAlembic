@@ -35,8 +35,7 @@
 #ifndef _PyImathEuler_h_
 #define _PyImathEuler_h_
 
-#include <Python.h>
-#include <boost/python.hpp>
+#include "python_include.h"
 #include <PyImath.h>
 #include <ImathEuler.h>
 #include <ImathVec.h>
@@ -44,8 +43,8 @@
 
 namespace PyImath {
 
-template <class T> boost::python::class_<IMATH_NAMESPACE::Euler<T>,boost::python::bases<IMATH_NAMESPACE::Vec3<T> > > register_Euler();
-template <class T> boost::python::class_<PyImath::FixedArray<IMATH_NAMESPACE::Euler<T> > > register_EulerArray();
+template <class T> py::class_<IMATH_NAMESPACE::Euler<T>, IMATH_NAMESPACE::Vec3<T> > register_Euler(py::module &m);
+template <class T> py::class_<PyImath::FixedArray<IMATH_NAMESPACE::Euler<T> > > register_EulerArray(py::module &m);
 typedef FixedArray<IMATH_NAMESPACE::Eulerf>  EulerfArray;
 typedef FixedArray<IMATH_NAMESPACE::Eulerd>  EulerdArray;
 
@@ -70,7 +69,7 @@ template <class T>
 PyObject *
 E<T>::wrap (const IMATH_NAMESPACE::Euler<T> &e)
 {
-    typename boost::python::return_by_value::apply < IMATH_NAMESPACE::Euler<T> >::type converter;
+    typename py::return_by_value::apply < IMATH_NAMESPACE::Euler<T> >::type converter;
     PyObject *p = converter (e);
     return p;
 }
@@ -79,7 +78,7 @@ template <class T>
 int
 E<T>::convert (PyObject *p, IMATH_NAMESPACE::Euler<T> *v)
 {
-    boost::python::extract <IMATH_NAMESPACE::Eulerf> extractorEf (p);
+    py::py::cast <IMATH_NAMESPACE::Eulerf> extractorEf (p);
     if (extractorEf.check())
     {
         IMATH_NAMESPACE::Eulerf e = extractorEf();
@@ -90,7 +89,7 @@ E<T>::convert (PyObject *p, IMATH_NAMESPACE::Euler<T> *v)
         return 1;
     }
 
-    boost::python::extract <IMATH_NAMESPACE::Eulerd> extractorEd (p);
+    py::py::cast <IMATH_NAMESPACE::Eulerd> extractorEd (p);
     if (extractorEd.check())
     {
         IMATH_NAMESPACE::Eulerd e = extractorEd();

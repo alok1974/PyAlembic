@@ -35,14 +35,13 @@
 #ifndef _PyImathShear_h_
 #define _PyImathShear_h_
 
-#include <Python.h>
-#include <boost/python.hpp>
+#include "python_include.h"
 #include <ImathShear.h>
 
 
 namespace PyImath {
 
-template <class T> boost::python::class_<IMATH_NAMESPACE::Shear6<T> > register_Shear();
+template <class T> py::class_<IMATH_NAMESPACE::Shear6<T> > register_Shear(py::module &m);
 
 //
 
@@ -64,7 +63,7 @@ template <class T>
 PyObject *
 S6<T>::wrap (const IMATH_NAMESPACE::Shear6<T> &s)
 {
-    typename boost::python::return_by_value::apply < IMATH_NAMESPACE::Shear6<T> >::type converter;
+    typename py::return_by_value::apply < IMATH_NAMESPACE::Shear6<T> >::type converter;
     PyObject *p = converter (s);
     return p;
 }
@@ -73,7 +72,7 @@ template <class T>
 int
 S6<T>::convert (PyObject *p, IMATH_NAMESPACE::Shear6<T> *s)
 {
-    boost::python::extract <IMATH_NAMESPACE::Shear6f> extractorShear6f (p);
+    py::py::cast <IMATH_NAMESPACE::Shear6f> extractorShear6f (p);
     if (extractorShear6f.check())
     {
         IMATH_NAMESPACE::Shear6f s6f = extractorShear6f();
@@ -83,7 +82,7 @@ S6<T>::convert (PyObject *p, IMATH_NAMESPACE::Shear6<T> *s)
         return 1;
     }
 
-    boost::python::extract <IMATH_NAMESPACE::Shear6d> extractorShear6d (p);
+    py::py::cast <IMATH_NAMESPACE::Shear6d> extractorShear6d (p);
     if (extractorShear6d.check())
     {
         IMATH_NAMESPACE::Shear6d s6d = extractorShear6d();
@@ -93,33 +92,33 @@ S6<T>::convert (PyObject *p, IMATH_NAMESPACE::Shear6<T> *s)
         return 1;
     }
 
-    boost::python::extract <boost::python::tuple> extractorTuple (p);
+    py::py::cast <py::tuple> extractorTuple (p);
     if (extractorTuple.check())
     {
-        boost::python::tuple t = extractorTuple();
+        py::tuple t = extractorTuple();
         if (t.attr ("__len__") () == 3)
         {
-            double xy = boost::python::extract <double> (t[0]);
-            double xz = boost::python::extract <double> (t[1]);
-            double yz = boost::python::extract <double> (t[2]);
+            double xy = py::py::cast <double> (t[0]);
+            double xz = py::py::cast <double> (t[1]);
+            double yz = py::py::cast <double> (t[2]);
             s->setValue (T(xy), T(xz), T(yz), T(0), T(0), T(0));
             return 1;
         }
 
         else if (t.attr ("__len__") () == 6)
         {
-            double xy = boost::python::extract <double> (t[0]);
-            double xz = boost::python::extract <double> (t[1]);
-            double yz = boost::python::extract <double> (t[2]);
-            double yx = boost::python::extract <double> (t[3]);
-            double zx = boost::python::extract <double> (t[4]);
-            double zy = boost::python::extract <double> (t[5]);
+            double xy = py::py::cast <double> (t[0]);
+            double xz = py::py::cast <double> (t[1]);
+            double yz = py::py::cast <double> (t[2]);
+            double yx = py::py::cast <double> (t[3]);
+            double zx = py::py::cast <double> (t[4]);
+            double zy = py::py::cast <double> (t[5]);
             s->setValue (T(xy), T(xz), T(yz), T(yx), T(zx), T(zy));
             return 1;
         }
     }
 
-    boost::python::extract <IMATH_NAMESPACE::V3i> extractorV3i (p);
+    py::py::cast <IMATH_NAMESPACE::V3i> extractorV3i (p);
     if (extractorV3i.check())
     {
         IMATH_NAMESPACE::V3i v3i = extractorV3i();
@@ -127,7 +126,7 @@ S6<T>::convert (PyObject *p, IMATH_NAMESPACE::Shear6<T> *s)
         return 1;
     }
 
-    boost::python::extract <IMATH_NAMESPACE::V3f> extractorV3f (p);
+    py::py::cast <IMATH_NAMESPACE::V3f> extractorV3f (p);
     if (extractorV3f.check())
     {
         IMATH_NAMESPACE::V3f v3f = extractorV3f();
@@ -135,7 +134,7 @@ S6<T>::convert (PyObject *p, IMATH_NAMESPACE::Shear6<T> *s)
         return 1;
     }
 
-    boost::python::extract <IMATH_NAMESPACE::V3d> extractorV3d (p);
+    py::py::cast <IMATH_NAMESPACE::V3d> extractorV3d (p);
     if (extractorV3d.check())
     {
         IMATH_NAMESPACE::V3d v3d = extractorV3d();

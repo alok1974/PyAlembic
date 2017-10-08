@@ -32,20 +32,17 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-
+#include "python_include.h"
 #include <PyImathRandom.h>
 #include "PyImathDecorators.h"
-#include <Python.h>
-#include <boost/python.hpp>
 #include <boost/format.hpp>
-#include <boost/python/make_constructor.hpp>
 #include <PyImath.h>
 #include <PyImathMathExc.h>
 #include <PyImathFixedArray.h>
 
 
 namespace PyImath{
-using namespace boost::python;
+
 
 template <class Rand, class T>
 static T
@@ -143,8 +140,8 @@ solidSphereRand(Rand &rand, int num)
     return retval;
 }
 
-class_<IMATH_NAMESPACE::Rand32>
-register_Rand32()
+py::class_<IMATH_NAMESPACE::Rand32>
+register_Rand32(py::module &m)
 {
     float (IMATH_NAMESPACE::Rand32::*nextf1)(void) = &IMATH_NAMESPACE::Rand32::nextf;
     
@@ -163,11 +160,11 @@ register_Rand32()
     IMATH_NAMESPACE::Vec2<float> (*nextSolidSphere3)(IMATH_NAMESPACE::Rand32 &, const IMATH_NAMESPACE::Vec2<float> &v) = &nextSolidSphere<float,IMATH_NAMESPACE::Rand32>;
     IMATH_NAMESPACE::Vec2<double> (*nextSolidSphere4)(IMATH_NAMESPACE::Rand32 &, const IMATH_NAMESPACE::Vec2<double> &v) = &nextSolidSphere<double,IMATH_NAMESPACE::Rand32>;
     
-    class_< IMATH_NAMESPACE::Rand32 > rand32_class("Rand32");
+    py::class_< IMATH_NAMESPACE::Rand32 > rand32_class(m, "Rand32");
     rand32_class
-        .def(init<>("default construction"))
-        .def("__init__", make_constructor(Rand_constructor1<IMATH_NAMESPACE::Rand32>))
-        .def("__init__", make_constructor(Rand_constructor2<IMATH_NAMESPACE::Rand32>))
+        .def(py::init<>(/*"default construction"*/))
+        .def("__init__", Rand_constructor1<IMATH_NAMESPACE::Rand32>)
+        .def("__init__", Rand_constructor2<IMATH_NAMESPACE::Rand32>)
         .def("init", &IMATH_NAMESPACE::Rand32::init,
              "r.init(i) -- initialize with integer "
 			 "seed i")
@@ -228,21 +225,21 @@ register_Rand32()
         .def("nextSolidSphere", nextSolidSphere4)    
         ;
 
-    def("hollowSphereRand",&hollowSphereRand<float,IMATH_NAMESPACE::Rand32>,"hollowSphereRand(randObj,num) return XYZ vectors uniformly "
-        "distributed across the surface of a sphere generated from the given Rand32 object",
-        args("randObj","num"));
+    m.def("hollowSphereRand",&hollowSphereRand<float,IMATH_NAMESPACE::Rand32>,"hollowSphereRand(randObj,num) return XYZ vectors uniformly "
+        "distributed across the surface of a sphere generated from the given Rand32 object"
+        /*args("randObj","num")*/);
         
-    def("solidSphereRand",&solidSphereRand<float,IMATH_NAMESPACE::Rand32>,"solidSphereRand(randObj,num) return XYZ vectors uniformly "
-        "distributed through the volume of a sphere generated from the given Rand32 object",
-        args("randObj","num"));
+    m.def("solidSphereRand",&solidSphereRand<float,IMATH_NAMESPACE::Rand32>,"solidSphereRand(randObj,num) return XYZ vectors uniformly "
+        "distributed through the volume of a sphere generated from the given Rand32 object"
+        /*args("randObj","num")*/);
 
     decoratecopy(rand32_class);
 
     return rand32_class;
 }
 
-class_<IMATH_NAMESPACE::Rand48>
-register_Rand48()
+py::class_<IMATH_NAMESPACE::Rand48>
+register_Rand48(py::module &m)
 {
     double (IMATH_NAMESPACE::Rand48::*nextf1)(void) = &IMATH_NAMESPACE::Rand48::nextf;
     
@@ -261,11 +258,11 @@ register_Rand48()
     IMATH_NAMESPACE::Vec2<float> (*nextSolidSphere3)(IMATH_NAMESPACE::Rand48&, const IMATH_NAMESPACE::Vec2<float> &v) = &nextSolidSphere<float,IMATH_NAMESPACE::Rand48>;
     IMATH_NAMESPACE::Vec2<double> (*nextSolidSphere4)(IMATH_NAMESPACE::Rand48 &, const IMATH_NAMESPACE::Vec2<double> &v) = &nextSolidSphere<double,IMATH_NAMESPACE::Rand48>;
    
-    class_< IMATH_NAMESPACE::Rand48 > rand48_class("Rand48");
+    py::class_< IMATH_NAMESPACE::Rand48 > rand48_class(m, "Rand48");
     rand48_class
-        .def(init<>("default construction"))
-        .def("__init__", make_constructor(Rand_constructor1<IMATH_NAMESPACE::Rand48>))
-        .def("__init__", make_constructor(Rand_constructor2<IMATH_NAMESPACE::Rand48>))
+        .def(py::init<>(/*"default construction"*/))
+        .def("__init__", Rand_constructor1<IMATH_NAMESPACE::Rand48>)
+        .def("__init__", Rand_constructor2<IMATH_NAMESPACE::Rand48>)
         .def("init", &IMATH_NAMESPACE::Rand48::init,
              "r.init(i) -- initialize with integer "
 			 "seed i")
@@ -334,10 +331,11 @@ register_Rand48()
 
 //
 
+/*
 PyObject *
 Rand32::wrap (const IMATH_NAMESPACE::Rand32 &r)
 {
-    boost::python::return_by_value::apply <IMATH_NAMESPACE::Rand32>::type converter;
+    py::return_by_value::apply <IMATH_NAMESPACE::Rand32>::type converter;
     PyObject *p = converter (r);
     return p;
 }
@@ -345,9 +343,10 @@ Rand32::wrap (const IMATH_NAMESPACE::Rand32 &r)
 PyObject *
 Rand48::wrap (const IMATH_NAMESPACE::Rand48 &r)
 {
-    boost::python::return_by_value::apply <IMATH_NAMESPACE::Rand48>::type converter;
+    py::return_by_value::apply <IMATH_NAMESPACE::Rand48>::type converter;
     PyObject *p = converter (r);
     return p;
 }
+*/
 
 } //namespace PyIMath

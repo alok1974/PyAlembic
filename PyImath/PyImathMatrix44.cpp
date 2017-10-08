@@ -34,16 +34,11 @@
 
 #define BOOST_PYTHON_MAX_ARITY 17
 
+#include "python_include.h"
 #include <PyImathMatrix.h>
 #include "PyImathExport.h"
 #include "PyImathDecorators.h"
-#include <Python.h>
-#include <boost/python.hpp>
-#include <boost/python/make_constructor.hpp>
 #include <boost/format.hpp>
-#include <boost/python/tuple.hpp>
-#include <boost/python/dict.hpp>
-#include <boost/python/raw_function.hpp>
 #include <PyImath.h>
 #include <PyImathVec.h>
 #include <PyImathMathExc.h>
@@ -56,7 +51,7 @@ namespace PyImath {
 template<> const char PYIMATH_EXPORT *PyImath::M44fArray::name() { return "M44fArray"; }
 template<> const char PYIMATH_EXPORT *PyImath::M44dArray::name() { return "M44dArray"; }
 
-using namespace boost::python;
+
 using namespace IMATH_NAMESPACE;
 using namespace PyImath;
 
@@ -67,13 +62,13 @@ struct MatrixRow {
     T *_data;
 
     static const char *name;
-    static void register_class()
+    static void register_class(py::module &m)
     {
         typedef PyImath::StaticFixedArray<MatrixRow,T,len> MatrixRow_helper;
-        class_<MatrixRow> matrixRow_class(name,no_init);
+        py::class_<MatrixRow> matrixRow_class(m, name);
         matrixRow_class
             .def("__len__", MatrixRow_helper::len)
-            .def("__getitem__", MatrixRow_helper::getitem,return_value_policy<copy_non_const_reference>())
+            .def("__getitem__", MatrixRow_helper::getitem, py::return_value_policy::reference_internal)
             .def("__setitem__", MatrixRow_helper::setitem)
             ;
     }
@@ -483,15 +478,15 @@ scaleV44(Matrix44<T> &mat, const Vec3<T> &s)
 
 template <class T>
 static const Matrix44<T> &
-scale44Tuple(Matrix44<T> &mat, const tuple &t)
+scale44Tuple(Matrix44<T> &mat, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
         Vec3<T> s;
-        s.x = extract<T>(t[0]);
-        s.y = extract<T>(t[1]);
-        s.z = extract<T>(t[2]);
+        s.x = py::cast<T>(t[0]);
+        s.y = py::cast<T>(t[1]);
+        s.z = py::cast<T>(t[2]);
         
         return mat.scale(s);
     }
@@ -509,7 +504,7 @@ rotateV44(Matrix44<T> &mat, const Vec3<T> &r)
 
 template <class T>
 static const Matrix44<T> &
-rotationMatrix44(Matrix44<T> &mat, const object &fromObj, const object &toObj)
+rotationMatrix44(Matrix44<T> &mat, const py::object &fromObj, const py::object &toObj)
 {
     MATH_EXC_ON;
     Vec3<T> from, to;
@@ -527,8 +522,8 @@ rotationMatrix44(Matrix44<T> &mat, const object &fromObj, const object &toObj)
 
 template <class T>
 static const Matrix44<T> &
-rotationMatrixWithUp44(Matrix44<T> &mat, const object &fromObj, const object &toObj,
-                       const object &upObj)
+rotationMatrixWithUp44(Matrix44<T> &mat, const py::object &fromObj, const py::object &toObj,
+                       const py::object &upObj)
 {
     MATH_EXC_ON;
     Vec3<T> from, to, up;
@@ -564,15 +559,15 @@ setScaleV44(Matrix44<T> &mat, const Vec3<T> &s)
 
 template <class T>
 static const Matrix44<T> &
-setScale44Tuple(Matrix44<T> &mat, const tuple &t)
+setScale44Tuple(Matrix44<T> &mat, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
         Vec3<T> s;
-        s.x = extract<T>(t[0]);
-        s.y = extract<T>(t[1]);
-        s.z = extract<T>(t[2]);
+        s.x = py::cast<T>(t[0]);
+        s.y = py::cast<T>(t[1]);
+        s.z = py::cast<T>(t[2]);
         
         return mat.setScale(s);
     }
@@ -600,25 +595,25 @@ setShearS44(Matrix44<T> &mat, const Shear6<T> &s)
 
 template <class T>
 static const Matrix44<T> &
-setShear44Tuple(Matrix44<T> &mat, const tuple &t)
+setShear44Tuple(Matrix44<T> &mat, const py::tuple &t)
 {    
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
         Vec3<T> s;
-        s.x = extract<T>(t[0]);
-        s.y = extract<T>(t[1]);
-        s.z = extract<T>(t[2]);
+        s.x = py::cast<T>(t[0]);
+        s.y = py::cast<T>(t[1]);
+        s.z = py::cast<T>(t[2]);
         Shear6<T> shear(s);
         
         return mat.setShear(shear);
     }
-    else if(t.attr("__len__")() == 6)
+    else if(py::cast<int>(t.attr("__len__")()) == 6)
     {
         Shear6<T> shear;
         for(int i = 0; i < 6; ++i)
         {
-            shear[i] = extract<T>(t[i]);
+            shear[i] = py::cast<T>(t[i]);
         }
         
         return mat.setShear(shear);
@@ -637,15 +632,15 @@ setTranslation44(Matrix44<T> &mat, const Vec3<T> t)
 
 template <class T>
 static const Matrix44<T> &
-setTranslation44Tuple(Matrix44<T> &mat, const tuple &t)
+setTranslation44Tuple(Matrix44<T> &mat, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
         Vec3<T> trans;
-        trans.x = extract<T>(t[0]);
-        trans.y = extract<T>(t[1]);
-        trans.z = extract<T>(t[2]);
+        trans.x = py::cast<T>(t[0]);
+        trans.y = py::cast<T>(t[1]);
+        trans.z = py::cast<T>(t[2]);
         
         return mat.setTranslation(trans);
     }
@@ -655,7 +650,7 @@ setTranslation44Tuple(Matrix44<T> &mat, const tuple &t)
 
 template <class T>
 static const Matrix44<T> &
-setTranslation44Obj(Matrix44<T> &mat, const object &o)
+setTranslation44Obj(Matrix44<T> &mat, const py::object &o)
 {
     MATH_EXC_ON;
     Vec3<T> v;
@@ -697,25 +692,25 @@ shearS44(Matrix44<T> &mat, const Shear6<T> &s)
 
 template <class T>
 static const Matrix44<T> &
-shear44Tuple(Matrix44<T> &mat, const tuple &t)
+shear44Tuple(Matrix44<T> &mat, const py::tuple &t)
 {    
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
         Vec3<T> s;
-        s.x = extract<T>(t[0]);
-        s.y = extract<T>(t[1]);
-        s.z = extract<T>(t[2]);
+        s.x = py::cast<T>(t[0]);
+        s.y = py::cast<T>(t[1]);
+        s.z = py::cast<T>(t[2]);
         Shear6<T> shear(s);
 
         return mat.shear(shear);
     }
-    else if(t.attr("__len__")() == 6)
+    else if(py::cast<int>(t.attr("__len__")()) == 6)
     {
         Shear6<T> shear;
         for(int i = 0; i < 6; ++i)
         {
-            shear[i] = extract<T>(t[i]);
+            shear[i] = py::cast<T>(t[i]);
         }
         
         return mat.shear(shear);
@@ -727,7 +722,7 @@ shear44Tuple(Matrix44<T> &mat, const tuple &t)
 
 template <class T>
 static const Matrix44<T> &
-translate44(Matrix44<T> &mat, const object &t)
+translate44(Matrix44<T> &mat, const py::object &t)
 {
     MATH_EXC_ON;
     Vec3<T> v;
@@ -743,15 +738,15 @@ translate44(Matrix44<T> &mat, const object &t)
 }
 template <class T>
 static const Matrix44<T> &
-translate44Tuple(Matrix44<T> &mat, const tuple &t)
+translate44Tuple(Matrix44<T> &mat, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
         Vec3<T> trans;
-        trans.x = extract<T>(t[0]);
-        trans.y = extract<T>(t[1]);
-        trans.z = extract<T>(t[2]);
+        trans.x = py::cast<T>(t[0]);
+        trans.y = py::cast<T>(t[1]);
+        trans.z = py::cast<T>(t[2]);
         
         return mat.translate(trans);
     }
@@ -890,15 +885,16 @@ greaterThanEqual44(Matrix44<T> &mat1, const Matrix44<T> &mat2)
 }
 
 template <class T>
-static tuple
+static py::tuple
 singularValueDecomposition44(const Matrix44<T>& m, bool forcePositiveDeterminant = false)
 {
     IMATH_NAMESPACE::Matrix44<T> U, V;
     IMATH_NAMESPACE::Vec4<T> S;
     IMATH_NAMESPACE::jacobiSVD (m, U, S, V, IMATH_NAMESPACE::limits<T>::epsilon(), forcePositiveDeterminant);
-    return make_tuple (U, S, V);
+    return py::make_tuple (U, S, V);
 }
 
+#if 0
 BOOST_PYTHON_FUNCTION_OVERLOADS(invert44_overloads, invert44, 1, 2);
 BOOST_PYTHON_FUNCTION_OVERLOADS(inverse44_overloads, inverse44, 1, 2);
 BOOST_PYTHON_FUNCTION_OVERLOADS(gjInvert44_overloads, gjInvert44, 1, 2);
@@ -911,16 +907,17 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(removeScaling44_overloads, removeScaling44, 1, 2
 BOOST_PYTHON_FUNCTION_OVERLOADS(removeScalingAndShear44_overloads, removeScalingAndShear44, 1, 2)
 BOOST_PYTHON_FUNCTION_OVERLOADS(sansScaling44_overloads, sansScaling44, 1, 2)
 BOOST_PYTHON_FUNCTION_OVERLOADS(sansScalingAndShear44_overloads, sansScalingAndShear44, 1, 2)
+#endif
 
 template <class T>
-static Matrix44<T> * Matrix4_tuple_constructor(const tuple &t0, const tuple &t1, const tuple &t2, const tuple &t3)
+static Matrix44<T> * Matrix4_tuple_constructor(const py::tuple &t0, const py::tuple &t1, const py::tuple &t2, const py::tuple &t3)
 {
-  if(t0.attr("__len__")() == 4 && t1.attr("__len__")() == 4 && t2.attr("__len__")() == 4 && t3.attr("__len__")() == 4)
+  if(py::cast<int>(t0.attr("__len__")()) == 4 && py::cast<int>(t1.attr("__len__")()) == 4 && py::cast<int>(t2.attr("__len__")()) == 4 && py::cast<int>(t3.attr("__len__")()) == 4)
   {
-      return new Matrix44<T>(extract<T>(t0[0]),  extract<T>(t0[1]),  extract<T>(t0[2]),  extract<T>(t0[3]),
-                             extract<T>(t1[0]),  extract<T>(t1[1]),  extract<T>(t1[2]),  extract<T>(t1[3]),
-                             extract<T>(t2[0]),  extract<T>(t2[1]),  extract<T>(t2[2]),  extract<T>(t2[3]),
-                             extract<T>(t3[0]),  extract<T>(t3[1]),  extract<T>(t3[2]),  extract<T>(t3[3]));
+      return new Matrix44<T>(py::cast<T>(t0[0]),  py::cast<T>(t0[1]),  py::cast<T>(t0[2]),  py::cast<T>(t0[3]),
+                             py::cast<T>(t1[0]),  py::cast<T>(t1[1]),  py::cast<T>(t1[2]),  py::cast<T>(t1[3]),
+                             py::cast<T>(t2[0]),  py::cast<T>(t2[1]),  py::cast<T>(t2[2]),  py::cast<T>(t2[3]),
+                             py::cast<T>(t3[0]),  py::cast<T>(t3[1]),  py::cast<T>(t3[2]),  py::cast<T>(t3[3]));
   }
   else
       THROW(IEX_NAMESPACE::LogicExc, "Matrix44 takes 4 tuples of length 4");
@@ -940,22 +937,23 @@ static Matrix44<T> *Matrix4_matrix_constructor(const Matrix44<S> &mat)
 
 
 template <class T>
-class_<Matrix44<T> >
-register_Matrix44()
+py::class_<Matrix44<T> >
+register_Matrix44(py::module &m)
 {
     typedef PyImath::StaticFixedArray<Matrix44<T>,T,4,IndexAccessMatrixRow<Matrix44<T>,T,4> > Matrix44_helper;
 
-    MatrixRow<T,4>::register_class();
+    MatrixRow<T,4>::register_class(m);
 
-    class_<Matrix44<T> > matrix44_class(Matrix44Name<T>::value, Matrix44Name<T>::value,init<Matrix44<T> >("copy construction"));
+    py::class_<Matrix44<T> > matrix44_class(m, Matrix44Name<T>::value, Matrix44Name<T>::value);
     matrix44_class
-        .def(init<>("initialize to identity"))
-        .def(init<T>("initialize all entries to a single value"))
-        .def("__init__", make_constructor(Matrix4_tuple_constructor<T>),"tuple constructor1")
-        .def("__init__", make_constructor(Matrix4_matrix_constructor<T,float>))
-        .def("__init__", make_constructor(Matrix4_matrix_constructor<T,double>))
+        .def(py::init<Matrix44<T> >(/*"copy construction"*/))
+        .def(py::init<>(/*"initialize to identity"*/))
+        .def(py::init<T>(/*"initialize all entries to a single value"*/))
+        .def("__init__", Matrix4_tuple_constructor<T>,"tuple constructor1")
+        .def("__init__", Matrix4_matrix_constructor<T,float>)
+        .def("__init__", Matrix4_matrix_constructor<T,double>)
         
-        .def(init<T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T>("make from components"))
+        .def(py::init<T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T>(/*"make from components"*/))
 	//.def_readwrite("x00", &Matrix44<T>::x[0][0])
 	//.def_readwrite("x01", &Matrix44<T>::x[0][1])
 	//.def_readwrite("x02", &Matrix44<T>::x[0][2])
@@ -972,14 +970,10 @@ register_Matrix44()
 	//.def_readwrite("x31", &Matrix44<T>::x[3][1])
 	//.def_readwrite("x32", &Matrix44<T>::x[3][2])
 	//.def_readwrite("x33", &Matrix44<T>::x[3][3])
-        .def("baseTypeEpsilon", &Matrix44<T>::baseTypeEpsilon,"baseTypeEpsilon() epsilon value of the base type of the vector")
-        .staticmethod("baseTypeEpsilon")
-        .def("baseTypeMax", &Matrix44<T>::baseTypeMax,"baseTypeMax() max value of the base type of the vector")
-        .staticmethod("baseTypeMax")
-        .def("baseTypeMin", &Matrix44<T>::baseTypeMin,"baseTypeMin() min value of the base type of the vector")
-        .staticmethod("baseTypeMin")
-        .def("baseTypeSmallest", &Matrix44<T>::baseTypeSmallest,"baseTypeSmallest() smallest value of the base type of the vector")
-        .staticmethod("baseTypeSmallest")
+        .def_static("baseTypeEpsilon", &Matrix44<T>::baseTypeEpsilon,"baseTypeEpsilon() epsilon value of the base type of the vector")
+        .def_static("baseTypeMax", &Matrix44<T>::baseTypeMax,"baseTypeMax() max value of the base type of the vector")
+        .def_static("baseTypeMin", &Matrix44<T>::baseTypeMin,"baseTypeMin() min value of the base type of the vector")
+        .def_static("baseTypeSmallest", &Matrix44<T>::baseTypeSmallest,"baseTypeSmallest() smallest value of the base type of the vector")
         .def("equalWithAbsError", &Matrix44<T>::equalWithAbsError,
              "m1.equalWithAbsError(m2,e) true if the elements "
              "of v1 and v2 are the same with an absolute error of no more than e, "
@@ -995,32 +989,34 @@ register_Matrix44()
         .def("__getitem__", Matrix44_helper::getitem)
 	//.def("__setitem__", Matrix44_helper::setitem)
         .def("makeIdentity",&Matrix44<T>::makeIdentity,"makeIdentity() make this matrix the identity matrix")
-        .def("transpose",&Matrix44<T>::transpose,return_internal_reference<>(),"transpose() transpose this matrix")
+        .def("transpose",&Matrix44<T>::transpose, py::return_value_policy::reference_internal, "transpose() transpose this matrix")
         .def("transposed",&Matrix44<T>::transposed,"transposed() return a transposed copy of this matrix")
         .def("minorOf",&Matrix44<T>::minorOf,"minorOf() return matrix minor of the (row,col) element of this matrix")
         .def("fastMinor",&Matrix44<T>::fastMinor,"fastMinor() return matrix minor using the specified rows and columns of this matrix")
         .def("determinant",&Matrix44<T>::determinant,"determinant() return the determinant of this matrix")
-        .def("invert",&invert44<T>,invert44_overloads("invert() invert this matrix")[return_internal_reference<>()])
-        .def("inverse",&inverse44<T>,inverse44_overloads("inverse() return a inverted copy of this matrix"))
-        .def("gjInvert",&gjInvert44<T>,gjInvert44_overloads("gjInvert() invert this matrix")[return_internal_reference<>()])
-        .def("gjInverse",&gjInverse44<T>,gjInverse44_overloads("gjInverse() return a inverted copy of this matrix"))
+        .def("invert",&invert44<T>, py::return_value_policy::reference_internal/*,invert44_overloads("invert() invert this matrix")[py::return_value_policy::reference_internal]*/)
+        .def("inverse",&inverse44<T>/*,inverse44_overloads("inverse() return a inverted copy of this matrix")*/)
+        .def("gjInvert",&gjInvert44<T>, py::return_value_policy::reference_internal/*,gjInvert44_overloads("gjInvert() invert this matrix")[py::return_value_policy::reference_internal]*/)
+        .def("gjInverse",&gjInverse44<T>/*,gjInverse44_overloads("gjInverse() return a inverted copy of this matrix")*/)
+        /*
         .def(self == self)
         .def(self != self)
-        .def("__iadd__", &iadd44<T, float>,return_internal_reference<>())
-        .def("__iadd__", &iadd44<T, double>,return_internal_reference<>())
-        .def("__iadd__", &iadd44T<T>,return_internal_reference<>())
+        */
+        .def("__iadd__", &iadd44<T, float>,py::return_value_policy::reference_internal)
+        .def("__iadd__", &iadd44<T, double>,py::return_value_policy::reference_internal)
+        .def("__iadd__", &iadd44T<T>,py::return_value_policy::reference_internal)
         .def("__add__", &add44<T>)
-        .def("__isub__", &isub44<T, float>,return_internal_reference<>())
-        .def("__isub__", &isub44<T, double>,return_internal_reference<>())
-        .def("__isub__", &isub44T<T>,return_internal_reference<>())
+        .def("__isub__", &isub44<T, float>,py::return_value_policy::reference_internal)
+        .def("__isub__", &isub44<T, double>,py::return_value_policy::reference_internal)
+        .def("__isub__", &isub44T<T>,py::return_value_policy::reference_internal)
         .def("__sub__", &sub44<T>)
-        .def("negate",&negate44<T>,return_internal_reference<>(),"negate() negate all entries in this matrix")
+        .def("negate",&negate44<T>,py::return_value_policy::reference_internal,"negate() negate all entries in this matrix")
         .def("__neg__", &neg44<T>)
-        .def("__imul__", &imul44T<T>,return_internal_reference<>())
+        .def("__imul__", &imul44T<T>,py::return_value_policy::reference_internal)
         .def("__mul__", &mul44T<T>)
         .def("__rmul__", &rmul44T<T>)
-        .def("__idiv__", &idiv44T<T>,return_internal_reference<>())
-        .def("__itruediv__", &idiv44T<T>,return_internal_reference<>())
+        .def("__idiv__", &idiv44T<T>,py::return_value_policy::reference_internal)
+        .def("__itruediv__", &idiv44T<T>,py::return_value_policy::reference_internal)
         .def("__div__", &div44T<T>)
         .def("__truediv__", &div44T<T>)
         .def("__add__", &add44T<T>)
@@ -1031,8 +1027,8 @@ register_Matrix44()
         .def("__mul__", &mul44<double, T>)
         .def("__rmul__", &rmul44<float, T>)
         .def("__rmul__", &rmul44<double, T>)
-        .def("__imul__", &imul44<float, T>,return_internal_reference<>())
-        .def("__imul__", &imul44<double, T>,return_internal_reference<>())
+        .def("__imul__", &imul44<float, T>,py::return_value_policy::reference_internal)
+        .def("__imul__", &imul44<double, T>,py::return_value_policy::reference_internal)
         .def("__lt__", &lessThan44<T>)
         .def("__gt__", &greaterThan44<T>)
         .def("__le__", &lessThanEqual44<T>)
@@ -1040,7 +1036,7 @@ register_Matrix44()
 	//.def(self_ns::str(self))
 	    .def("__repr__",&Matrix44_repr<T>)
     
-        .def("extractAndRemoveScalingAndShear", &extractAndRemoveScalingAndShear44<T>, 
+        .def("extractAndRemoveScalingAndShear", &extractAndRemoveScalingAndShear44<T>/*, 
              extractAndRemoveScalingAndShear44_overloads(				
              "M.extractAndRemoveScalingAndShear(scl, shr, "
              "[exc]) -- extracts the scaling component of "
@@ -1051,12 +1047,12 @@ register_Matrix44()
              "nearly 0, in which case 0 is returned. "
              "If optional arg. exc == 1, then if the "
              "scaling component is nearly 0, then MathExc "
-             "is thrown."))
+             "is thrown.")*/)
              
-        .def("extractEulerXYZ", &extractEulerXYZ<T>, "extract Euler")          
-        .def("extractEulerZYX", &extractEulerZYX<T>, "extract Euler")
+        .def("extractEulerXYZ", &extractEulerXYZ<T>, "py::cast Euler")          
+        .def("extractEulerZYX", &extractEulerZYX<T>, "py::cast Euler")
           
-        .def("extractSHRT", &extractSHRT44<T>, extractSHRT44_overloads(
+        .def("extractSHRT", &extractSHRT44<T>/*, extractSHRT44_overloads(
              "M.extractSHRT(Vs, Vh, Vr, Vt, [exc]) -- "
 	         "extracts the scaling component of M into Vs, "
 			 "the shearing component of M in Vh (as XY, "
@@ -1065,10 +1061,10 @@ register_Matrix44()
 	         "and the translaation of M into Vt. "
 			 "If optional arg. exc == 1, then if the "
              "scaling component is nearly 0, then MathExc "
-             "is thrown. "))
+             "is thrown. ")*/)
                 
-        .def("extractScaling", &extractScaling44<T>, extractScaling44_overloads("extract scaling"))
-        .def("extractScalingAndShear", &extractScalingAndShear44<T>, extractScalingAndShear44_overloads("extract scaling"))
+        .def("extractScaling", &extractScaling44<T>/*, extractScaling44_overloads("py::cast scaling")*/)
+        .def("extractScalingAndShear", &extractScalingAndShear44<T>/*, extractScalingAndShear44_overloads("py::cast scaling")*/)
         .def("singularValueDecomposition", &singularValueDecomposition44<T>, 
              "Decomposes the matrix using the singular value decomposition (SVD) into three\n"
              "matrices U, S, and V which have the following properties: \n"
@@ -1087,8 +1083,8 @@ register_Matrix44()
              "\n"
              "Our SVD implementation uses two-sided Jacobi rotations to iteratively\n"
              "diagonalize the matrix, which should be quite robust and significantly faster\n"
-             "than the more general SVD solver in LAPACK.  \n",
-             args("matrix", "forcePositiveDeterminant"))
+             "than the more general SVD solver in LAPACK.  \n"/*,
+             args("matrix", "forcePositiveDeterminant")*/)
         .def("symmetricEigensolve", &PyImath::jacobiEigensolve<IMATH_NAMESPACE::Matrix44<T> >, 
              "Decomposes the matrix A using a symmetric eigensolver into matrices Q and S \n"
              "which have the following properties: \n"
@@ -1118,32 +1114,32 @@ register_Matrix44()
         .def("multVecMatrix", &multVecMatrix44<float,T>, "mult matrix")
         .def("multVecMatrix", &multVecMatrix44_return_value<float,T>, "mult matrix")
         .def("multVecMatrix", &multVecMatrix44_array<float,T>, "mult matrix")
-        .def("removeScaling", &removeScaling44<T>, removeScaling44_overloads("remove scaling"))
-        .def("removeScalingAndShear", &removeScalingAndShear44<T>, removeScalingAndShear44_overloads("remove scaling"))
-        .def("sansScaling", &sansScaling44<T>, sansScaling44_overloads("sans scaling"))
-        .def("sansScalingAndShear", &sansScalingAndShear44<T>, sansScalingAndShear44_overloads("sans scaling and shear"))
-        .def("scale", &scaleSc44<T>, return_internal_reference<>(), "scale matrix")
-        .def("scale", &scaleV44<T>, return_internal_reference<>(), "scale matrix")
-        .def("scale", &scale44Tuple<T>, return_internal_reference<>(), "scale matrix")
-        .def("rotate", &rotateV44<T>, return_internal_reference<>(), "rotate matrix")
-        .def("rotationMatrix", &rotationMatrix44<T>, return_internal_reference<>(), "rotationMatrix()")
-        .def("rotationMatrixWithUpDir", &rotationMatrixWithUp44<T>, return_internal_reference<>(), "roationMatrixWithUp()")
-        .def("setScale", &setScaleSc44<T>, return_internal_reference<>(),"setScale()")
-        .def("setScale", &setScaleV44<T>, return_internal_reference<>(),"setScale()")
-        .def("setScale", &setScale44Tuple<T>, return_internal_reference<>(),"setScale()")
+        .def("removeScaling", &removeScaling44<T>/*, removeScaling44_overloads("remove scaling")*/)
+        .def("removeScalingAndShear", &removeScalingAndShear44<T>/*, removeScalingAndShear44_overloads("remove scaling")*/)
+        .def("sansScaling", &sansScaling44<T>/*, sansScaling44_overloads("sans scaling")*/)
+        .def("sansScalingAndShear", &sansScalingAndShear44<T>/*, sansScalingAndShear44_overloads("sans scaling and shear")*/)
+        .def("scale", &scaleSc44<T>, py::return_value_policy::reference_internal, "scale matrix")
+        .def("scale", &scaleV44<T>, py::return_value_policy::reference_internal, "scale matrix")
+        .def("scale", &scale44Tuple<T>, py::return_value_policy::reference_internal, "scale matrix")
+        .def("rotate", &rotateV44<T>, py::return_value_policy::reference_internal, "rotate matrix")
+        .def("rotationMatrix", &rotationMatrix44<T>, py::return_value_policy::reference_internal, "rotationMatrix()")
+        .def("rotationMatrixWithUpDir", &rotationMatrixWithUp44<T>, py::return_value_policy::reference_internal, "roationMatrixWithUp()")
+        .def("setScale", &setScaleSc44<T>, py::return_value_policy::reference_internal,"setScale()")
+        .def("setScale", &setScaleV44<T>, py::return_value_policy::reference_internal,"setScale()")
+        .def("setScale", &setScale44Tuple<T>, py::return_value_policy::reference_internal,"setScale()")
 
-        .def("setShear", &setShearV44<T>, return_internal_reference<>(),"setShear()")
-        .def("setShear", &setShearS44<T>, return_internal_reference<>(),"setShear()")
-        .def("setShear", &setShear44Tuple<T>, return_internal_reference<>(),"setShear()")
-        .def("setTranslation", &setTranslation44<T>, return_internal_reference<>(),"setTranslation()")
-        .def("setTranslation", &setTranslation44Tuple<T>, return_internal_reference<>(),"setTranslation()")
-        .def("setTranslation", &setTranslation44Obj<T>, return_internal_reference<>(),"setTranslation()")
+        .def("setShear", &setShearV44<T>, py::return_value_policy::reference_internal,"setShear()")
+        .def("setShear", &setShearS44<T>, py::return_value_policy::reference_internal,"setShear()")
+        .def("setShear", &setShear44Tuple<T>, py::return_value_policy::reference_internal,"setShear()")
+        .def("setTranslation", &setTranslation44<T>, py::return_value_policy::reference_internal,"setTranslation()")
+        .def("setTranslation", &setTranslation44Tuple<T>, py::return_value_policy::reference_internal,"setTranslation()")
+        .def("setTranslation", &setTranslation44Obj<T>, py::return_value_policy::reference_internal,"setTranslation()")
         .def("setValue", &setValue44<T>, "setValue()")
-        .def("shear", &shearV44<T>, return_internal_reference<>(),"shear()")
-        .def("shear", &shearS44<T>, return_internal_reference<>(),"shear()")
-        .def("shear", &shear44Tuple<T>, return_internal_reference<>(),"shear()")
-        .def("translate", &translate44<T>, return_internal_reference<>(),"translate()")
-        .def("translate", &translate44Tuple<T>, return_internal_reference<>(),"translate()")
+        .def("shear", &shearV44<T>, py::return_value_policy::reference_internal,"shear()")
+        .def("shear", &shearS44<T>, py::return_value_policy::reference_internal,"shear()")
+        .def("shear", &shear44Tuple<T>, py::return_value_policy::reference_internal,"shear()")
+        .def("translate", &translate44<T>, py::return_value_policy::reference_internal,"translate()")
+        .def("translate", &translate44Tuple<T>, py::return_value_policy::reference_internal,"translate()")
         .def("translation", &Matrix44<T>::translation, "translation()")
 
         ;
@@ -1187,10 +1183,10 @@ setM44ArrayItem(FixedArray<IMATH_NAMESPACE::Matrix44<T> > &ma,
 }
 
 template <class T>
-class_<FixedArray<IMATH_NAMESPACE::Matrix44<T> > >
-register_M44Array()
+py::class_<FixedArray<IMATH_NAMESPACE::Matrix44<T> > >
+register_M44Array(py::module &m)
 {
-    class_<FixedArray<IMATH_NAMESPACE::Matrix44<T> > > matrixArray_class = FixedArray<IMATH_NAMESPACE::Matrix44<T> >::register_("Fixed length array of IMATH_NAMESPACE::Matrix44");
+    py::class_<FixedArray<IMATH_NAMESPACE::Matrix44<T> > > matrixArray_class = FixedArray<IMATH_NAMESPACE::Matrix44<T> >::register_(m, "Fixed length array of IMATH_NAMESPACE::Matrix44");
     matrixArray_class
          .def("__setitem__", &setM44ArrayItem<T>)
         ;
@@ -1198,11 +1194,11 @@ register_M44Array()
 }
 
 
-template PYIMATH_EXPORT class_<IMATH_NAMESPACE::Matrix44<float> > register_Matrix44<float>();
-template PYIMATH_EXPORT class_<IMATH_NAMESPACE::Matrix44<double> > register_Matrix44<double>();
+template PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Matrix44<float> > register_Matrix44<float>(py::module &m);
+template PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Matrix44<double> > register_Matrix44<double>(py::module &m);
 
-template PYIMATH_EXPORT class_<FixedArray<IMATH_NAMESPACE::Matrix44<float> > > register_M44Array<float>();
-template PYIMATH_EXPORT class_<FixedArray<IMATH_NAMESPACE::Matrix44<double> > > register_M44Array<double>();
+template PYIMATH_EXPORT py::class_<FixedArray<IMATH_NAMESPACE::Matrix44<float> > > register_M44Array<float>(py::module &m);
+template PYIMATH_EXPORT py::class_<FixedArray<IMATH_NAMESPACE::Matrix44<double> > > register_M44Array<double>(py::module &m);
 
 template<> PYIMATH_EXPORT IMATH_NAMESPACE::Matrix44<float> FixedArrayDefaultValue<IMATH_NAMESPACE::Matrix44<float> >::value() { return IMATH_NAMESPACE::Matrix44<float>(); }
 template<> PYIMATH_EXPORT IMATH_NAMESPACE::Matrix44<double> FixedArrayDefaultValue<IMATH_NAMESPACE::Matrix44<double> >::value() { return IMATH_NAMESPACE::Matrix44<double>(); }

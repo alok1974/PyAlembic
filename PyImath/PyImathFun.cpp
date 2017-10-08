@@ -32,21 +32,20 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
+#include "python_include.h"
 #include <PyImathFun.h>
 #include <PyImathDecorators.h>
 #include <PyImathExport.h>
-#include <PyImathAutovectorize.h>
-#include <Python.h>
-#include <boost/python.hpp>
-#include <boost/python/make_constructor.hpp>
+//#include <PyImathAutovectorize.h>
 #include <boost/format.hpp>
+#include <boost/mpl/bool.hpp>
 #include <ImathVec.h>
 #include <ImathMatrixAlgo.h>
 #include <ImathFun.h>
 
 namespace PyImath {
 
-using namespace boost::python;
+
 using namespace PyImath;
 
 namespace {
@@ -279,184 +278,177 @@ struct gain_op
 
 } // namespace
 
-void register_functions()
+void register_functions(py::module &m)
 {
     //
     // Utility Functions
     //
 
-    // nb: MSVC gets confused about which arg we want (it thinks it
-    // might be boost::arg), so telling it which one explicitly here.
-    typedef boost::python::arg arg;
+    PyImath::generate_bindings(m, &abs_op<int>::apply,
+        "abs",
+        "return the absolute value of 'value'"
+        );
+    PyImath::generate_bindings(m, &abs_op<float>::apply,
+        "abs",
+        "return the absolute value of 'value'"
+        );
+    PyImath::generate_bindings(m, &abs_op<double>::apply,
+        "abs",
+        "return the absolute value of 'value'"
+        );
+    PyImath::generate_bindings(m, &sign_op<int>::apply,
+        "sign",
+        "return 1 or -1 based on the sign of 'value'"
+        );
+    PyImath::generate_bindings(m, &sign_op<float>::apply,
+        "sign",
+        "return 1 or -1 based on the sign of 'value'"
+        );
+    PyImath::generate_bindings(m, &sign_op<double>::apply,
+        "sign",
+        "return 1 or -1 based on the sign of 'value'"
+        );
 
-    PyImath::generate_bindings<abs_op<int>,boost::mpl::true_>(
-        "abs",
-        "return the absolute value of 'value'",
-        (arg("value")));
-    PyImath::generate_bindings<abs_op<float>,boost::mpl::true_>(
-        "abs",
-        "return the absolute value of 'value'",
-        (arg("value")));
-    PyImath::generate_bindings<abs_op<double>,boost::mpl::true_>(
-        "abs",
-        "return the absolute value of 'value'",
-        (arg("value")));
-    
-    PyImath::generate_bindings<sign_op<int>,boost::mpl::true_>(
-        "sign",
-        "return 1 or -1 based on the sign of 'value'",
-        (arg("value")));
-    PyImath::generate_bindings<sign_op<float>,boost::mpl::true_>(
-        "sign",
-        "return 1 or -1 based on the sign of 'value'",
-        (arg("value")));
-    PyImath::generate_bindings<sign_op<double>,boost::mpl::true_>(
-        "sign",
-        "return 1 or -1 based on the sign of 'value'",
-        (arg("value")));
-    
-    PyImath::generate_bindings<log_op<float>,boost::mpl::true_>(
+    PyImath::generate_bindings(m, &log_op<float>::apply,
         "log",
-        "return the natural log of 'value'",
-        (arg("value")));
-    PyImath::generate_bindings<log_op<double>,boost::mpl::true_>(
+        "return the natural log of 'value'"
+        );
+    PyImath::generate_bindings(m, &log_op<double>::apply,
         "log",
-        "return the natural log of 'value'",
-        (arg("value")));
-    
-    PyImath::generate_bindings<log10_op<float>,boost::mpl::true_>(
+        "return the natural log of 'value'"
+        );
+
+    PyImath::generate_bindings(m, &log10_op<float>::apply,
         "log10",
-        "return the base 10 log of 'value'",
-        (arg("value")));
-    PyImath::generate_bindings<log10_op<double>,boost::mpl::true_>(
+        "return the base 10 log of 'value'"
+        );
+    PyImath::generate_bindings(m, &log10_op<double>::apply,
         "log10",
-        "return the base 10 log of 'value'",
-        (arg("value")));
-    
-    PyImath::generate_bindings<lerp_op<float>,boost::mpl::true_,boost::mpl::true_,boost::mpl::true_>(
+        "return the base 10 log of 'value'"
+        );
+
+    PyImath::generate_bindings(m, &lerp_op<float>::apply,
         "lerp",
-        "return the linear interpolation of 'a' to 'b' using parameter 't'",
-        (arg("a"),arg("b"),arg("t")));
-    PyImath::generate_bindings<lerp_op<double>,boost::mpl::true_,boost::mpl::true_,boost::mpl::true_>(
+        "return the linear interpolation of 'a' to 'b' using parameter 't'"
+        );
+    PyImath::generate_bindings(m, &lerp_op<double>::apply,
         "lerp",
-        "return the linear interpolation of 'a' to 'b' using parameter 't'",
-        (arg("a"),arg("b"),arg("t")));
-    
-    PyImath::generate_bindings<lerpfactor_op<float>,boost::mpl::true_,boost::mpl::true_,boost::mpl::true_>(
+        "return the linear interpolation of 'a' to 'b' using parameter 't'"
+        );
+
+    PyImath::generate_bindings(m, &lerpfactor_op<float>::apply,
         "lerpfactor",
-        "return how far m is between a and b, that is return t such that\n"
-        "if:\n"
-        "    t = lerpfactor(m, a, b);\n"
-        "then:\n"
-        "    m = lerp(a, b, t);\n"
-        "\n"
-        "If a==b, return 0.\n",
-        (arg("m"),arg("a"),arg("b")));
-    PyImath::generate_bindings<lerpfactor_op<double>,boost::mpl::true_,boost::mpl::true_,boost::mpl::true_>(
+        R"(return how far m is between a and b, that is return t such that\
+if:
+    t = lerpfactor(m, a, b);
+then:
+    m = lerp(a, b, t);
+if a==b, return 0.)"
+        );
+    PyImath::generate_bindings(m, &lerpfactor_op<double>::apply,
         "lerpfactor",
-        "return how far m is between a and b, that is return t such that\n"
-        "    if:\n"
-        "        t = lerpfactor(m, a, b);\n"
-        "    then:\n"
-        "        m = lerp(a, b, t);\n"
-        "    if a==b, return 0.\n",
-        (arg("m"),arg("a"),arg("b")));
-    
-    PyImath::generate_bindings<clamp_op<int>,boost::mpl::true_,boost::mpl::true_,boost::mpl::true_>(
+        R"(return how far m is between a and b, that is return t such that\n"
+if:
+    t = lerpfactor(m, a, b);
+then:
+    m = lerp(a, b, t);
+if a==b, return 0.)"
+        );
+
+    PyImath::generate_bindings(m, &clamp_op<int>::apply,
         "clamp",
-        "return the value clamped to the range [low,high]",
-        (arg("value"),arg("low"),arg("high")));
-    PyImath::generate_bindings<clamp_op<float>,boost::mpl::true_,boost::mpl::true_,boost::mpl::true_>(
+        "return the value clamped to the range [low,high]"
+        );
+    PyImath::generate_bindings(m, &clamp_op<float>::apply,
         "clamp",
-        "return the value clamped to the range [low,high]",
-        (arg("value"),arg("low"),arg("high")));
-    PyImath::generate_bindings<clamp_op<double>,boost::mpl::true_,boost::mpl::true_,boost::mpl::true_>(
+        "return the value clamped to the range [low,high]"
+        );
+    PyImath::generate_bindings(m, &clamp_op<double>::apply,
         "clamp",
-        "return the value clamped to the range [low,high]",
-        (arg("value"),arg("low"),arg("high")));
+        "return the value clamped to the range [low,high]"
+        );
 
-    def("cmp", IMATH_NAMESPACE::cmp<float>);
-    def("cmp", IMATH_NAMESPACE::cmp<double>);   
+    m.def("cmp", IMATH_NAMESPACE::cmp<float>);
+    m.def("cmp", IMATH_NAMESPACE::cmp<double>);
 
-    def("cmpt", IMATH_NAMESPACE::cmpt<float>);
-    def("cmpt", IMATH_NAMESPACE::cmpt<double>);
+    m.def("cmpt", IMATH_NAMESPACE::cmpt<float>);
+    m.def("cmpt", IMATH_NAMESPACE::cmpt<double>);
 
-    def("iszero", IMATH_NAMESPACE::iszero<float>);
-    def("iszero", IMATH_NAMESPACE::iszero<double>);
+    m.def("iszero", IMATH_NAMESPACE::iszero<float>);
+    m.def("iszero", IMATH_NAMESPACE::iszero<double>);
 
-    def("equal", IMATH_NAMESPACE::equal<float, float, float>);
-    def("equal", IMATH_NAMESPACE::equal<double, double, double>);    
+    m.def("equal", IMATH_NAMESPACE::equal<float, float, float>);
+    m.def("equal", IMATH_NAMESPACE::equal<double, double, double>);
 
-    PyImath::generate_bindings<floor_op<float>,boost::mpl::true_>(
+    PyImath::generate_bindings(m, &floor_op<float>::apply,
         "floor",
-        "return the closest integer less than or equal to 'value'",
-        (arg("value")));
-    PyImath::generate_bindings<floor_op<double>,boost::mpl::true_>(
+        "return the closest integer less than or equal to 'value'"
+        );
+    PyImath::generate_bindings(m, &floor_op<double>::apply,
         "floor",
-        "return the closest integer less than or equal to 'value'",
-        (arg("value")));
+        "return the closest integer less than or equal to 'value'"
+        );
 
-    PyImath::generate_bindings<ceil_op<float>,boost::mpl::true_>(
+    PyImath::generate_bindings(m, &ceil_op<float>::apply,
         "ceil",
-        "return the closest integer greater than or equal to 'value'",
-        (arg("value")));
-    PyImath::generate_bindings<ceil_op<double>,boost::mpl::true_>(
+        "return the closest integer greater than or equal to 'value'"
+        );
+    PyImath::generate_bindings(m, &ceil_op<double>::apply,
         "ceil",
-        "return the closest integer greater than or equal to 'value'",
-        (arg("value")));
+        "return the closest integer greater than or equal to 'value'"
+        );
 
-    PyImath::generate_bindings<trunc_op<float>,boost::mpl::true_>(
+    PyImath::generate_bindings(m, &trunc_op<float>::apply,
         "trunc",
-        "return the closest integer with magnitude less than or equal to 'value'",
-        (arg("value")));
-    PyImath::generate_bindings<trunc_op<double>,boost::mpl::true_>(
+        "return the closest integer with magnitude less than or equal to 'value'"
+        );
+    PyImath::generate_bindings(m, &trunc_op<double>::apply,
         "trunc",
-        "return the closest integer with magnitude less than or equal to 'value'",
-        (arg("value")));
+        "return the closest integer with magnitude less than or equal to 'value'"
+        );
 
-    PyImath::generate_bindings<divs_op,boost::mpl::true_,boost::mpl::true_>(
+    PyImath::generate_bindings(m, &divs_op::apply,
         "divs",
-        "return x/y where the remainder has the same sign as x:\n"
-        "    divs(x,y) == (abs(x) / abs(y)) * (sign(x) * sign(y))\n",
-        (arg("x"),arg("y")));
-    PyImath::generate_bindings<mods_op,boost::mpl::true_,boost::mpl::true_>(
+        R"(return x/y where the remainder has the same sign as x:
+divs(x,y) == (abs(x) / abs(y)) * (sign(x) * sign(y)))"
+        );
+
+    PyImath::generate_bindings(m, &mods_op::apply,
         "mods",
-        "return x%y where the remainder has the same sign as x:\n"
-        "    mods(x,y) == x - y * divs(x,y)\n",
-        (arg("x"),arg("y")));
+        R"("return x%y where the remainder has the same sign as x:
+mods(x,y) == x - y * divs(x,y))"
+        );
 
-    PyImath::generate_bindings<divp_op,boost::mpl::true_,boost::mpl::true_>(
+    PyImath::generate_bindings(m, &divp_op::apply,
         "divp",
-        "return x/y where the remainder is always positive:\n"
-        "    divp(x,y) == floor (double(x) / double (y))\n",
-        (arg("x"),arg("y")));
-    PyImath::generate_bindings<modp_op,boost::mpl::true_,boost::mpl::true_>(
+        R"(return x/y where the remainder is always positive:
+divp(x,y) == floor (double(x) / double (y)))"
+        );
+    PyImath::generate_bindings(m, &modp_op::apply,
         "modp",
-        "return x%y where the remainder is always positive:\n"
-        "    modp(x,y) == x - y * divp(x,y)\n",
-        (arg("x"),arg("y")));
+        R"(return x%y where the remainder is always positive:
+modp(x,y) == x - y * divp(x,y))"
+        );
 
-    PyImath::generate_bindings<bias_op,boost::mpl::true_,boost::mpl::true_>(
+    PyImath::generate_bindings(m, &bias_op::apply,
          "bias",
-         "bias(x,b) is a gamma correction that remaps the unit interval such that bias(0.5, b) = b.",
-         (arg("x"),arg("b")));
+         "bias(x,b) is a gamma correction that remaps the unit interval such that bias(0.5, b) = b."
+         );
 
-    PyImath::generate_bindings<gain_op,boost::mpl::true_,boost::mpl::true_>(
+    PyImath::generate_bindings(m, &gain_op::apply,
          "gain",
-         "gain(x,g) is a gamma correction that remaps the unit interval with the property that gain(0.5, g) = 0.5.\n"
-         "The gain function can be thought of as two scaled bias curves forming an 'S' shape in the unit interval.",
-         (arg("x"),arg("g")));
+         R"(gain(x,g) is a gamma correction that remaps the unit interval with the property that gain(0.5, g) = 0.5.
+ The gain function can be thought of as two scaled bias curves forming an 'S' shape in the unit interval.)"
+         );
 
     //
     // Vectorized utility functions
     // 
-    PyImath::generate_bindings<rotationXYZWithUpDir_op<float>,boost::mpl::true_,boost::mpl::true_,boost::mpl::true_>(
+    PyImath::generate_bindings(m, &rotationXYZWithUpDir_op<float>::apply,
         "rotationXYZWithUpDir",
-        "return the XYZ rotation vector that rotates 'fromDir' to 'toDir'"
-        "using the up vector 'upDir'",
-        args("fromDir","toDir","upDir"));
+        R"(return the XYZ rotation vector that rotates 'fromDir' to 'toDir'"
+using the up vector 'upDir')"
+        );
 }
 
 } // namespace PyImath
-
-

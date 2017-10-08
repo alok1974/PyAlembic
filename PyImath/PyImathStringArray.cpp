@@ -38,7 +38,7 @@
 
 namespace PyImath {
 
-using namespace boost::python;
+
 
 template<class T>
 StringArrayT<T>* StringArrayT<T>::createDefaultArray(size_t length)
@@ -155,7 +155,7 @@ StringArrayT<T>::setitem_string_vector(PyObject *index, const StringArrayT<T> &d
     // we have a valid range of indices
     if (data.len() != slicelength) {
         PyErr_SetString(PyExc_IndexError, "Dimensions of source do not match destination");
-        throw_error_already_set();
+        throw py::error_already_set();
     }
     for (size_t i=0; i<slicelength; ++i) {
         StringTableIndex di = _table.intern(data._table.lookup(data[i]));
@@ -183,7 +183,7 @@ StringArrayT<T>::setitem_string_vector_mask(const FixedArray<int> &mask, const S
 
         if (data.len() != count) {
             PyErr_SetString(PyExc_IndexError, "Dimensions of source data do not match destination either masked or unmasked");
-            throw_error_already_set();
+            throw py::error_already_set();
         }
             
         size_t dataIndex = 0;
@@ -287,49 +287,53 @@ template FixedArray<int> operator != (const WstringArray& a0, const WstringArray
 template FixedArray<int> operator != (const WstringArray& a0, const std::wstring& v1);
 template FixedArray<int> operator != (const std::wstring& a0, const WstringArray& v1);
 
-void register_StringArrays()
+void register_StringArrays(py::module &m)
 {
     typedef StringArrayT<std::string> StringArray;
     typedef StringArrayT<std::wstring> WstringArray;
     
-    class_<StringArray> string_array_class =
-        class_<StringArray>("StringArray",no_init);
+    py::class_<StringArray> string_array_class =
+        py::class_<StringArray>(m, "StringArray");
     string_array_class
-        .def("__init__", make_constructor(StringArray::createDefaultArray))
-        .def("__init__", make_constructor(StringArray::createUniformArray))
-        .def("__getitem__", &StringArray::getslice_string, return_value_policy<manage_new_object>()) 
+        .def("__init__", StringArray::createDefaultArray)
+        .def("__init__", StringArray::createUniformArray)
+        //.def("__getitem__", &StringArray::getslice_string, return_value_policy<manage_new_object>()) 
         .def("__getitem__", &StringArray::getitem_string) 
         .def("__setitem__", &StringArray::setitem_string_scalar)
         .def("__setitem__", &StringArray::setitem_string_scalar_mask)
         .def("__setitem__", &StringArray::setitem_string_vector)
         .def("__setitem__", &StringArray::setitem_string_vector_mask)
         .def("__len__",&StringArray::len)
+        /*
         .def(self == self)
         .def(self == other<std::string>())
         .def(other<std::string>() == self)
         .def(self != self)
         .def(self != other<std::string>())
         .def(other<std::string>() != self)
+        */
         ;
 
-    class_<WstringArray> wstring_array_class =
-        class_<WstringArray>("WstringArray",no_init);
+    py::class_<WstringArray> wstring_array_class =
+        py::class_<WstringArray>(m, "WstringArray");
     wstring_array_class
-        .def("__init__", make_constructor(WstringArray::createDefaultArray))
-        .def("__init__", make_constructor(WstringArray::createUniformArray))
-        .def("__getitem__", &WstringArray::getslice_string, return_value_policy<manage_new_object>()) 
+        .def("__init__", WstringArray::createDefaultArray)
+        .def("__init__", WstringArray::createUniformArray)
+        //.def("__getitem__", &WstringArray::getslice_string, return_value_policy<manage_new_object>()) 
         .def("__getitem__", &WstringArray::getitem_string) 
         .def("__setitem__", &WstringArray::setitem_string_scalar)
         .def("__setitem__", &WstringArray::setitem_string_scalar_mask)
         .def("__setitem__", &WstringArray::setitem_string_vector)
         .def("__setitem__", &WstringArray::setitem_string_vector_mask)
         .def("__len__",&WstringArray::len)
+        /*
         .def(self == self)
         .def(self == other<std::wstring>())
         .def(other<std::wstring>() == self)
         .def(self != self)
         .def(self != other<std::wstring>())
         .def(other<std::wstring>() != self)
+        */
         ;
 }
 

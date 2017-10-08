@@ -32,12 +32,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
+#include "python_include.h"
 #include <PyImathLine.h>
 #include "PyImathDecorators.h"
 #include "PyImathExport.h"
-#include <Python.h>
-#include <boost/python.hpp>
-#include <boost/python/make_constructor.hpp>
 #include <boost/format.hpp>
 #include <PyImath.h>
 #include <PyImathVec.h>
@@ -48,7 +46,7 @@
 
 
 namespace PyImath{
-using namespace boost::python;
+
 using namespace IMATH_NAMESPACE;
 
 template <class T> struct LineName {static const char *value;};
@@ -67,18 +65,18 @@ Line3_construct_default()
 
 template <class T>
 static Line3<T> * 
-Line3_tuple_construct(const tuple &t0, const tuple &t1)
+Line3_tuple_construct(const py::tuple &t0, const py::tuple &t1)
 {
     Vec3<T> v0, v1;
-    if(t0.attr("__len__")() == 3 && t1.attr("__len__")() == 3)
+    if(py::cast<int>(t0.attr("__len__")()) == 3 && py::cast<int>(t1.attr("__len__")()) == 3)
     {
-        v0.x = extract<T>(t0[0]);
-        v0.y = extract<T>(t0[1]);
-        v0.z = extract<T>(t0[2]);
+        v0.x = py::cast<T>(t0[0]);
+        v0.y = py::cast<T>(t0[1]);
+        v0.z = py::cast<T>(t0[2]);
 
-        v1.x = extract<T>(t1[0]);
-        v1.y = extract<T>(t1[1]);
-        v1.z = extract<T>(t1[2]);
+        v1.x = py::cast<T>(t1[0]);
+        v1.y = py::cast<T>(t1[1]);
+        v1.z = py::cast<T>(t1[2]);
         
         return new Line3<T>(v0, v1);
     }
@@ -107,19 +105,19 @@ set1(Line3<T> &line, const Vec3<T> &p0, const Vec3<T> &p1)
 
 template <class T>
 static void
-setTuple(Line3<T> &line, const tuple &t0, const tuple &t1)
+setTuple(Line3<T> &line, const py::tuple &t0, const py::tuple &t1)
 {
     MATH_EXC_ON;
     Vec3<T> v0, v1;
-    if(t0.attr("__len__")() == 3 && t1.attr("__len__")() == 3)
+    if(py::cast<int>(t0.attr("__len__")()) == 3 && py::cast<int>(t1.attr("__len__")()) == 3)
     {
-        v0.x = extract<T>(t0[0]);
-        v0.y = extract<T>(t0[1]);
-        v0.z = extract<T>(t0[2]);
+        v0.x = py::cast<T>(t0[0]);
+        v0.y = py::cast<T>(t0[1]);
+        v0.z = py::cast<T>(t0[2]);
 
-        v1.x = extract<T>(t1[0]);
-        v1.y = extract<T>(t1[1]);
-        v1.z = extract<T>(t1[2]);
+        v1.x = py::cast<T>(t1[0]);
+        v1.y = py::cast<T>(t1[1]);
+        v1.z = py::cast<T>(t1[2]);
         
         line.set(v0, v1);
     }
@@ -153,14 +151,14 @@ distanceTo2(Line3<T> &line, Line3<T> &other)
 
 template <class T>
 static T
-distanceToTuple(Line3<T> line, const tuple &t)
+distanceToTuple(Line3<T> line, const py::tuple &t)
 {
     Vec3<T> v;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
-        v.x = extract<T>(t[0]);
-        v.y = extract<T>(t[1]);
-        v.z = extract<T>(t[2]);
+        v.x = py::cast<T>(t[0]);
+        v.y = py::cast<T>(t[1]);
+        v.z = py::cast<T>(t[2]);
         
         return line.distanceTo(v);
     }
@@ -186,15 +184,15 @@ closestPointTo2(Line3<T> line, const Line3<T> &other)
                      
 template <class T>
 static Vec3<T>
-closestPointToTuple(Line3<T> line, const tuple &t)
+closestPointToTuple(Line3<T> line, const py::tuple &t)
 {
     MATH_EXC_ON;
     Vec3<T> v;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
-        v.x = extract<T>(t[0]);
-        v.y = extract<T>(t[1]);
-        v.z = extract<T>(t[2]);
+        v.x = py::cast<T>(t[0]);
+        v.y = py::cast<T>(t[1]);
+        v.z = py::cast<T>(t[2]);
         
         return line.closestPointTo(v);
     }
@@ -218,14 +216,14 @@ setPosition(Line3<T> &line, const Vec3<T> &pos)
 
 template <class T>
 static void
-setPositionTuple(Line3<T> &line, const tuple &t)
+setPositionTuple(Line3<T> &line, const py::tuple &t)
 {
     Vec3<T> pos;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
-        pos.x = extract<T>(t[0]);
-        pos.y = extract<T>(t[1]);
-        pos.z = extract<T>(t[2]);
+        pos.x = py::cast<T>(t[0]);
+        pos.y = py::cast<T>(t[1]);
+        pos.z = py::cast<T>(t[2]);
         
         line.pos = pos;
     }
@@ -250,15 +248,15 @@ setDirection(Line3<T> &line, const Vec3<T> &dir)
 
 template <class T>
 static void
-setDirectionTuple(Line3<T> &line, const tuple &t)
+setDirectionTuple(Line3<T> &line, const py::tuple &t)
 {
     MATH_EXC_ON;
     Vec3<T> dir;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
-        dir.x = extract<T>(t[0]);
-        dir.y = extract<T>(t[1]);
-        dir.z = extract<T>(t[2]);
+        dir.x = py::cast<T>(t[0]);
+        dir.y = py::cast<T>(t[1]);
+        dir.z = py::cast<T>(t[2]);
         
         line.dir = dir.normalized();
     }
@@ -275,23 +273,23 @@ closestPoints1(Line3<T> &line1, const Line3<T> &line2, Vec3<T> &p0, Vec3<T> &p1)
 }
 
 template <class T>
-static tuple
+static py::tuple
 closestPoints2(Line3<T> &line1, const Line3<T> &line2)
 {
     MATH_EXC_ON;
     Vec3<T> p0, p1;
     IMATH_NAMESPACE::closestPoints(line1, line2, p0, p1);
-    tuple p0Tuple = make_tuple(p0.x,p0.y,p0.z);
-    tuple p1Tuple = make_tuple(p1.x,p1.y,p1.z);
+    auto p0Tuple = py::make_tuple(p0.x,p0.y,p0.z);
+    auto p1Tuple = py::make_tuple(p1.x,p1.y,p1.z);
 
 #if !defined(_MSC_VER) || (_MSC_VER <= 1200)
     tuple t = make_tuple(p0Tuple, p1Tuple);
     return t;
 #else
-    list v3;
+    py::list v3;
     v3.append(p0Tuple);
     v3.append(p1Tuple);
-    return tuple(v3);
+    return py::tuple(v3);
 #endif
 }
 
@@ -305,23 +303,23 @@ closestVertex(Line3<T> &line, const Vec3<T> &v0, const Vec3<T> &v1, const Vec3<T
 
 template <class T>
 static Vec3<T>
-closestVertexTuple(Line3<T> &line, const tuple &t0, const tuple &t1, const tuple &t2)
+closestVertexTuple(Line3<T> &line, const py::tuple &t0, const py::tuple &t1, const py::tuple &t2)
 {
     MATH_EXC_ON;
-    if(t0.attr("__len__")() == 3 && t1.attr("__len__")() == 3 && t2.attr("__len__")() == 3)
+    if(py::cast<int>(t0.attr("__len__")()) == 3 && py::cast<int>(t1.attr("__len__")()) == 3 && py::cast<int>(t2.attr("__len__")()) == 3)
     {
         Vec3<T> v0, v1, v2;
-        v0.x = extract<T>(t0[0]);
-        v0.y = extract<T>(t0[1]);
-        v0.z = extract<T>(t0[2]);
+        v0.x = py::cast<T>(t0[0]);
+        v0.y = py::cast<T>(t0[1]);
+        v0.z = py::cast<T>(t0[2]);
         
-        v1.x = extract<T>(t1[0]);
-        v1.y = extract<T>(t1[1]);
-        v1.z = extract<T>(t1[2]);
+        v1.x = py::cast<T>(t1[0]);
+        v1.y = py::cast<T>(t1[1]);
+        v1.z = py::cast<T>(t1[2]);
 
-        v2.x = extract<T>(t2[0]);
-        v2.y = extract<T>(t2[1]);
-        v2.z = extract<T>(t2[2]);
+        v2.x = py::cast<T>(t2[0]);
+        v2.y = py::cast<T>(t2[1]);
+        v2.z = py::cast<T>(t2[2]);
         
         return IMATH_NAMESPACE::closestVertex(v0, v1, v2, line);
     }        
@@ -339,7 +337,7 @@ intersect1(Line3<T> &line, const Vec3<T> &v0, const Vec3<T> &v1, const Vec3<T> &
 }
 
 template <class T>
-static object
+static py::object
 intersect2(Line3<T> &line, const Vec3<T> &v0, const Vec3<T> &v1, const Vec3<T> &v2)
 {    
     MATH_EXC_ON;
@@ -348,44 +346,44 @@ intersect2(Line3<T> &line, const Vec3<T> &v0, const Vec3<T> &v1, const Vec3<T> &
     
     if(IMATH_NAMESPACE::intersect(line, v0, v1, v2, pt, bar, front))
     {
-        tuple t = make_tuple(pt, bar, front);
+        auto t = py::make_tuple(pt, bar, front);
         return t;
     }
     else
     {
-        return object();
+        return py::object();
     }
 }
 
 template <class T>
-static tuple
-intersectTuple(Line3<T> &line, const tuple &t0, const tuple &t1, const tuple &t2)
+static py::tuple
+intersectTuple(Line3<T> &line, const py::tuple &t0, const py::tuple &t1, const py::tuple &t2)
 {    
 
-    if(t0.attr("__len__")() == 3 && t1.attr("__len__")() == 3 && t2.attr("__len__")() == 3)
+    if(py::cast<int>(t0.attr("__len__")()) == 3 && py::cast<int>(t1.attr("__len__")()) == 3 && py::cast<int>(t2.attr("__len__")()) == 3)
     {   
         Vec3<T> v0, v1, v2, pt, bar;
         bool front;
-        v0.x = extract<T>(t0[0]);
-        v0.y = extract<T>(t0[1]);
-        v0.z = extract<T>(t0[2]);
+        v0.x = py::cast<T>(t0[0]);
+        v0.y = py::cast<T>(t0[1]);
+        v0.z = py::cast<T>(t0[2]);
         
-        v1.x = extract<T>(t1[0]);
-        v1.y = extract<T>(t1[1]);
-        v1.z = extract<T>(t1[2]);
+        v1.x = py::cast<T>(t1[0]);
+        v1.y = py::cast<T>(t1[1]);
+        v1.z = py::cast<T>(t1[2]);
 
-        v2.x = extract<T>(t2[0]);
-        v2.y = extract<T>(t2[1]);
-        v2.z = extract<T>(t2[2]);
+        v2.x = py::cast<T>(t2[0]);
+        v2.y = py::cast<T>(t2[1]);
+        v2.z = py::cast<T>(t2[2]);
         
         if(IMATH_NAMESPACE::intersect(line, v0, v1, v2, pt, bar, front))
         {
-            tuple t = make_tuple(pt, bar, front);
+            auto t = py::make_tuple(pt, bar, front);
             return t;
         }
         else
         {
-            tuple t;
+            py::tuple t;
             return t;
         }
     }
@@ -403,15 +401,15 @@ rotatePoint(Line3<T> &line, const Vec3<T> &p, const T &r)
 
 template <class T>
 static Vec3<T>
-rotatePointTuple(Line3<T> &line, const tuple &t, const T &r)
+rotatePointTuple(Line3<T> &line, const py::tuple &t, const T &r)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
         Vec3<T> p;
-        p.x = extract<T>(t[0]);
-        p.y = extract<T>(t[1]);
-        p.z = extract<T>(t[2]);
+        p.x = py::cast<T>(t[0]);
+        p.y = py::cast<T>(t[1]);
+        p.z = py::cast<T>(t[2]);
         
         return IMATH_NAMESPACE::rotatePoint(p, line, r);
     }        
@@ -425,17 +423,15 @@ static std::string Line3_repr(const Line3<T> &v)
     Vec3<T> v1 = v.pos;
     Vec3<T> v2 = v.pos + v.dir;
 
-    PyObject *v1Obj = V3<T>::wrap (v1);
-    PyObject *v1ReprObj = PyObject_Repr (v1Obj);
+    auto v1Obj = py::cast(v1);
+    PyObject *v1ReprObj = PyObject_Repr (v1Obj.ptr());
     std::string v1ReprStr = PyString_AsString (v1ReprObj);
     Py_DECREF (v1ReprObj);
-    Py_DECREF (v1Obj);
 
-    PyObject *v2Obj = V3<T>::wrap (v2);
-    PyObject *v2ReprObj = PyObject_Repr (v2Obj);
+    auto v2Obj = py::cast(v2);
+    PyObject *v2ReprObj = PyObject_Repr (v2Obj.ptr());
     std::string v2ReprStr = PyString_AsString (v2ReprObj);
     Py_DECREF (v2ReprObj);
-    Py_DECREF (v2Obj);
 
     std::stringstream stream;
     stream << LineName<T>::value << "(" << v1ReprStr << ", " << v2ReprStr << ")";
@@ -463,20 +459,20 @@ notequal(const Line3<T> &l1, const Line3<T> &l2)
 }
 
 template <class T>
-class_<Line3<T> >
-register_Line()
+py::class_<Line3<T> >
+register_Line(py::module &m)
 {
     const char *name = LineName<T>::value;
     
-    class_<Line3<T> > line_class(name);
+    py::class_<Line3<T> > line_class(m, name);
     line_class
-        .def("__init__", make_constructor(Line3_construct_default<T>), "initialize point to (0,0,0) and direction to (1,0,0)")
-        .def("__init__", make_constructor(Line3_tuple_construct<T>))
-        .def("__init__", make_constructor(Line3_line_construct<T,float>))
-        .def("__init__", make_constructor(Line3_line_construct<T,double>))
-        .def(init<const Vec3<float> &, const Vec3<float> &>("Line3(point1, point2) construction"))
-        .def(init<const Vec3<double> &, const Vec3<double> &>("Line3(point1, point2) construction"))
-        .def(self * Matrix44<T>())
+        .def("__init__", Line3_construct_default<T>, "initialize point to (0,0,0) and direction to (1,0,0)")
+        .def("__init__", Line3_tuple_construct<T>)
+        .def("__init__", Line3_line_construct<T,float>)
+        .def("__init__", Line3_line_construct<T,double>)
+        .def(py::init<const Vec3<float> &, const Vec3<float> &>(/*"Line3(point1, point2) construction"*/))
+        .def(py::init<const Vec3<double> &, const Vec3<double> &>(/*"Line3(point1, point2) construction"*/))
+        //.def(self * Matrix44<T>())
         .def("__eq__", &equal<T>)
         .def("__ne__", &notequal<T>)
         
@@ -579,8 +575,8 @@ register_Line()
     return line_class;
 }
 
-template PYIMATH_EXPORT class_<Line3<float> > register_Line<float>();
-template PYIMATH_EXPORT class_<Line3<double> > register_Line<double>();
+template PYIMATH_EXPORT py::class_<Line3<float> > register_Line<float>(py::module &m);
+template PYIMATH_EXPORT py::class_<Line3<double> > register_Line<double>(py::module &m);
 
 } // namespace PyImath
 

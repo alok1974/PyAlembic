@@ -32,48 +32,47 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
+#include "python_include.h"
 #include <PyImathBasicTypes.h>
-#include <Python.h>
-#include <boost/python.hpp>
 #include <PyImath.h>
 #include <PyImathFixedArray.h>
 #include <PyImathFixedVArray.h>
 
-using namespace boost::python;
+
 
 namespace PyImath {
 
 void
-register_basicTypes()
+register_basicTypes(py::module &m)
 {
-    class_<BoolArray> bclass = BoolArray::register_("Fixed length array of bool");
+    auto bclass = BoolArray::register_(m, "Fixed length array of bool");
     add_comparison_functions(bclass);
 
-    class_<SignedCharArray> scclass = SignedCharArray::register_("Fixed length array of signed chars");
+    py::class_<SignedCharArray> scclass = SignedCharArray::register_(m, "Fixed length array of signed chars");
     add_arithmetic_math_functions(scclass);
     add_mod_math_functions(scclass);
     add_comparison_functions(scclass);
     add_ordered_comparison_functions(scclass);
 
-    class_<UnsignedCharArray> ucclass = UnsignedCharArray::register_("Fixed length array of unsigned chars");
+    py::class_<UnsignedCharArray> ucclass = UnsignedCharArray::register_(m, "Fixed length array of unsigned chars");
     add_arithmetic_math_functions(ucclass);
     add_mod_math_functions(ucclass);
     add_comparison_functions(ucclass);
     add_ordered_comparison_functions(ucclass);
 
-    class_<ShortArray> sclass = ShortArray::register_("Fixed length array of shorts");
+    py::class_<ShortArray> sclass = ShortArray::register_(m, "Fixed length array of shorts");
     add_arithmetic_math_functions(sclass);
     add_mod_math_functions(sclass);
     add_comparison_functions(sclass);
     add_ordered_comparison_functions(sclass);
 
-    class_<UnsignedShortArray> usclass = UnsignedShortArray::register_("Fixed length array of unsigned shorts");
+    py::class_<UnsignedShortArray> usclass = UnsignedShortArray::register_(m, "Fixed length array of unsigned shorts");
     add_arithmetic_math_functions(usclass);
     add_mod_math_functions(usclass);
     add_comparison_functions(usclass);
     add_ordered_comparison_functions(usclass);
 
-    class_<IntArray> iclass = IntArray::register_("Fixed length array of ints");
+    py::class_<IntArray> iclass = IntArray::register_(m, "Fixed length array of ints");
     add_arithmetic_math_functions(iclass);
     add_mod_math_functions(iclass);
     add_comparison_functions(iclass);
@@ -81,7 +80,7 @@ register_basicTypes()
     add_explicit_construction_from_type<float>(iclass);
     add_explicit_construction_from_type<double>(iclass);
 
-    class_<UnsignedIntArray> uiclass = UnsignedIntArray::register_("Fixed length array of unsigned ints");
+    py::class_<UnsignedIntArray> uiclass = UnsignedIntArray::register_(m, "Fixed length array of unsigned ints");
     add_arithmetic_math_functions(uiclass);
     add_mod_math_functions(uiclass);
     add_comparison_functions(uiclass);
@@ -89,7 +88,7 @@ register_basicTypes()
     add_explicit_construction_from_type<float>(uiclass);
     add_explicit_construction_from_type<double>(uiclass);
 
-    class_<FloatArray> fclass = FloatArray::register_("Fixed length array of floats");
+    py::class_<FloatArray> fclass = FloatArray::register_(m, "Fixed length array of floats");
     add_arithmetic_math_functions(fclass);
     add_pow_math_functions(fclass);
     add_comparison_functions(fclass);
@@ -97,7 +96,7 @@ register_basicTypes()
     add_explicit_construction_from_type<int>(fclass);
     add_explicit_construction_from_type<double>(fclass);
 
-    class_<DoubleArray> dclass = DoubleArray::register_("Fixed length array of doubles");
+    py::class_<DoubleArray> dclass = DoubleArray::register_(m, "Fixed length array of doubles");
     add_arithmetic_math_functions(dclass);
     add_pow_math_functions(dclass);
     add_comparison_functions(dclass);
@@ -105,7 +104,7 @@ register_basicTypes()
     add_explicit_construction_from_type<int>(dclass);
     add_explicit_construction_from_type<float>(dclass);
 
-    class_<VIntArray> ivclass = VIntArray::register_("Variable fixed length array of ints");
+    py::class_<VIntArray> ivclass = VIntArray::register_(m, "Variable fixed length array of ints");
     // Don't add other functionality until its defined better.
 }
 

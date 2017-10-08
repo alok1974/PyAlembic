@@ -35,16 +35,15 @@
 #ifndef _PyImathVec_h_
 #define _PyImathVec_h_
 
-#include <Python.h>
-#include <boost/python.hpp>
+#include "python_include.h"
 #include <PyImath.h>
 #include <ImathVec.h>
 #include <PyImathFixedArray.h>
 
 namespace PyImath {
 
-template <class T> boost::python::class_<IMATH_NAMESPACE::Vec2<T> > register_Vec2();
-template <class T> boost::python::class_<FixedArray<IMATH_NAMESPACE::Vec2<T> > > register_Vec2Array();
+template <class T> py::class_<IMATH_NAMESPACE::Vec2<T> > register_Vec2(py::module &m);
+template <class T> py::class_<FixedArray<IMATH_NAMESPACE::Vec2<T> > > register_Vec2Array(py::module &m);
 typedef FixedArray<IMATH_NAMESPACE::V2s>  V2sArray;
 typedef FixedArray<IMATH_NAMESPACE::V2i>  V2iArray;
 typedef FixedArray<IMATH_NAMESPACE::V2f>  V2fArray;
@@ -87,8 +86,8 @@ static PyImath::FixedArray<IMATH_NAMESPACE::Vec2<T> > operator / (const PyImath:
 
 namespace PyImath {
 
-template <class T> boost::python::class_<IMATH_NAMESPACE::Vec3<T> > register_Vec3();
-template <class T> boost::python::class_<FixedArray<IMATH_NAMESPACE::Vec3<T> > > register_Vec3Array();
+template <class T> py::class_<IMATH_NAMESPACE::Vec3<T> > register_Vec3(py::module &m);
+template <class T> py::class_<FixedArray<IMATH_NAMESPACE::Vec3<T> > > register_Vec3Array(py::module &m);
 typedef FixedArray<IMATH_NAMESPACE::Vec3<unsigned char> >  V3cArray;
 typedef FixedArray<IMATH_NAMESPACE::V3s>  V3sArray;
 typedef FixedArray<IMATH_NAMESPACE::V3i>  V3iArray;
@@ -141,8 +140,8 @@ static PyImath::FixedArray<IMATH_NAMESPACE::Vec3<T> > operator / (const PyImath:
 
 namespace PyImath {
 
-template <class T> boost::python::class_<IMATH_NAMESPACE::Vec4<T> > register_Vec4();
-template <class T> boost::python::class_<PyImath::FixedArray<IMATH_NAMESPACE::Vec4<T> > > register_Vec4Array();
+template <class T> py::class_<IMATH_NAMESPACE::Vec4<T> > register_Vec4(py::module &m);
+template <class T> py::class_<PyImath::FixedArray<IMATH_NAMESPACE::Vec4<T> > > register_Vec4Array(py::module &m);
 typedef FixedArray<IMATH_NAMESPACE::Vec4<unsigned char> >  V4cArray;
 typedef FixedArray<IMATH_NAMESPACE::V4s>  V4sArray;
 typedef FixedArray<IMATH_NAMESPACE::V4i>  V4iArray;
@@ -209,29 +208,30 @@ namespace PyImath {
 template <class T>
 class V2 {
   public:
-    static PyObject *	wrap (const IMATH_NAMESPACE::Vec2<T> &v);
+    //static PyObject *	wrap (const IMATH_NAMESPACE::Vec2<T> &v);
     static int		convert (PyObject *p, IMATH_NAMESPACE::Vec2<T> *v);
 };
 
 template <class T>
 class V3 {
   public:
-    static PyObject *	wrap (const IMATH_NAMESPACE::Vec3<T> &v);
+    //static PyObject *	wrap (const IMATH_NAMESPACE::Vec3<T> &v);
     static int		convert (PyObject *p, IMATH_NAMESPACE::Vec3<T> *v);
 };
 
 template <class T>
 class V4 {
   public:
-    static PyObject *	wrap (const IMATH_NAMESPACE::Vec4<T> &v);
+    //static PyObject *	wrap (const IMATH_NAMESPACE::Vec4<T> &v);
     static int		convert (PyObject *p, IMATH_NAMESPACE::Vec4<T> *v);
 };
 
+#if 0
 template <class T>
 PyObject *
 V2<T>::wrap (const IMATH_NAMESPACE::Vec2<T> &v)
 {
-    typename boost::python::return_by_value::apply < IMATH_NAMESPACE::Vec2<T> >::type converter;
+    typename py::return_by_value::apply < IMATH_NAMESPACE::Vec2<T> >::type converter;
     PyObject *p = converter (v);
     return p;
 }
@@ -240,7 +240,7 @@ template <class T>
 PyObject *
 V3<T>::wrap (const IMATH_NAMESPACE::Vec3<T> &v)
 {
-    typename boost::python::return_by_value::apply < IMATH_NAMESPACE::Vec3<T> >::type converter;
+    typename py::return_by_value::apply < IMATH_NAMESPACE::Vec3<T> >::type converter;
     PyObject *p = converter (v);
     return p;
 }
@@ -249,16 +249,17 @@ template <class T>
 PyObject *
 V4<T>::wrap (const IMATH_NAMESPACE::Vec4<T> &v)
 {
-    typename boost::python::return_by_value::apply < IMATH_NAMESPACE::Vec4<T> >::type converter;
+    typename py::return_by_value::apply < IMATH_NAMESPACE::Vec4<T> >::type converter;
     PyObject *p = converter (v);
     return p;
 }
+#endif
 
 template <class T>
 int
 V2<T>::convert (PyObject *p, IMATH_NAMESPACE::Vec2<T> *v)
 {
-    boost::python::extract <IMATH_NAMESPACE::V2i> extractorV2i (p);
+    py_extract <IMATH_NAMESPACE::V2i> extractorV2i (p);
     if (extractorV2i.check())
     {
         IMATH_NAMESPACE::V2i v2i = extractorV2i();
@@ -266,7 +267,7 @@ V2<T>::convert (PyObject *p, IMATH_NAMESPACE::Vec2<T> *v)
         return 1;
     }
 
-    boost::python::extract <IMATH_NAMESPACE::V2f> extractorV2f (p);
+    py_extract <IMATH_NAMESPACE::V2f> extractorV2f (p);
     if (extractorV2f.check())
     {
         IMATH_NAMESPACE::V2f v2f = extractorV2f();
@@ -274,7 +275,7 @@ V2<T>::convert (PyObject *p, IMATH_NAMESPACE::Vec2<T> *v)
         return 1;
     }
 
-    boost::python::extract <IMATH_NAMESPACE::V2d> extractorV2d (p);
+    py_extract <IMATH_NAMESPACE::V2d> extractorV2d (p);
     if (extractorV2d.check())
     {
         IMATH_NAMESPACE::V2d v2d = extractorV2d();
@@ -282,11 +283,11 @@ V2<T>::convert (PyObject *p, IMATH_NAMESPACE::Vec2<T> *v)
         return 1;
     }
 
-    boost::python::extract <boost::python::tuple> extractorTuple (p);
+    py_extract <py::tuple> extractorTuple (p);
     if (extractorTuple.check())
     {
-        boost::python::tuple t = extractorTuple();
-        if (t.attr ("__len__") () == 2)
+        py::tuple t = extractorTuple();
+        if (py::cast<int>(t.attr ("__len__") ()) == 2)
         {
             // Extracting the tuple elements as doubles and casting them to
             // Ts in setValue() works better than extracting them as Ts from
@@ -296,26 +297,23 @@ V2<T>::convert (PyObject *p, IMATH_NAMESPACE::Vec2<T> *v)
             // when Box2<int>::convert() is passed a tuple of two tuples of
             // floats. 
 
-            double a = boost::python::extract <double> (t[0]);
-            double b = boost::python::extract <double> (t[1]);
+            double a = py::cast <double> (t[0]);
+            double b = py::cast <double> (t[1]);
             v->setValue (T(a), T(b));
             return 1;
         }
     }
 
-    boost::python::extract <boost::python::list> extractorList (p);
+    py_extract <py::list> extractorList (p);
     if (extractorList.check())
     {
-        boost::python::list l = extractorList();
-        if (l.attr ("__len__") () == 2)
+        py::list l = extractorList();
+        if (py::cast<int>(l.attr ("__len__") ()) == 2)
         {
-            boost::python::extract <double> extractor0 (l[0]);
-            boost::python::extract <double> extractor1 (l[1]);
-            if (extractor0.check() && extractor1.check())
-            {
-                v->setValue (T(extractor0()), T(extractor1()));
-                return 1;
-            }
+            double a = py::cast <double>(l[0]);
+            double b = py::cast <double>(l[1]);
+            v->setValue(T(a), T(b));
+            return 1;
         }
     }
 
@@ -326,7 +324,7 @@ template <class T>
 int
 V3<T>::convert (PyObject *p, IMATH_NAMESPACE::Vec3<T> *v)
 {
-    boost::python::extract <IMATH_NAMESPACE::V3i> extractorV3i (p);
+    py_extract <IMATH_NAMESPACE::V3i> extractorV3i (p);
     if (extractorV3i.check())
     {
         IMATH_NAMESPACE::V3i v3i = extractorV3i();
@@ -334,7 +332,7 @@ V3<T>::convert (PyObject *p, IMATH_NAMESPACE::Vec3<T> *v)
         return 1;
     }
 
-    boost::python::extract <IMATH_NAMESPACE::V3f> extractorV3f (p);
+    py_extract <IMATH_NAMESPACE::V3f> extractorV3f (p);
     if (extractorV3f.check())
     {
         IMATH_NAMESPACE::V3f v3f = extractorV3f();
@@ -342,7 +340,7 @@ V3<T>::convert (PyObject *p, IMATH_NAMESPACE::Vec3<T> *v)
         return 1;
     }
 
-    boost::python::extract <IMATH_NAMESPACE::V3d> extractorV3d (p);
+    py_extract <IMATH_NAMESPACE::V3d> extractorV3d (p);
     if (extractorV3d.check())
     {
         IMATH_NAMESPACE::V3d v3d = extractorV3d();
@@ -350,38 +348,35 @@ V3<T>::convert (PyObject *p, IMATH_NAMESPACE::Vec3<T> *v)
         return 1;
     }
 
-    boost::python::extract <boost::python::tuple> extractorTuple (p);
+    py_extract <py::tuple> extractorTuple (p);
     if (extractorTuple.check())
     {
-        boost::python::tuple t = extractorTuple();
-        if (t.attr ("__len__") () == 3)
+        py::tuple t = extractorTuple();
+        if (py::cast<int>(t.attr ("__len__") ()) == 3)
         {
             // See the comment in V2<T>::convert().
 
-            double a = boost::python::extract <double> (t[0]);
-            double b = boost::python::extract <double> (t[1]);
-            double c = boost::python::extract <double> (t[2]);
+            double a = py::cast <double> (t[0]);
+            double b = py::cast <double> (t[1]);
+            double c = py::cast <double> (t[2]);
             v->setValue (T(a), T(b), T(c));
             return 1;
         }
     }
 
-    boost::python::extract <boost::python::list> extractorList (p);
+    py_extract <py::list> extractorList (p);
     if (extractorList.check())
     {
-        boost::python::list l = extractorList();
-        if (l.attr ("__len__") () == 3)
+        py::list l = extractorList();
+        if (py::cast<int>(l.attr ("__len__") ()) == 3)
         {
-            boost::python::extract <double> extractor0 (l[0]);
-            boost::python::extract <double> extractor1 (l[1]);
-            boost::python::extract <double> extractor2 (l[2]);
-            if (extractor0.check() && extractor1.check() &&
-                extractor2.check())
-            {
-                v->setValue (T(extractor0()), T(extractor1()),
-                             T(extractor2()));
-                return 1;
-            }
+            // See the comment in V2<T>::convert().
+
+            double a = py::cast <double>(l[0]);
+            double b = py::cast <double>(l[1]);
+            double c = py::cast <double>(l[2]);
+            v->setValue(T(a), T(b), T(c));
+            return 1;
         }
     }
 
@@ -392,7 +387,7 @@ template <class T>
 int
 V4<T>::convert (PyObject *p, IMATH_NAMESPACE::Vec4<T> *v)
 {
-    boost::python::extract <IMATH_NAMESPACE::V4i> extractorV4i (p);
+    py_extract <IMATH_NAMESPACE::V4i> extractorV4i (p);
     if (extractorV4i.check())
     {
         IMATH_NAMESPACE::V4i v4i = extractorV4i();
@@ -400,7 +395,7 @@ V4<T>::convert (PyObject *p, IMATH_NAMESPACE::Vec4<T> *v)
         return 1;
     }
 
-    boost::python::extract <IMATH_NAMESPACE::V4f> extractorV4f (p);
+    py_extract <IMATH_NAMESPACE::V4f> extractorV4f (p);
     if (extractorV4f.check())
     {
         IMATH_NAMESPACE::V4f v4f = extractorV4f();
@@ -408,7 +403,7 @@ V4<T>::convert (PyObject *p, IMATH_NAMESPACE::Vec4<T> *v)
         return 1;
     }
 
-    boost::python::extract <IMATH_NAMESPACE::V4d> extractorV4d (p);
+    py_extract <IMATH_NAMESPACE::V4d> extractorV4d (p);
     if (extractorV4d.check())
     {
         IMATH_NAMESPACE::V4d v4d = extractorV4d();
@@ -416,46 +411,40 @@ V4<T>::convert (PyObject *p, IMATH_NAMESPACE::Vec4<T> *v)
         return 1;
     }
 
-    boost::python::extract <boost::python::tuple> extractorTuple (p);
+    py_extract <py::tuple> extractorTuple (p);
     if (extractorTuple.check())
     {
-        boost::python::tuple t = extractorTuple();
-        if (t.attr ("__len__") () == 4)
+        py::tuple t = extractorTuple();
+        if (py::cast<int>(t.attr ("__len__") ()) == 4)
         {
             // See the comment in V2<T>::convert().
 
-            double a = boost::python::extract <double> (t[0]);
-            double b = boost::python::extract <double> (t[1]);
-            double c = boost::python::extract <double> (t[2]);
-            double d = boost::python::extract <double> (t[3]);
+            double a = py::cast<double> (t[0]);
+            double b = py::cast<double> (t[1]);
+            double c = py::cast<double> (t[2]);
+            double d = py::cast<double> (t[3]);
             *v = IMATH_NAMESPACE::Vec4<T>(T(a), T(b), T(c), T(d));
             return 1;
         }
     }
 
-    boost::python::extract <boost::python::list> extractorList (p);
+    py_extract <py::list> extractorList (p);
     if (extractorList.check())
     {
-        boost::python::list l = extractorList();
-        if (l.attr ("__len__") () == 4)
+        py::list l = extractorList();
+        if (py::cast<int>(l.attr ("__len__") ()) == 4)
         {
-            boost::python::extract <double> extractor0 (l[0]);
-            boost::python::extract <double> extractor1 (l[1]);
-            boost::python::extract <double> extractor2 (l[2]);
-            boost::python::extract <double> extractor3 (l[3]);
-            if (extractor0.check() && extractor1.check() &&
-                extractor2.check() && extractor3.check())
-            {
-                *v = IMATH_NAMESPACE::Vec4<T>(T(extractor0()), T(extractor1()),
-                             T(extractor2()), T(extractor3()));
-                return 1;
-            }
+            double a = py::cast<double>(l[0]);
+            double b = py::cast<double>(l[1]);
+            double c = py::cast<double>(l[2]);
+            double d = py::cast<double>(l[3]);
+            *v = IMATH_NAMESPACE::Vec4<T>(T(a), T(b), T(c), T(d));
+            return 1;
         }
     }
 
     return 0;
 }
-
 
 typedef V2<int>		V2i;
 typedef V2<float>	V2f;

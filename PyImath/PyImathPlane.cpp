@@ -32,13 +32,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-
+#include "python_include.h"
 #include <PyImathPlane.h>
 #include "PyImathDecorators.h"
 #include "PyImathExport.h"
-#include <Python.h>
-#include <boost/python.hpp>
-#include <boost/python/make_constructor.hpp>
 #include <boost/format.hpp>
 #include <PyImath.h>
 #include <PyImathVec.h>
@@ -46,7 +43,7 @@
 #include <Iex.h>
 
 namespace PyImath{
-using namespace boost::python;
+
 using namespace IMATH_NAMESPACE;
 
 template <class T> struct PlaneName {static const char *value;};
@@ -61,22 +58,23 @@ static Plane3<T> *Plane3_construct_default()
 }
 
 template <class T>
-static Plane3<T> *Plane3_plane_construct(const object &planeObj)
+static Plane3<T> *Plane3_plane_construct(const py::object &planeObj)
 {
     MATH_EXC_ON;
-    extract < Plane3<float> > ef (planeObj);
-    extract < Plane3<double> > ed (planeObj);
+    //extract < Plane3<float> > ef (planeObj);
+    //extract < Plane3<double> > ed (planeObj);
 
-    Plane3<T> *p = 0;
+    auto p = new Plane3<T>();
 
-    if (ef.check())
+    //if (ef.check())
     {
-        Plane3<float> efp = ef();
-        p = new Plane3<T>;
+        Plane3<T> efp = py::cast<Plane3<T>>(planeObj);
+        //p = new Plane3<float>;
         p->normal = efp.normal;
         p->distance = efp.distance;
     }
 
+    /*
     else if (ed.check())
     {
         Plane3<double> edp = ed();
@@ -89,20 +87,21 @@ static Plane3<T> *Plane3_plane_construct(const object &planeObj)
     {
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameter passed to Plane constructor");
     }
+    */
     
     return p;
 }
 
 template <class T>
-static Plane3<T> *Plane3_tuple_constructor1(const tuple &t, T distance)
+static Plane3<T> *Plane3_tuple_constructor1(const py::tuple &t, T distance)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 3)
+    if (py::cast<int>(t.attr("__len__")()) == 3)
     {
         Vec3<T> normal;
-        normal.x = extract<T>(t[0]);
-        normal.y = extract<T>(t[1]);
-        normal.z = extract<T>(t[2]);
+        normal.x = py::cast<T>(t[0]);
+        normal.y = py::cast<T>(t[1]);
+        normal.z = py::cast<T>(t[2]);
         
         return new Plane3<T>(normal, distance);
     }
@@ -111,19 +110,19 @@ static Plane3<T> *Plane3_tuple_constructor1(const tuple &t, T distance)
 }
 
 template <class T>
-static Plane3<T> *Plane3_tuple_constructor2(const tuple &t0, const tuple &t1)
+static Plane3<T> *Plane3_tuple_constructor2(const py::tuple &t0, const py::tuple &t1)
 {
     MATH_EXC_ON;
-    if(t0.attr("__len__")() == 3 && t1.attr("__len__")() == 3)
+    if(py::cast<int>(t0.attr("__len__")()) == 3 && py::cast<int>(t1.attr("__len__")()) == 3)
     {
         Vec3<T> point, normal;
-        point.x = extract<T>(t0[0]);
-        point.y = extract<T>(t0[1]);
-        point.z = extract<T>(t0[2]);
+        point.x = py::cast<T>(t0[0]);
+        point.y = py::cast<T>(t0[1]);
+        point.z = py::cast<T>(t0[2]);
         
-        normal.x = extract<T>(t1[0]);
-        normal.y = extract<T>(t1[1]);
-        normal.z = extract<T>(t1[2]);
+        normal.x = py::cast<T>(t1[0]);
+        normal.y = py::cast<T>(t1[1]);
+        normal.z = py::cast<T>(t1[2]);
         
         return new Plane3<T>(point, normal);
     }
@@ -132,23 +131,23 @@ static Plane3<T> *Plane3_tuple_constructor2(const tuple &t0, const tuple &t1)
 }
 
 template <class T>
-static Plane3<T> *Plane3_tuple_constructor3(const tuple &t0, const tuple &t1, const tuple &t2)
+static Plane3<T> *Plane3_tuple_constructor3(const py::tuple &t0, const py::tuple &t1, const py::tuple &t2)
 {
     MATH_EXC_ON;
-    if(t0.attr("__len__")() == 3 && t1.attr("__len__")() == 3 && t2.attr("__len__")() == 3)
+    if(py::cast<int>(t0.attr("__len__")()) == 3 && py::cast<int>(t1.attr("__len__")()) == 3 && py::cast<int>(t2.attr("__len__")()) == 3)
     {
         Vec3<T> point0, point1, point2;
-        point0.x = extract<T>(t0[0]);
-        point0.y = extract<T>(t0[1]);
-        point0.z = extract<T>(t0[2]);
+        point0.x = py::cast<T>(t0[0]);
+        point0.y = py::cast<T>(t0[1]);
+        point0.z = py::cast<T>(t0[2]);
         
-        point1.x = extract<T>(t1[0]);
-        point1.y = extract<T>(t1[1]);
-        point1.z = extract<T>(t1[2]);
+        point1.x = py::cast<T>(t1[0]);
+        point1.y = py::cast<T>(t1[1]);
+        point1.z = py::cast<T>(t1[2]);
 
-        point2.x = extract<T>(t2[0]);
-        point2.y = extract<T>(t2[1]);
-        point2.z = extract<T>(t2[2]); 
+        point2.x = py::cast<T>(t2[0]);
+        point2.y = py::cast<T>(t2[1]);
+        point2.z = py::cast<T>(t2[2]); 
         
         return new Plane3<T>(point0, point1, point2);
     }
@@ -193,11 +192,10 @@ static std::string Plane3_str(const Plane3<T> &plane)
 {
     std::stringstream stream;
 
-    PyObject *normalObj = V3<T>::wrap (plane.normal);
-    PyObject *normalReprObj = PyObject_Repr (normalObj);
+    auto normalObj = py::cast(plane.normal);
+    PyObject *normalReprObj = PyObject_Repr (normalObj.ptr());
     std::string normalReprStr = PyString_AsString (normalReprObj);
     Py_DECREF (normalReprObj);
-    Py_DECREF (normalObj);
 
     stream << PlaneName<T>::value << "(" << normalReprStr << ", " 
            << plane.distance << ")";
@@ -215,11 +213,10 @@ static std::string Plane3_repr(const Plane3<T> &plane)
 template <>
 std::string Plane3_repr(const Plane3<float> &plane)
 {
-    PyObject *normalObj = V3<float>::wrap (plane.normal);
-    PyObject *normalReprObj = PyObject_Repr (normalObj);
+    auto normalObj = py::cast(plane.normal);
+    PyObject *normalReprObj = PyObject_Repr (normalObj.ptr());
     std::string normalReprStr = PyString_AsString (normalReprObj);
     Py_DECREF (normalReprObj);
-    Py_DECREF (normalObj);
 
     return (boost::format("%s(%s, %.9g)")
                         % PlaneName<float>::value
@@ -231,11 +228,10 @@ std::string Plane3_repr(const Plane3<float> &plane)
 template <>
 std::string Plane3_repr(const Plane3<double> &plane)
 {
-    PyObject *normalObj = V3<double>::wrap (plane.normal);
-    PyObject *normalReprObj = PyObject_Repr (normalObj);
+    auto normalObj = py::cast(plane.normal);
+    PyObject *normalReprObj = PyObject_Repr (normalObj.ptr());
     std::string normalReprStr = PyString_AsString (normalReprObj);
     Py_DECREF (normalReprObj);
-    Py_DECREF (normalObj);
 
     return (boost::format("%s(%s, %.17g)")
                         % PlaneName<double>::value
@@ -274,7 +270,7 @@ setDistance(Plane3<T> &plane, const T &distance)
 }
 
 template <class T, class S>
-static object intersectT(const Plane3<T> &plane, const Line3<S> &line)
+static py::object intersectT(const Plane3<T> &plane, const Line3<S> &line)
 {
     MATH_EXC_ON;
     T param;
@@ -283,9 +279,9 @@ static object intersectT(const Plane3<T> &plane, const Line3<S> &line)
     l.dir = line.dir;
 
     if(plane.intersectT(l, param))
-        return object(param);
+        return py::cast(param);
     
-    return object();
+    return py::object();
 }
 
 template <class T>
@@ -297,7 +293,7 @@ intersect2(const Plane3<T> &plane, const Line3<T> &line, Vec3<T> &intersection)
 }
 
 template <class T, class S>
-static object
+static py::object
 intersect1(const Plane3<T> &plane, const Line3<S> &line)
 {
     MATH_EXC_ON;
@@ -306,23 +302,23 @@ intersect1(const Plane3<T> &plane, const Line3<S> &line)
     l.pos = line.pos;
     l.dir = line.dir;
     if(plane.intersect(l, intersection))
-        return object(intersection);
+        return py::cast(intersection);
     
-    return object();
+    return py::object();
     
 }
 
 template <class T>
 static void
-setTuple1(Plane3<T> &plane, const tuple &t, T distance)
+setTuple1(Plane3<T> &plane, const py::tuple &t, T distance)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
         Vec3<T> normal;
-        normal.x = extract<T>(t[0]);
-        normal.y = extract<T>(t[1]);
-        normal.z = extract<T>(t[2]);
+        normal.x = py::cast<T>(t[0]);
+        normal.y = py::cast<T>(t[1]);
+        normal.z = py::cast<T>(t[2]);
         
         plane.set(normal, distance);
     }
@@ -332,19 +328,19 @@ setTuple1(Plane3<T> &plane, const tuple &t, T distance)
 
 template <class T>
 static void
-setTuple2(Plane3<T> &plane, const tuple &t0, const tuple &t1)
+setTuple2(Plane3<T> &plane, const py::tuple &t0, const py::tuple &t1)
 {
     MATH_EXC_ON;
-    if(t0.attr("__len__")() == 3 && t1.attr("__len__")() == 3)
+    if(py::cast<int>(t0.attr("__len__")()) == 3 && py::cast<int>(t1.attr("__len__")()) == 3)
     {
         Vec3<T> point, normal;
-        point.x = extract<T>(t0[0]);
-        point.y = extract<T>(t0[1]);
-        point.z = extract<T>(t0[2]);
+        point.x = py::cast<T>(t0[0]);
+        point.y = py::cast<T>(t0[1]);
+        point.z = py::cast<T>(t0[2]);
         
-        normal.x = extract<T>(t1[0]);
-        normal.y = extract<T>(t1[1]);
-        normal.z = extract<T>(t1[2]);
+        normal.x = py::cast<T>(t1[0]);
+        normal.y = py::cast<T>(t1[1]);
+        normal.z = py::cast<T>(t1[2]);
         
         plane.set(point, normal);
     }
@@ -354,23 +350,23 @@ setTuple2(Plane3<T> &plane, const tuple &t0, const tuple &t1)
 
 template <class T>
 static void
-setTuple3(Plane3<T> &plane, const tuple &t0, const tuple &t1, const tuple &t2)
+setTuple3(Plane3<T> &plane, const py::tuple &t0, const py::tuple &t1, const py::tuple &t2)
 {
     MATH_EXC_ON;
-    if(t0.attr("__len__")() == 3 && t1.attr("__len__")() == 3 && t2.attr("__len__")() == 3)
+    if(py::cast<int>(t0.attr("__len__")()) == 3 && py::cast<int>(t1.attr("__len__")()) == 3 && py::cast<int>(t2.attr("__len__")()) == 3)
     {
         Vec3<T> point0, point1, point2;
-        point0.x = extract<T>(t0[0]);
-        point0.y = extract<T>(t0[1]);
-        point0.z = extract<T>(t0[2]);
+        point0.x = py::cast<T>(t0[0]);
+        point0.y = py::cast<T>(t0[1]);
+        point0.z = py::cast<T>(t0[2]);
         
-        point1.x = extract<T>(t1[0]);
-        point1.y = extract<T>(t1[1]);
-        point1.z = extract<T>(t1[2]);
+        point1.x = py::cast<T>(t1[0]);
+        point1.y = py::cast<T>(t1[1]);
+        point1.z = py::cast<T>(t1[2]);
 
-        point2.x = extract<T>(t2[0]);
-        point2.y = extract<T>(t2[1]);
-        point2.z = extract<T>(t2[2]); 
+        point2.x = py::cast<T>(t2[0]);
+        point2.y = py::cast<T>(t2[1]);
+        point2.z = py::cast<T>(t2[2]); 
         
         plane.set(point0, point1, point2);
     }
@@ -388,15 +384,15 @@ reflectPoint(Plane3<T> &plane, const Vec3<T> &p)
 
 template <class T>
 static Vec3<T>
-reflectPointTuple(Plane3<T> &plane, const tuple &t)
+reflectPointTuple(Plane3<T> &plane, const py::tuple &t)
 {
     MATH_EXC_ON;
     Vec3<T> point;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
-        point.x = extract<T>(t[0]);
-        point.y = extract<T>(t[1]);
-        point.z = extract<T>(t[2]); 
+        point.x = py::cast<T>(t[0]);
+        point.y = py::cast<T>(t[1]);
+        point.z = py::cast<T>(t[2]); 
         
         return plane.reflectPoint(point);
     }
@@ -414,15 +410,15 @@ distanceTo(Plane3<T> &plane, const Vec3<T> &v)
 
 template <class T>
 static T
-distanceToTuple(Plane3<T> &plane, const tuple &t)
+distanceToTuple(Plane3<T> &plane, const py::tuple &t)
 {
     MATH_EXC_ON;
     Vec3<T> point;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
-        point.x = extract<T>(t[0]);
-        point.y = extract<T>(t[1]);
-        point.z = extract<T>(t[2]); 
+        point.x = py::cast<T>(t[0]);
+        point.y = py::cast<T>(t[1]);
+        point.z = py::cast<T>(t[2]); 
         
         return plane.distanceTo(point);
     }
@@ -440,15 +436,15 @@ reflectVector(Plane3<T> &plane, const Vec3<T> &v)
 
 template <class T>
 static Vec3<T>
-reflectVectorTuple(Plane3<T> &plane, const tuple &t)
+reflectVectorTuple(Plane3<T> &plane, const py::tuple &t)
 {
     MATH_EXC_ON;
     Vec3<T> point;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
-        point.x = extract<T>(t[0]);
-        point.y = extract<T>(t[1]);
-        point.z = extract<T>(t[2]); 
+        point.x = py::cast<T>(t[0]);
+        point.y = py::cast<T>(t[1]);
+        point.z = py::cast<T>(t[2]); 
         
         return plane.reflectVector(point);
     }
@@ -490,21 +486,21 @@ negate(const Plane3<T> &plane)
 
 
 template <class T>
-class_<Plane3<T> >
-register_Plane()
+py::class_<Plane3<T> >
+register_Plane(py::module &m)
 {
     const char *name = PlaneName<T>::value;
     
-    class_< Plane3<T> > plane_class(name);
+    py::class_< Plane3<T> > plane_class(m, name);
     plane_class
-        .def("__init__",make_constructor(Plane3_construct_default<T>),"initialize normal to  (1,0,0), distance to 0")
-        .def("__init__",make_constructor(Plane3_tuple_constructor1<T>))
-        .def("__init__",make_constructor(Plane3_tuple_constructor2<T>))
-        .def("__init__",make_constructor(Plane3_tuple_constructor3<T>))
-        .def("__init__",make_constructor(Plane3_plane_construct<T>))
-        .def(init<const Vec3<T> &, T>("Plane3(normal, distance) construction"))
-        .def(init<const Vec3<T> &, const Vec3<T> &>("Plane3(point, normal) construction"))
-        .def(init<const Vec3<T> &, const Vec3<T> &, const Vec3<T> &>("Plane3(point1, point2, point3) construction"))
+        .def("__init__",Plane3_construct_default<T>,"initialize normal to  (1,0,0), distance to 0")
+        .def("__init__",Plane3_tuple_constructor1<T>)
+        .def("__init__",Plane3_tuple_constructor2<T>)
+        .def("__init__",Plane3_tuple_constructor3<T>)
+        .def("__init__",Plane3_plane_construct<T>)
+        .def(py::init<const Vec3<T> &, T>(/*"Plane3(normal, distance) construction"*/))
+        .def(py::init<const Vec3<T> &, const Vec3<T> &>(/*"Plane3(point, normal) construction"*/))
+        .def(py::init<const Vec3<T> &, const Vec3<T> &, const Vec3<T> &>(/*"Plane3(point1, point2, point3) construction"*/))
         .def("__eq__", &equal<T>)
         .def("__ne__", &notequal<T>)
         .def("__mul__", &mul<T>)
@@ -603,7 +599,7 @@ register_Plane()
     return plane_class;
 }
 
-template PYIMATH_EXPORT class_<Plane3<float> > register_Plane<float>();
-template PYIMATH_EXPORT class_<Plane3<double> > register_Plane<double>();
+template PYIMATH_EXPORT py::class_<Plane3<float> > register_Plane<float>(py::module &m);
+template PYIMATH_EXPORT py::class_<Plane3<double> > register_Plane<double>(py::module &m);
 
 } //namespace PyIMath

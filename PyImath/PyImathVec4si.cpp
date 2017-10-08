@@ -41,16 +41,16 @@ template <> const char *PyImath::V4cArray::name() { return "V4cArray"; }
 template <> const char *PyImath::V4sArray::name() { return "V4sArray"; }
 template <> const char *PyImath::V4iArray::name() { return "V4iArray"; }
 
-using namespace boost::python;
+
 using namespace IMATH_NAMESPACE;
 
 template<> const char *Vec4Name<unsigned char>::value() { return "V4c"; }
 template<> const char *Vec4Name<short>::value() { return "V4s"; }
 template<> const char *Vec4Name<int>::value() { return "V4i"; }
 
-template PYIMATH_EXPORT class_<IMATH_NAMESPACE::Vec4<unsigned char> > register_Vec4<unsigned char>();
-template PYIMATH_EXPORT class_<IMATH_NAMESPACE::Vec4<short> > register_Vec4<short>();
-template PYIMATH_EXPORT class_<IMATH_NAMESPACE::Vec4<int> > register_Vec4<int>();
+template PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Vec4<unsigned char> > register_Vec4<unsigned char>(py::module &m);
+template PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Vec4<short> > register_Vec4<short>(py::module &m);
+template PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Vec4<int> > register_Vec4<int>(py::module &m);
 
 }
 

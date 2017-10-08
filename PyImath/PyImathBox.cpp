@@ -37,7 +37,6 @@
 #include "PyImathMathExc.h"
 #include "PyImathDecorators.h"
 #include "PyImathExport.h"
-#include <boost/python/make_constructor.hpp>
 #include <Iex.h>
 #include <ImathBoxAlgo.h>
 #include <PyImathTask.h>
@@ -45,7 +44,7 @@
 #include "PyImathBoxArrayImpl.h"
 
 namespace PyImath {
-using namespace boost::python;
+
 using namespace IMATH_NAMESPACE;
 using namespace PyImath;
 
@@ -69,16 +68,16 @@ template <> PYIMATH_EXPORT const char *PyImath::Box3fArray::name() { return "Box
 template <> PYIMATH_EXPORT const char *PyImath::Box3dArray::name() { return "Box3dArray"; }
 
 template <class T>
-static Box<T> * box2TupleConstructor1(const tuple &t)
+static Box<T> * box2TupleConstructor1(const py::tuple &t)
 {
-    if(t.attr("__len__")() == 2)
+    if(py::cast<int>(t.attr("__len__")()) == 2)
     {
         // The constructor was called like this:
         // Box2f ((V2f(1,2), V2f(3,4))) or
         // Box2f (((1,2), (3,4)))
 
-        PyObject *t0Obj = extract <object> (t[0])().ptr();
-        PyObject *t1Obj = extract <object> (t[1])().ptr();
+        PyObject *t0Obj = py::cast<py::object> (t[0])().ptr();
+        PyObject *t1Obj = py::cast<py::object> (t[1])().ptr();
         T t0, t1;
         if (V2<typename T::BaseType>::convert (t0Obj, &t0) &&
             V2<typename T::BaseType>::convert (t1Obj, &t1))
@@ -92,8 +91,8 @@ static Box<T> * box2TupleConstructor1(const tuple &t)
         else
         {
             T point;
-            point.x = extract<double>(t[0]);
-            point.y = extract<double>(t[1]);
+            point.x = py::cast<double>(t[0]);
+            point.y = py::cast<double>(t[1]);
             return new Box<T>(point);
         }
     }
@@ -102,13 +101,13 @@ static Box<T> * box2TupleConstructor1(const tuple &t)
 }
 
 template <class T>
-static Box<T> * box2TupleConstructor2(const tuple &t0, const tuple &t1)
+static Box<T> * box2TupleConstructor2(const py::tuple &t0, const py::tuple &t1)
 {
-    if(t0.attr("__len__")() == 2 && t1.attr("__len__")() == 2)
+    if(py::cast<int>(t0.attr("__len__")()) == 2 && py::cast<int>(t1.attr("__len__")()) == 2)
     {
         T point0, point1;
-        point0.x = extract<double>(t0[0]); point0.y = extract<double>(t0[1]);
-        point1.x = extract<double>(t1[0]); point1.y = extract<double>(t1[1]);
+        point0.x = py::cast<double>(t0[0]); point0.y = py::cast<double>(t0[1]);
+        point1.x = py::cast<double>(t1[0]); point1.y = py::cast<double>(t1[1]);
         
         return new Box<T>(point0, point1);
     }
@@ -127,28 +126,28 @@ static Box<T> *boxConstructor(const Box<S> &box)
 }
 
 template <class T>
-static Box<T> * box3TupleConstructor1(const tuple &t)
+static Box<T> * box3TupleConstructor1(const py::tuple &t)
 {
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
         // The constructor was called like this:
         // Box3f ((1,2,3))
 
         T point;
-        point.x = extract<double>(t[0]);
-        point.y = extract<double>(t[1]);
-        point.z = extract<double>(t[2]);
+        point.x = py::cast<double>(t[0]);
+        point.y = py::cast<double>(t[1]);
+        point.z = py::cast<double>(t[2]);
         return new Box<T>(point);
     }
 
-    else if (t.attr("__len__")() == 2)
+    else if (py::cast<int>(t.attr("__len__")()) == 2)
     {
         // The constructor was called like this:
         // Box3f ((V3f(1,2,3), V3f(4,5,6))) or
         // Box3f (((1,2,3), (4,5,6)))
 
-        PyObject *t0Obj = extract <object> (t[0])().ptr();
-        PyObject *t1Obj = extract <object> (t[1])().ptr();
+        PyObject *t0Obj = py::cast <py::object> (t[0])().ptr();
+        PyObject *t1Obj = py::cast <py::object> (t[1])().ptr();
         T t0, t1;
         if (V3<typename T::BaseType>::convert (t0Obj, &t0) &&
             V3<typename T::BaseType>::convert (t1Obj, &t1))
@@ -164,18 +163,18 @@ static Box<T> * box3TupleConstructor1(const tuple &t)
 }
 
 template <class T>
-static Box<T> * box3TupleConstructor2(const tuple &t0, const tuple &t1)
+static Box<T> * box3TupleConstructor2(const py::tuple &t0, const py::tuple &t1)
 {
-    if(t0.attr("__len__")() == 3 && t1.attr("__len__")() == 3)
+    if(py::cast<int>(t0.attr("__len__")()) == 3 && py::cast<int>(t1.attr("__len__")()) == 3)
     {
         T point0, point1;
-        point0.x = extract<double>(t0[0]); 
-        point0.y = extract<double>(t0[1]);
-        point0.z = extract<double>(t0[2]);
+        point0.x = py::cast<double>(t0[0]); 
+        point0.y = py::cast<double>(t0[1]);
+        point0.z = py::cast<double>(t0[2]);
         
-        point1.x = extract<double>(t1[0]); 
-        point1.y = extract<double>(t1[1]);
-        point1.z = extract<double>(t1[2]);
+        point1.x = py::cast<double>(t1[0]); 
+        point1.y = py::cast<double>(t1[1]);
+        point1.z = py::cast<double>(t1[2]);
         
         return new Box<T>(point0, point1);
     }
@@ -187,7 +186,8 @@ template <class T>
 static std::string Box2_repr(const Box<T> &box)
 {
     std::stringstream stream;
-    typename boost::python::return_by_value::apply <T>::type converter;
+    /*
+    typename py::return_by_value::apply <T>::type converter;
 
     PyObject *minObj = converter (box.min);
     PyObject *minReprObj = PyObject_Repr (minObj);
@@ -202,7 +202,7 @@ static std::string Box2_repr(const Box<T> &box)
     Py_DECREF (maxObj);
 
     stream << BoxName<T>::value << "(" << minReprStr << ", " << maxReprStr << ")";
-    
+    */
     return stream.str();
 }
 
@@ -210,7 +210,8 @@ template <class T>
 static std::string Box3_repr(const Box<T> &box)
 {
     std::stringstream stream;
-    typename boost::python::return_by_value::apply <T>::type converter;
+    /*
+    typename py::return_by_value::apply <T>::type converter;
 
     PyObject *minObj = converter (box.min);
     PyObject *minReprObj = PyObject_Repr (minObj);
@@ -225,7 +226,7 @@ static std::string Box3_repr(const Box<T> &box)
     Py_DECREF (maxObj);
 
     stream << BoxName<T>::value << "(" << minReprStr << ", " << maxReprStr << ")";
-    
+    */
     return stream.str();
 }
 
@@ -318,30 +319,32 @@ box_intersects(IMATH_NAMESPACE::Box<T>& box, const PyImath::FixedArray<T>& point
 }
 
 template <class T>
-class_<IMATH_NAMESPACE::Box<T> >
-register_Box2()
+py::class_<IMATH_NAMESPACE::Box<T> >
+register_Box2(py::module &m)
 {
     void (IMATH_NAMESPACE::Box<T>::*extendBy1)(const T&)              = &IMATH_NAMESPACE::Box<T>::extendBy;
     void (IMATH_NAMESPACE::Box<T>::*extendBy2)(const IMATH_NAMESPACE::Box<T>&)  = &IMATH_NAMESPACE::Box<T>::extendBy;
     bool (IMATH_NAMESPACE::Box<T>::*intersects1)(const T&) const              = &IMATH_NAMESPACE::Box<T>::intersects;
     bool (IMATH_NAMESPACE::Box<T>::*intersects2)(const IMATH_NAMESPACE::Box<T>&) const  = &IMATH_NAMESPACE::Box<T>::intersects;
     const char *name = BoxName<T>::value;
-    class_<Box<T> > box_class(name);
+    py::class_<Box<T> > box_class(m, name);
     box_class
-        .def(init<>("Box() create empty box") )
-        .def(init<T>("Box(point)create box containing the given point") )
-        .def(init<T,T>("Box(point,point) create box continaing min and max") )
-        .def("__init__", make_constructor(box2TupleConstructor1<T>), "Box(point) where point is a python tuple")
-        .def("__init__", make_constructor(box2TupleConstructor2<T>), "Box(point,point) where point is a python tuple")
-        .def("__init__", make_constructor(boxConstructor<T, IMATH_NAMESPACE::V2f>))
-        .def("__init__", make_constructor(boxConstructor<T, IMATH_NAMESPACE::V2d>))
-        .def("__init__", make_constructor(boxConstructor<T, IMATH_NAMESPACE::V2i>))
+        .def(py::init<>(/*"Box() create empty box"*/) )
+        .def(py::init<T>(/*"Box(point)create box containing the given point"*/) )
+        .def(py::init<T,T>(/*"Box(point,point) create box continaing min and max"*/) )
+        .def("__init__", box2TupleConstructor1<T>, "Box(point) where point is a python tuple")
+        .def("__init__", box2TupleConstructor2<T>, "Box(point,point) where point is a python tuple")
+        .def("__init__", boxConstructor<T, IMATH_NAMESPACE::V2f>)
+        .def("__init__", boxConstructor<T, IMATH_NAMESPACE::V2d>)
+        .def("__init__", boxConstructor<T, IMATH_NAMESPACE::V2i>)
         .def_readwrite("min",&Box<T>::min)
         .def_readwrite("max",&Box<T>::max)
         .def("min", &boxMin<T>)
         .def("max", &boxMax<T>)
+        /*
         .def(self == self)
         .def(self != self)
+        */
         .def("__repr__", &Box2_repr<T>)
         .def("makeEmpty",&Box<T>::makeEmpty,"makeEmpty() make the box empty")
         .def("makeInfinite",&Box<T>::makeInfinite,"makeInfinite() make the box cover all space")
@@ -380,32 +383,34 @@ imulM44 (IMATH_NAMESPACE::Box<T> &b, const Matrix44<U> &m)
 }
 
 template <class T>
-class_<IMATH_NAMESPACE::Box<T> >
-register_Box3()
+py::class_<IMATH_NAMESPACE::Box<T> >
+register_Box3(py::module &m)
 {
     void (IMATH_NAMESPACE::Box<T>::*extendBy1)(const T&)              = &IMATH_NAMESPACE::Box<T>::extendBy;
     void (IMATH_NAMESPACE::Box<T>::*extendBy2)(const IMATH_NAMESPACE::Box<T>&)  = &IMATH_NAMESPACE::Box<T>::extendBy;
     bool (IMATH_NAMESPACE::Box<T>::*intersects1)(const T&) const              = &IMATH_NAMESPACE::Box<T>::intersects;
     bool (IMATH_NAMESPACE::Box<T>::*intersects2)(const IMATH_NAMESPACE::Box<T>&) const  = &IMATH_NAMESPACE::Box<T>::intersects;
     const char *name = BoxName<T>::value;
-    class_<Box<T> > box_class(name);
+    py::class_<Box<T> > box_class(m, name);
     box_class
-        .def(init<>("Box() create empty box") )
-        .def(init<T>("Box(point)create box containing the given point") )
-        .def(init<T,T>("Box(point,point) create box continaing min and max") )
-        .def("__init__", make_constructor(box3TupleConstructor1<T>), "Box(point) where point is a python tuple")
-        .def("__init__", make_constructor(box3TupleConstructor2<T>), "Box(point,point) where point is a python tuple")
-        .def("__init__", make_constructor(boxConstructor<T, IMATH_NAMESPACE::V3f>))
-        .def("__init__", make_constructor(boxConstructor<T, IMATH_NAMESPACE::V3d>))
-        .def("__init__", make_constructor(boxConstructor<T, IMATH_NAMESPACE::V3i>))
+        .def(py::init<>(/*"Box() create empty box"*/) )
+        .def(py::init<T>(/*"Box(point)create box containing the given point"*/) )
+        .def(py::init<T,T>(/*"Box(point,point) create box continaing min and max"*/) )
+        .def("__init__", box3TupleConstructor1<T>, "Box(point) where point is a python tuple")
+        .def("__init__", box3TupleConstructor2<T>, "Box(point,point) where point is a python tuple")
+        .def("__init__", boxConstructor<T, IMATH_NAMESPACE::V3f>)
+        .def("__init__", boxConstructor<T, IMATH_NAMESPACE::V3d>)
+        .def("__init__", boxConstructor<T, IMATH_NAMESPACE::V3i>)
         .def_readwrite("min",&Box<T>::min)
         .def_readwrite("max",&Box<T>::max)
+        /*
         .def(self == self)
         .def(self != self)
+        */
         .def("__mul__", &mulM44<T, float>)
         .def("__mul__", &mulM44<T, double>)
-        .def("__imul__", &imulM44<T, float>,return_internal_reference<>())
-        .def("__imul__", &imulM44<T, double>,return_internal_reference<>())
+        .def("__imul__", &imulM44<T, float>, py::return_value_policy::reference_internal)
+        .def("__imul__", &imulM44<T, double>, py::return_value_policy::reference_internal)
         .def("min", &boxMin<T>)
         .def("max", &boxMax<T>)
         .def("__repr__", &Box3_repr<T>)
@@ -433,13 +438,13 @@ register_Box3()
 }
 
 
-template PYIMATH_EXPORT class_<IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V2s> > register_Box2<IMATH_NAMESPACE::V2s>();
-template PYIMATH_EXPORT class_<IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V2i> > register_Box2<IMATH_NAMESPACE::V2i>();
-template PYIMATH_EXPORT class_<IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V2f> > register_Box2<IMATH_NAMESPACE::V2f>();
-template PYIMATH_EXPORT class_<IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V2d> > register_Box2<IMATH_NAMESPACE::V2d>();
-template PYIMATH_EXPORT class_<IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V3s> > register_Box3<IMATH_NAMESPACE::V3s>();
-template PYIMATH_EXPORT class_<IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V3i> > register_Box3<IMATH_NAMESPACE::V3i>();
-template PYIMATH_EXPORT class_<IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V3f> > register_Box3<IMATH_NAMESPACE::V3f>();
-template PYIMATH_EXPORT class_<IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V3d> > register_Box3<IMATH_NAMESPACE::V3d>();
+template PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V2s> > register_Box2<IMATH_NAMESPACE::V2s>(py::module &m);
+template PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V2i> > register_Box2<IMATH_NAMESPACE::V2i>(py::module &m);
+template PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V2f> > register_Box2<IMATH_NAMESPACE::V2f>(py::module &m);
+template PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V2d> > register_Box2<IMATH_NAMESPACE::V2d>(py::module &m);
+template PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V3s> > register_Box3<IMATH_NAMESPACE::V3s>(py::module &m);
+template PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V3i> > register_Box3<IMATH_NAMESPACE::V3i>(py::module &m);
+template PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V3f> > register_Box3<IMATH_NAMESPACE::V3f>(py::module &m);
+template PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V3d> > register_Box3<IMATH_NAMESPACE::V3d>(py::module &m);
 
 }

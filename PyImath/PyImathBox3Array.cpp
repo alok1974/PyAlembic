@@ -36,12 +36,12 @@
 #include <PyImathExport.h>
 
 namespace PyImath {
-using namespace boost::python;
 
-template PYIMATH_EXPORT class_<FixedArray<IMATH_NAMESPACE::Box3s> > register_BoxArray<IMATH_NAMESPACE::V3s>();
-template PYIMATH_EXPORT class_<FixedArray<IMATH_NAMESPACE::Box3i> > register_BoxArray<IMATH_NAMESPACE::V3i>();
-template PYIMATH_EXPORT class_<FixedArray<IMATH_NAMESPACE::Box3f> > register_BoxArray<IMATH_NAMESPACE::V3f>();
-template PYIMATH_EXPORT class_<FixedArray<IMATH_NAMESPACE::Box3d> > register_BoxArray<IMATH_NAMESPACE::V3d>();
+
+template PYIMATH_EXPORT py::class_<FixedArray<IMATH_NAMESPACE::Box3s> > register_BoxArray<IMATH_NAMESPACE::V3s>(py::module &m);
+template PYIMATH_EXPORT py::class_<FixedArray<IMATH_NAMESPACE::Box3i> > register_BoxArray<IMATH_NAMESPACE::V3i>(py::module &m);
+template PYIMATH_EXPORT py::class_<FixedArray<IMATH_NAMESPACE::Box3f> > register_BoxArray<IMATH_NAMESPACE::V3f>(py::module &m);
+template PYIMATH_EXPORT py::class_<FixedArray<IMATH_NAMESPACE::Box3d> > register_BoxArray<IMATH_NAMESPACE::V3d>(py::module &m);
 
 template<> PYIMATH_EXPORT IMATH_NAMESPACE::Box3s PyImath::FixedArrayDefaultValue<IMATH_NAMESPACE::Box3s>::value() { return IMATH_NAMESPACE::Box3s(); }
 template<> PYIMATH_EXPORT IMATH_NAMESPACE::Box3i PyImath::FixedArrayDefaultValue<IMATH_NAMESPACE::Box3i>::value() { return IMATH_NAMESPACE::Box3i(); }

@@ -35,7 +35,7 @@
 #ifndef _PyImathFixedVArray_h_
 #define _PyImathFixedVArray_h_
 
-#include <boost/python.hpp>
+#include "python_include.h"
 #include <boost/any.hpp>
 #include <vector>
 #include <PyImathFixedArray.h>
@@ -125,7 +125,7 @@ class FixedVArray
 
     // ----------------
 
-    static boost::python::class_<FixedVArray<T> > register_(const char* doc);
+    static py::class_<FixedVArray<T> > register_(py::module &m, const char* doc);
 
     // Instantiations of fixed variable arrays must implement this static member.
     static const char* name();

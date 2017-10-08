@@ -32,17 +32,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-
-#include <Python.h>
-#include <boost/python.hpp>
-#include <boost/python/make_constructor.hpp>
-#include <boost/format.hpp>
+#include "python_include.h"
 #include <ImathVec.h>
 #include <ImathQuat.h>
 #include <ImathEuler.h>
 #include <ImathFun.h>
 #include <ImathMatrixAlgo.h>
-#include <PyIexExport.h>
 #include <PyImathFixedArray.h>
 #include <PyImath.h>
 #include <PyImathExport.h>
@@ -60,11 +55,10 @@
 #include <PyImathRandom.h>
 #include <PyImathShear.h>
 #include <PyImathMathExc.h>
-#include <PyImathAutovectorize.h>
+//#include <PyImathAutovectorize.h>
 #include <PyImathStringArrayRegister.h>
-#include <PyIex.h>
 
-using namespace boost::python;
+
 using namespace PyImath;
 
 namespace {
@@ -81,64 +75,64 @@ computeBoundingBox(const PyImath::FixedArray<IMATH_NAMESPACE::Vec3<T> >& positio
 }
 
 IMATH_NAMESPACE::M44d
-procrustes1 (PyObject* from_input, 
-             PyObject* to_input,
-             PyObject* weights_input = 0,
-             bool doScale = false)
+procrustes1(PyObject* from_input,
+    PyObject* to_input,
+    PyObject* weights_input = 0,
+    bool doScale = false)
 {
     // Verify the sequences:
-    if (!PySequence_Check (from_input))
+    if (!PySequence_Check(from_input))
     {
-        PyErr_SetString (PyExc_TypeError, "Expected a sequence type for 'from'");
-        boost::python::throw_error_already_set();
-    }
-        
-    if (!PySequence_Check (to_input))
-    {
-        PyErr_SetString (PyExc_TypeError, "Expected a sequence type for 'to'");
-        boost::python::throw_error_already_set();
+        PyErr_SetString(PyExc_TypeError, "Expected a sequence type for 'from'");
+        throw py::error_already_set();
     }
 
-    bool useWeights = PySequence_Check (weights_input);
+    if (!PySequence_Check(to_input))
+    {
+        PyErr_SetString(PyExc_TypeError, "Expected a sequence type for 'to'");
+        throw py::error_already_set();
+    }
+
+    bool useWeights = PySequence_Check(weights_input);
 
     // Now verify the lengths:
-    const size_t n = PySequence_Length (from_input);
-    if (n != PySequence_Length (to_input) ||
-        (useWeights && n != PySequence_Length (weights_input)))
+    const size_t n = PySequence_Length(from_input);
+    if (n != PySequence_Length(to_input) ||
+        (useWeights && n != PySequence_Length(weights_input)))
     {
-        PyErr_SetString (PyExc_TypeError, "'from, 'to', and 'weights' should all have the same lengths.");
-        boost::python::throw_error_already_set();
+        PyErr_SetString(PyExc_TypeError, "'from, 'to', and 'weights' should all have the same lengths.");
+        throw py::error_already_set();
     }
 
-    std::vector<IMATH_NAMESPACE::V3d> from;  from.reserve (n);
-    std::vector<IMATH_NAMESPACE::V3d> to;    to.reserve (n);
-    std::vector<double> weights;   weights.reserve (n);
+    std::vector<IMATH_NAMESPACE::V3d> from;  from.reserve(n);
+    std::vector<IMATH_NAMESPACE::V3d> to;    to.reserve(n);
+    std::vector<double> weights;   weights.reserve(n);
 
     for (size_t i = 0; i < n; ++i)
     {
-        PyObject* f = PySequence_GetItem (from_input, i);
-        PyObject* t = PySequence_GetItem (to_input, i);
+        PyObject* f = PySequence_GetItem(from_input, i);
+        PyObject* t = PySequence_GetItem(to_input, i);
         PyObject* w = 0;
         if (useWeights)
-            w = PySequence_GetItem (weights_input, i);
+            w = PySequence_GetItem(weights_input, i);
 
         if (f == 0 || t == 0 || (useWeights && w == 0))
         {
-            PyErr_SetString (PyExc_TypeError,
-                             "Missing element in array");
-            boost::python::throw_error_already_set();
+            PyErr_SetString(PyExc_TypeError,
+                "Missing element in array");
+            throw py::error_already_set();
         }
 
-        from.push_back (boost::python::extract<IMATH_NAMESPACE::V3d> (f));
-        to.push_back (boost::python::extract<IMATH_NAMESPACE::V3d> (t));
+        from.push_back(py::cast<IMATH_NAMESPACE::V3d>(f));
+        to.push_back(py::cast<IMATH_NAMESPACE::V3d>(t));
         if (useWeights)
-            weights.push_back (boost::python::extract<double> (w));
+            weights.push_back(py::cast<double>(w));
     }
 
     if (useWeights)
-        return IMATH_NAMESPACE::procrustesRotationAndTranslation (&from[0], &to[0], &weights[0], n, doScale);
+        return IMATH_NAMESPACE::procrustesRotationAndTranslation(&from[0], &to[0], &weights[0], n, doScale);
     else
-        return IMATH_NAMESPACE::procrustesRotationAndTranslation (&from[0], &to[0], n, doScale);
+        return IMATH_NAMESPACE::procrustesRotationAndTranslation(&from[0], &to[0], n, doScale);
 }
 
 FixedArray2D<int> rangeX(int sizeX, int sizeY)
@@ -161,17 +155,17 @@ FixedArray2D<int> rangeY(int sizeX, int sizeY)
 
 }
 
-BOOST_PYTHON_MODULE(imath)
+PYBIND11_MODULE(imath, m)
 {
-    handle<> iex(PyImport_ImportModule("iex"));
-    if (PyErr_Occurred()) boost::python::throw_error_already_set();
-    
-    scope().attr("iex") = iex;
-    scope().attr("__doc__") = "Imath module";
+    py::handle iex(PyImport_ImportModule("iex"));
+    if (PyErr_Occurred()) throw py::error_already_set();
 
-    register_basicTypes();
+    m["iex"] = iex;
+    m.doc() = "Imath module";
 
-    class_<IntArray2D> iclass2D = IntArray2D::register_("IntArray2D","Fixed length array of ints");
+    register_basicTypes(m);
+
+    auto iclass2D = IntArray2D::register_(m, "IntArray2D", "Fixed length array of ints");
     add_arithmetic_math_functions(iclass2D);
     add_mod_math_functions(iclass2D);
     add_comparison_functions(iclass2D);
@@ -179,10 +173,10 @@ BOOST_PYTHON_MODULE(imath)
     add_explicit_construction_from_type<float>(iclass2D);
     add_explicit_construction_from_type<double>(iclass2D);
 
-    class_<IntMatrix> imclass = IntMatrix::register_("IntMatrix","Fixed size matrix of ints");
+    py::class_<IntMatrix> imclass = IntMatrix::register_(m, "IntMatrix", "Fixed size matrix of ints");
     add_arithmetic_math_functions(imclass);
 
-    class_<FloatArray2D> fclass2D = FloatArray2D::register_("FloatArray2D","Fixed length 2D array of floats");
+    py::class_<FloatArray2D> fclass2D = FloatArray2D::register_(m, "FloatArray2D", "Fixed length 2D array of floats");
     add_arithmetic_math_functions(fclass2D);
     add_pow_math_functions(fclass2D);
     add_comparison_functions(fclass2D);
@@ -190,11 +184,11 @@ BOOST_PYTHON_MODULE(imath)
     add_explicit_construction_from_type<int>(fclass2D);
     add_explicit_construction_from_type<double>(fclass2D);
 
-    class_<FloatMatrix> fmclass = FloatMatrix::register_("FloatMatrix","Fixed size matrix of floats");
+    py::class_<FloatMatrix> fmclass = FloatMatrix::register_(m, "FloatMatrix", "Fixed size matrix of floats");
     add_arithmetic_math_functions(fmclass);
     add_pow_math_functions(fmclass);
 
-    class_<DoubleArray2D> dclass2D = DoubleArray2D::register_("DoubleArray2D","Fixed length array of doubles");
+    py::class_<DoubleArray2D> dclass2D = DoubleArray2D::register_(m, "DoubleArray2D", "Fixed length array of doubles");
     add_arithmetic_math_functions(dclass2D);
     add_pow_math_functions(dclass2D);
     add_comparison_functions(dclass2D);
@@ -202,24 +196,24 @@ BOOST_PYTHON_MODULE(imath)
     add_explicit_construction_from_type<int>(dclass2D);
     add_explicit_construction_from_type<float>(dclass2D);
 
-    class_<DoubleMatrix> dmclass = DoubleMatrix::register_("DoubleMatrix","Fixed size matrix of doubles");
+    py::class_<DoubleMatrix> dmclass = DoubleMatrix::register_(m, "DoubleMatrix", "Fixed size matrix of doubles");
     add_arithmetic_math_functions(dmclass);
     add_pow_math_functions(dmclass);
 
-    def("rangeX", &rangeX);
-    def("rangeY", &rangeY);
+    m.def("rangeX", &rangeX);
+    m.def("rangeY", &rangeY);
 
     //
     //  Vec2
     //
-    register_Vec2<short>();
-    register_Vec2<int>();
-    register_Vec2<float>();
-    register_Vec2<double>();
-    class_<FixedArray<IMATH_NAMESPACE::V2s> > v2s_class = register_Vec2Array<short>();
-    class_<FixedArray<IMATH_NAMESPACE::V2i> > v2i_class = register_Vec2Array<int>();
-    class_<FixedArray<IMATH_NAMESPACE::V2f> > v2f_class = register_Vec2Array<float>();
-    class_<FixedArray<IMATH_NAMESPACE::V2d> > v2d_class = register_Vec2Array<double>();
+    register_Vec2<short>(m);
+    register_Vec2<int>(m);
+    register_Vec2<float>(m);
+    register_Vec2<double>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::V2s> > v2s_class = register_Vec2Array<short>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::V2i> > v2i_class = register_Vec2Array<int>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::V2f> > v2f_class = register_Vec2Array<float>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::V2d> > v2d_class = register_Vec2Array<double>(m);
     add_explicit_construction_from_type<IMATH_NAMESPACE::V2f>(v2i_class);
     add_explicit_construction_from_type<IMATH_NAMESPACE::V2d>(v2i_class);
     add_explicit_construction_from_type<IMATH_NAMESPACE::V2i>(v2f_class);
@@ -227,19 +221,18 @@ BOOST_PYTHON_MODULE(imath)
     add_explicit_construction_from_type<IMATH_NAMESPACE::V2i>(v2d_class);
     add_explicit_construction_from_type<IMATH_NAMESPACE::V2f>(v2d_class);
 
-
     //
     //  Vec3
     //
-    register_Vec3<unsigned char>();
-    register_Vec3<short>();
-    register_Vec3<int>();
-    register_Vec3<float>();
-    register_Vec3<double>();
-    class_<FixedArray<IMATH_NAMESPACE::V3s> > v3s_class = register_Vec3Array<short>();
-    class_<FixedArray<IMATH_NAMESPACE::V3i> > v3i_class = register_Vec3Array<int>();
-    class_<FixedArray<IMATH_NAMESPACE::V3f> > v3f_class = register_Vec3Array<float>();
-    class_<FixedArray<IMATH_NAMESPACE::V3d> > v3d_class = register_Vec3Array<double>();
+    register_Vec3<unsigned char>(m);
+    register_Vec3<short>(m);
+    register_Vec3<int>(m);
+    register_Vec3<float>(m);
+    register_Vec3<double>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::V3s> > v3s_class = register_Vec3Array<short>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::V3i> > v3i_class = register_Vec3Array<int>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::V3f> > v3f_class = register_Vec3Array<float>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::V3d> > v3d_class = register_Vec3Array<double>(m);
     add_explicit_construction_from_type<IMATH_NAMESPACE::V3f>(v3i_class);
     add_explicit_construction_from_type<IMATH_NAMESPACE::V3d>(v3i_class);
     add_explicit_construction_from_type<IMATH_NAMESPACE::V3i>(v3f_class);
@@ -250,15 +243,15 @@ BOOST_PYTHON_MODULE(imath)
     //
     //  Vec4
     //
-    register_Vec4<unsigned char>();
-    register_Vec4<short>();
-    register_Vec4<int>();
-    register_Vec4<float>();
-    register_Vec4<double>();
-    class_<FixedArray<IMATH_NAMESPACE::V4s> > v4s_class = register_Vec4Array<short>();
-    class_<FixedArray<IMATH_NAMESPACE::V4i> > v4i_class = register_Vec4Array<int>();
-    class_<FixedArray<IMATH_NAMESPACE::V4f> > v4f_class = register_Vec4Array<float>();
-    class_<FixedArray<IMATH_NAMESPACE::V4d> > v4d_class = register_Vec4Array<double>();
+    register_Vec4<unsigned char>(m);
+    register_Vec4<short>(m);
+    register_Vec4<int>(m);
+    register_Vec4<float>(m);
+    register_Vec4<double>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::V4s> > v4s_class = register_Vec4Array<short>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::V4i> > v4i_class = register_Vec4Array<int>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::V4f> > v4f_class = register_Vec4Array<float>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::V4d> > v4d_class = register_Vec4Array<double>(m);
     add_explicit_construction_from_type<IMATH_NAMESPACE::V4f>(v4i_class);
     add_explicit_construction_from_type<IMATH_NAMESPACE::V4d>(v4i_class);
     add_explicit_construction_from_type<IMATH_NAMESPACE::V4i>(v4f_class);
@@ -268,132 +261,131 @@ BOOST_PYTHON_MODULE(imath)
     //
     //  Quat
     //
-    register_Quat<float>();
-    register_Quat<double>();
-    class_<FixedArray<IMATH_NAMESPACE::Quatf> > quatf_class = register_QuatArray<float>();
-    class_<FixedArray<IMATH_NAMESPACE::Quatd> > quatd_class = register_QuatArray<double>();
+    register_Quat<float>(m);
+    register_Quat<double>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::Quatf> > quatf_class = register_QuatArray<float>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::Quatd> > quatd_class = register_QuatArray<double>(m);
     add_explicit_construction_from_type<IMATH_NAMESPACE::Quatd>(quatf_class);
     add_explicit_construction_from_type<IMATH_NAMESPACE::Quatf>(quatd_class);
 
     //
     // Euler
     //
-    register_Euler<float>();
-    register_Euler<double>();
-    class_<FixedArray<IMATH_NAMESPACE::Eulerf> > eulerf_class = register_EulerArray<float>();
-    class_<FixedArray<IMATH_NAMESPACE::Eulerd> > eulerd_class = register_EulerArray<double>();
+    register_Euler<float>(m);
+    register_Euler<double>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::Eulerf> > eulerf_class = register_EulerArray<float>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::Eulerd> > eulerd_class = register_EulerArray<double>(m);
     add_explicit_construction_from_type<IMATH_NAMESPACE::Eulerd>(eulerf_class);
     add_explicit_construction_from_type<IMATH_NAMESPACE::Eulerf>(eulerd_class);
 
     //
     // Box2
     //
-    register_Box2<IMATH_NAMESPACE::V2s>();
-    register_Box2<IMATH_NAMESPACE::V2i>();
-    register_Box2<IMATH_NAMESPACE::V2f>();
-    register_Box2<IMATH_NAMESPACE::V2d>();
-    class_<FixedArray<IMATH_NAMESPACE::Box2s> > b2s_class = register_BoxArray<IMATH_NAMESPACE::V2s>();
-    class_<FixedArray<IMATH_NAMESPACE::Box2i> > b2i_class = register_BoxArray<IMATH_NAMESPACE::V2i>();
-    class_<FixedArray<IMATH_NAMESPACE::Box2f> > b2f_class = register_BoxArray<IMATH_NAMESPACE::V2f>();
-    class_<FixedArray<IMATH_NAMESPACE::Box2d> > b2d_class = register_BoxArray<IMATH_NAMESPACE::V2d>();
+    register_Box2<IMATH_NAMESPACE::V2s>(m);
+    register_Box2<IMATH_NAMESPACE::V2i>(m);
+    register_Box2<IMATH_NAMESPACE::V2f>(m);
+    register_Box2<IMATH_NAMESPACE::V2d>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::Box2s> > b2s_class = register_BoxArray<IMATH_NAMESPACE::V2s>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::Box2i> > b2i_class = register_BoxArray<IMATH_NAMESPACE::V2i>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::Box2f> > b2f_class = register_BoxArray<IMATH_NAMESPACE::V2f>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::Box2d> > b2d_class = register_BoxArray<IMATH_NAMESPACE::V2d>(m);
 
     //
     // Box3
     //
-    register_Box3<IMATH_NAMESPACE::V3s>();
-    register_Box3<IMATH_NAMESPACE::V3i>();
-    register_Box3<IMATH_NAMESPACE::V3f>();
-    register_Box3<IMATH_NAMESPACE::V3d>();
-    class_<FixedArray<IMATH_NAMESPACE::Box3s> > b3s_class = register_BoxArray<IMATH_NAMESPACE::V3s>();
-    class_<FixedArray<IMATH_NAMESPACE::Box3i> > b3i_class = register_BoxArray<IMATH_NAMESPACE::V3i>();
-    class_<FixedArray<IMATH_NAMESPACE::Box3f> > b3f_class = register_BoxArray<IMATH_NAMESPACE::V3f>();
-    class_<FixedArray<IMATH_NAMESPACE::Box3d> > b3d_class = register_BoxArray<IMATH_NAMESPACE::V3d>();
+    register_Box3<IMATH_NAMESPACE::V3s>(m);
+    register_Box3<IMATH_NAMESPACE::V3i>(m);
+    register_Box3<IMATH_NAMESPACE::V3f>(m);
+    register_Box3<IMATH_NAMESPACE::V3d>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::Box3s> > b3s_class = register_BoxArray<IMATH_NAMESPACE::V3s>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::Box3i> > b3i_class = register_BoxArray<IMATH_NAMESPACE::V3i>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::Box3f> > b3f_class = register_BoxArray<IMATH_NAMESPACE::V3f>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::Box3d> > b3d_class = register_BoxArray<IMATH_NAMESPACE::V3d>(m);
 
     //
     // Matrix33/44
     //
-    register_Matrix33<float>();
-    register_Matrix33<double>();
-    register_Matrix44<float>();
-    register_Matrix44<double>();
+    register_Matrix33<float>(m);
+    register_Matrix33<double>(m);
+    register_Matrix44<float>(m);
+    register_Matrix44<double>(m);
 
     //
     // M33/44Array
     //
-    class_<FixedArray<IMATH_NAMESPACE::M44d> > m44d_class = register_M44Array<double>();
-    class_<FixedArray<IMATH_NAMESPACE::M44f> > m44f_class = register_M44Array<float>();
+    py::class_<FixedArray<IMATH_NAMESPACE::M44d> > m44d_class = register_M44Array<double>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::M44f> > m44f_class = register_M44Array<float>(m);
     add_explicit_construction_from_type< IMATH_NAMESPACE::Matrix44<double> >(m44d_class);
-    add_explicit_construction_from_type< IMATH_NAMESPACE::Matrix44<float> > (m44f_class);
+    add_explicit_construction_from_type< IMATH_NAMESPACE::Matrix44<float> >(m44f_class);
 
-    class_<FixedArray<IMATH_NAMESPACE::M33d> > m33d_class = register_M33Array<double>();
-    class_<FixedArray<IMATH_NAMESPACE::M33f> > m33f_class = register_M33Array<float>();
+    py::class_<FixedArray<IMATH_NAMESPACE::M33d> > m33d_class = register_M33Array<double>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::M33f> > m33f_class = register_M33Array<float>(m);
     add_explicit_construction_from_type< IMATH_NAMESPACE::Matrix33<double> >(m33d_class);
-    add_explicit_construction_from_type< IMATH_NAMESPACE::Matrix33<float> > (m33f_class);
+    add_explicit_construction_from_type< IMATH_NAMESPACE::Matrix33<float> >(m33f_class);
 
     //
     // String Array
     //
-    register_StringArrays();
+    register_StringArrays(m);
 
     //
     // Color3/4
     //
-    register_Color3<unsigned char>();
-    register_Color3<float>();
-    register_Color4<unsigned char>();
-    register_Color4<float>();
+    register_Color3<unsigned char>(m);
+    register_Color3<float>(m);
+    register_Color4<unsigned char>(m);
+    register_Color4<float>(m);
 
     //
     // C3/4Array
     //
-    class_<FixedArray<IMATH_NAMESPACE::Color3f> > c3f_class = register_Color3Array<float>();
-    class_<FixedArray<IMATH_NAMESPACE::Color3c> > c3c_class = register_Color3Array<unsigned char>();
+    py::class_<FixedArray<IMATH_NAMESPACE::Color3f> > c3f_class = register_Color3Array<float>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::Color3c> > c3c_class = register_Color3Array<unsigned char>(m);
     add_explicit_construction_from_type<IMATH_NAMESPACE::V3f>(c3f_class);
     add_explicit_construction_from_type<IMATH_NAMESPACE::V3d>(c3f_class);
 
-    class_<FixedArray<IMATH_NAMESPACE::Color4f> > c4f_class = register_Color4Array<float>();
-    class_<FixedArray<IMATH_NAMESPACE::Color4c> > c4c_class = register_Color4Array<unsigned char>();
+    py::class_<FixedArray<IMATH_NAMESPACE::Color4f> > c4f_class = register_Color4Array<float>(m);
+    py::class_<FixedArray<IMATH_NAMESPACE::Color4c> > c4c_class = register_Color4Array<unsigned char>(m);
 
     //
     // Color4Array
     //
-    register_Color4Array2D<float>();
-    register_Color4Array2D<unsigned char>();
+    register_Color4Array2D<float>(m);
+    register_Color4Array2D<unsigned char>(m);
 
     //
     // Frustum
     //
-    register_Frustum<float>();
-    register_Frustum<double>();
-    register_FrustumTest<float>();
-    register_FrustumTest<double>();
+    register_Frustum<float>(m);
+    register_Frustum<double>(m);
+    register_FrustumTest<float>(m);
+    register_FrustumTest<double>(m);
 
     //
     // Plane
     //
-    register_Plane<float>();
-    register_Plane<double>();
+    register_Plane<float>(m);
+    register_Plane<double>(m);
 
     //
     // Line
     //
-    register_Line<float>();
-    register_Line<double>();
+    register_Line<float>(m);
+    register_Line<double>(m);
 
     //
     // Shear
     //
-    register_Shear<float>();
-    register_Shear<double>();
+    register_Shear<float>(m);
+    register_Shear<double>(m);
 
     //
     // Utility Functions
     //
-    register_functions();
-   
+    register_functions(m);
 
-    def("procrustesRotationAndTranslation", procrustes1, 
-        args("fromPts", "toPts", "weights", "doScale"),  // Can't use 'from' and 'to' because 'from' is a reserved keywork in Python
+    m.def("procrustesRotationAndTranslation", procrustes1,
+        //py::args("fromPts", "toPts", "weights", "doScale"),  // Can't use 'from' and 'to' because 'from' is a reserved keywork in Python
         "Computes the orthogonal transform (consisting only of rotation and translation) mapping the "
         "'fromPts' points as close as possible to the 'toPts' points in the least squares norm.  The 'fromPts' and "
         "'toPts' lists must be the same length or the function will error out.  If weights "
@@ -404,69 +396,91 @@ BOOST_PYTHON_MODULE(imath)
     //
     // Rand
     //
-    register_Rand32();
-    register_Rand48();
-    
+    register_Rand32(m);
+    register_Rand48(m);
+
     //
     // Initialize constants
     //
+    m.attr("EULER_XYZ") = IMATH_NAMESPACE::Eulerf::XYZ;
+    m.attr("EULER_XZY") = IMATH_NAMESPACE::Eulerf::XZY;
+    m.attr("EULER_YZX") = IMATH_NAMESPACE::Eulerf::YZX;
+    m.attr("EULER_YXZ") = IMATH_NAMESPACE::Eulerf::YXZ;
+    m.attr("EULER_ZXY") = IMATH_NAMESPACE::Eulerf::ZXY;
+    m.attr("EULER_ZYX") = IMATH_NAMESPACE::Eulerf::ZYX;
+    m.attr("EULER_XZX") = IMATH_NAMESPACE::Eulerf::XZX;
+    m.attr("EULER_XYX") = IMATH_NAMESPACE::Eulerf::XYX;
+    m.attr("EULER_YXY") = IMATH_NAMESPACE::Eulerf::YXY;
+    m.attr("EULER_YZY") = IMATH_NAMESPACE::Eulerf::YZY;
+    m.attr("EULER_ZYZ") = IMATH_NAMESPACE::Eulerf::ZYZ;
+    m.attr("EULER_ZXZ") = IMATH_NAMESPACE::Eulerf::ZXZ;
+    m.attr("EULER_XYZr") = IMATH_NAMESPACE::Eulerf::XYZr;
+    m.attr("EULER_XZYr") = IMATH_NAMESPACE::Eulerf::XZYr;
+    m.attr("EULER_YZXr") = IMATH_NAMESPACE::Eulerf::YZXr;
+    m.attr("EULER_YXZr") = IMATH_NAMESPACE::Eulerf::YXZr;
+    m.attr("EULER_ZXYr") = IMATH_NAMESPACE::Eulerf::ZXYr;
+    m.attr("EULER_ZYXr") = IMATH_NAMESPACE::Eulerf::ZYXr;
+    m.attr("EULER_XZXr") = IMATH_NAMESPACE::Eulerf::XZXr;
+    m.attr("EULER_XYXr") = IMATH_NAMESPACE::Eulerf::XYXr;
+    m.attr("EULER_YXYr") = IMATH_NAMESPACE::Eulerf::YXYr;
+    m.attr("EULER_YZYr") = IMATH_NAMESPACE::Eulerf::YZYr;
+    m.attr("EULER_ZYZr") = IMATH_NAMESPACE::Eulerf::ZYZr;
+    m.attr("EULER_ZXZr") = IMATH_NAMESPACE::Eulerf::ZXZr;
+    m.attr("EULER_X_AXIS") = IMATH_NAMESPACE::Eulerf::X;
+    m.attr("EULER_Y_AXIS") = IMATH_NAMESPACE::Eulerf::Y;
+    m.attr("EULER_Z_AXIS") = IMATH_NAMESPACE::Eulerf::Z;
 
-    scope().attr("EULER_XYZ")    = IMATH_NAMESPACE::Eulerf::XYZ;
-    scope().attr("EULER_XZY")    = IMATH_NAMESPACE::Eulerf::XZY;
-    scope().attr("EULER_YZX")    = IMATH_NAMESPACE::Eulerf::YZX;
-    scope().attr("EULER_YXZ")    = IMATH_NAMESPACE::Eulerf::YXZ;
-    scope().attr("EULER_ZXY")    = IMATH_NAMESPACE::Eulerf::ZXY;
-    scope().attr("EULER_ZYX")    = IMATH_NAMESPACE::Eulerf::ZYX;
-    scope().attr("EULER_XZX")    = IMATH_NAMESPACE::Eulerf::XZX;
-    scope().attr("EULER_XYX")    = IMATH_NAMESPACE::Eulerf::XYX;
-    scope().attr("EULER_YXY")    = IMATH_NAMESPACE::Eulerf::YXY;
-    scope().attr("EULER_YZY")    = IMATH_NAMESPACE::Eulerf::YZY;
-    scope().attr("EULER_ZYZ")    = IMATH_NAMESPACE::Eulerf::ZYZ;
-    scope().attr("EULER_ZXZ")    = IMATH_NAMESPACE::Eulerf::ZXZ;
-    scope().attr("EULER_XYZr")   = IMATH_NAMESPACE::Eulerf::XYZr;
-    scope().attr("EULER_XZYr")   = IMATH_NAMESPACE::Eulerf::XZYr;
-    scope().attr("EULER_YZXr")   = IMATH_NAMESPACE::Eulerf::YZXr;
-    scope().attr("EULER_YXZr")   = IMATH_NAMESPACE::Eulerf::YXZr;
-    scope().attr("EULER_ZXYr")   = IMATH_NAMESPACE::Eulerf::ZXYr;
-    scope().attr("EULER_ZYXr")   = IMATH_NAMESPACE::Eulerf::ZYXr;
-    scope().attr("EULER_XZXr")   = IMATH_NAMESPACE::Eulerf::XZXr;
-    scope().attr("EULER_XYXr")   = IMATH_NAMESPACE::Eulerf::XYXr;
-    scope().attr("EULER_YXYr")   = IMATH_NAMESPACE::Eulerf::YXYr;
-    scope().attr("EULER_YZYr")   = IMATH_NAMESPACE::Eulerf::YZYr;
-    scope().attr("EULER_ZYZr")   = IMATH_NAMESPACE::Eulerf::ZYZr;
-    scope().attr("EULER_ZXZr")   = IMATH_NAMESPACE::Eulerf::ZXZr;
-    scope().attr("EULER_X_AXIS") = IMATH_NAMESPACE::Eulerf::X;
-    scope().attr("EULER_Y_AXIS") = IMATH_NAMESPACE::Eulerf::Y;
-    scope().attr("EULER_Z_AXIS") = IMATH_NAMESPACE::Eulerf::Z;
-    
-    scope().attr("INT_MIN")      = IMATH_NAMESPACE::limits<int>::min();
-    scope().attr("INT_MAX")      = IMATH_NAMESPACE::limits<int>::max();
-    scope().attr("INT_SMALLEST") = IMATH_NAMESPACE::limits<int>::smallest();
-    scope().attr("INT_EPS")      = IMATH_NAMESPACE::limits<int>::epsilon();
+    m.attr("INT_MIN") = IMATH_NAMESPACE::limits<int>::min();
+    m.attr("INT_MAX") = IMATH_NAMESPACE::limits<int>::max();
+    m.attr("INT_SMALLEST") = IMATH_NAMESPACE::limits<int>::smallest();
+    m.attr("INT_EPS") = IMATH_NAMESPACE::limits<int>::epsilon();
 
-    scope().attr("FLT_MIN")      = IMATH_NAMESPACE::limits<float>::min();
-    scope().attr("FLT_MAX")      = IMATH_NAMESPACE::limits<float>::max();
-    scope().attr("FLT_SMALLEST") = IMATH_NAMESPACE::limits<float>::smallest();
-    scope().attr("FLT_EPS")      = IMATH_NAMESPACE::limits<float>::epsilon();
+    m.attr("FLT_MIN") = IMATH_NAMESPACE::limits<float>::min();
+    m.attr("FLT_MAX") = IMATH_NAMESPACE::limits<float>::max();
+    m.attr("FLT_SMALLEST") = IMATH_NAMESPACE::limits<float>::smallest();
+    m.attr("FLT_EPS") = IMATH_NAMESPACE::limits<float>::epsilon();
 
-    scope().attr("DBL_MIN")      = IMATH_NAMESPACE::limits<double>::min();
-    scope().attr("DBL_MAX")      = IMATH_NAMESPACE::limits<double>::max();
-    scope().attr("DBL_SMALLEST") = IMATH_NAMESPACE::limits<double>::smallest();
-    scope().attr("DBL_EPS")      = IMATH_NAMESPACE::limits<double>::epsilon();
-    
+    m.attr("DBL_MIN") = IMATH_NAMESPACE::limits<double>::min();
+    m.attr("DBL_MAX") = IMATH_NAMESPACE::limits<double>::max();
+    m.attr("DBL_SMALLEST") = IMATH_NAMESPACE::limits<double>::smallest();
+    m.attr("DBL_EPS") = IMATH_NAMESPACE::limits<double>::epsilon();
+
     //
     // Register Exceptions
     //
-    PyIex::registerExc<IMATH_NAMESPACE::NullVecExc,IEX_NAMESPACE::MathExc>("NullVecExc","imath");
-    PyIex::registerExc<IMATH_NAMESPACE::NullQuatExc,IEX_NAMESPACE::MathExc>("NullQuatExc","imath");
-    PyIex::registerExc<IMATH_NAMESPACE::SingMatrixExc,IEX_NAMESPACE::MathExc>("SingMatrixExc","imath");
-    PyIex::registerExc<IMATH_NAMESPACE::ZeroScaleExc,IEX_NAMESPACE::MathExc>("ZeroScaleExc","imath");
-    PyIex::registerExc<IMATH_NAMESPACE::IntVecNormalizeExc,IEX_NAMESPACE::MathExc>("IntVecNormalizeExc","imath");
+    static py::exception<IMATH_NAMESPACE::NullVecExc> PyNullVecExc(m, "NullVecExc");
+    static py::exception<IMATH_NAMESPACE::NullQuatExc> PyNullQuatExc(m, "NullQuatExc");
+    static py::exception<IMATH_NAMESPACE::SingMatrixExc> PySingMatrixExc(m, "SingMatrixExc");
+    static py::exception<IMATH_NAMESPACE::ZeroScaleExc> PyZeroScaleExc(m, "ZeroScaleExc");
+    static py::exception<IMATH_NAMESPACE::IntVecNormalizeExc> PyIntVecNormalizeExc(m, "IntVecNormalizeExc");
+    py::register_exception_translator([](std::exception_ptr p) {
+        // translate c++ exception to python exception
+        try {
+            if (p) std::rethrow_exception(p);
+        }
+        //
+        //
+        catch (const IMATH_NAMESPACE::NullVecExc &e) {
+            PyNullVecExc(e.what());
+        }
+        catch (const IMATH_NAMESPACE::NullQuatExc &e) {
+            PyNullQuatExc(e.what());
+        }
+        catch (const IMATH_NAMESPACE::SingMatrixExc &e) {
+            PySingMatrixExc(e.what());
+        }
+        catch (const IMATH_NAMESPACE::ZeroScaleExc &e) {
+            PyZeroScaleExc(e.what());
+        }
+        catch (const IMATH_NAMESPACE::IntVecNormalizeExc &e) {
+            PyIntVecNormalizeExc(e.what());
+        }
+    });
 
-    def("computeBoundingBox", &computeBoundingBox<float>,
+    m.def("computeBoundingBox", &computeBoundingBox<float>,
         "computeBoundingBox(position) -- computes the bounding box from the position array.");
 
-    def("computeBoundingBox", &computeBoundingBox<double>,
+    m.def("computeBoundingBox", &computeBoundingBox<double>,
         "computeBoundingBox(position) -- computes the bounding box from the position array.");
+
 }
-

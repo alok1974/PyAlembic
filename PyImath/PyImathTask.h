@@ -36,7 +36,7 @@
 #define _PyImathTask_h_
 
 #include <PyImathExport.h>
-#include <unistd.h>
+
 
 namespace PyImath {
 

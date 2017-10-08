@@ -35,16 +35,15 @@
 #ifndef _PyImathRandom_h_
 #define _PyImathRandom_h_
 
-#include <Python.h>
+#include "python_include.h"
 #include "PyImathExport.h"
-#include <boost/python.hpp>
 #include <ImathRandom.h>
 
 
 namespace PyImath {
 
-PYIMATH_EXPORT boost::python::class_<IMATH_NAMESPACE::Rand32> register_Rand32();
-PYIMATH_EXPORT boost::python::class_<IMATH_NAMESPACE::Rand48> register_Rand48();
+PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Rand32> register_Rand32(py::module &m);
+PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Rand48> register_Rand48(py::module &m);
 
 class PYIMATH_EXPORT Rand32
 {

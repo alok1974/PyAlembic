@@ -33,14 +33,11 @@
 ///////////////////////////////////////////////////////////////////////////
 
 
+#include "python_include.h"
 #include <PyImathShear.h>
-
 #include <PyImathPlane.h>
 #include "PyImathDecorators.h"
 #include "PyImathExport.h"
-#include <Python.h>
-#include <boost/python.hpp>
-#include <boost/python/make_constructor.hpp>
 #include <boost/format.hpp>
 #include <PyImath.h>
 #include <PyImathMathExc.h>
@@ -48,7 +45,7 @@
 
 
 namespace PyImath{
-using namespace boost::python;
+
 using namespace IMATH_NAMESPACE;
 
 template <class T> struct ShearName {static const char *value;};
@@ -93,15 +90,15 @@ std::string Shear_repr(const Shear6<double> &v)
 }
 
 template <class T>
-static Shear6<T> * shearTupleConstructor(tuple t)
+static Shear6<T> * shearTupleConstructor(py::tuple t)
 {
-    if(t.attr("__len__")() == 3){
-        return new Shear6<T>(extract<T>(t[0]), extract<T>(t[1]), extract<T>(t[2]),
+    if(py::cast<int>(t.attr("__len__")()) == 3){
+        return new Shear6<T>(py::cast<T>(t[0]), py::cast<T>(t[1]), py::cast<T>(t[2]),
                              T(0), T(0), T(0));
     }
-    else if(t.attr("__len__")() == 6){
-        return new Shear6<T>(extract<T>(t[0]), extract<T>(t[1]), extract<T>(t[2]),
-                             extract<T>(t[3]), extract<T>(t[4]), extract<T>(t[5]));        
+    else if(py::cast<int>(t.attr("__len__")()) == 6){
+        return new Shear6<T>(py::cast<T>(t[0]), py::cast<T>(t[1]), py::cast<T>(t[2]),
+                             py::cast<T>(t[3]), py::cast<T>(t[4]), py::cast<T>(t[5]));        
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "Shear6 expects tuple of length 3 or 6");
@@ -227,18 +224,18 @@ divT(const Shear6<T> &shear, T t)
 
 template <class T>
 static Shear6<T>
-subtract1(Shear6<T> &v, tuple t)
+subtract1(Shear6<T> &v, py::tuple t)
 {
     MATH_EXC_ON;
     Shear6<T> w;
     
-    if(t.attr("__len__")() == 6){
-        w[0] = v[0] - extract<T>(t[0]);
-        w[1] = v[1] - extract<T>(t[1]);   
-        w[2] = v[2] - extract<T>(t[2]);
-        w[3] = v[3] - extract<T>(t[3]);
-        w[4] = v[4] - extract<T>(t[4]);   
-        w[5] = v[5] - extract<T>(t[5]);
+    if(py::cast<int>(t.attr("__len__")()) == 6){
+        w[0] = v[0] - py::cast<T>(t[0]);
+        w[1] = v[1] - py::cast<T>(t[1]);   
+        w[2] = v[2] - py::cast<T>(t[2]);
+        w[3] = v[3] - py::cast<T>(t[3]);
+        w[4] = v[4] - py::cast<T>(t[4]);   
+        w[5] = v[5] - py::cast<T>(t[5]);
     }        
     else
         THROW(IEX_NAMESPACE::LogicExc, "tuple must have length of 6");
@@ -248,18 +245,18 @@ subtract1(Shear6<T> &v, tuple t)
 
 template <class T>
 static Shear6<T>
-subtract2(Shear6<T> &v, tuple t)
+subtract2(Shear6<T> &v, py::tuple t)
 {
     MATH_EXC_ON;
     Shear6<T> w;
     
-    if(t.attr("__len__")() == 6){
-        w[0] = extract<T>(t[0]) - v[0];
-        w[1] = extract<T>(t[1]) - v[1];   
-        w[2] = extract<T>(t[2]) - v[2];
-        w[3] = extract<T>(t[3]) - v[3];
-        w[4] = extract<T>(t[4]) - v[4];   
-        w[5] = extract<T>(t[5]) - v[5];
+    if(py::cast<int>(t.attr("__len__")()) == 6){
+        w[0] = py::cast<T>(t[0]) - v[0];
+        w[1] = py::cast<T>(t[1]) - v[1];   
+        w[2] = py::cast<T>(t[2]) - v[2];
+        w[3] = py::cast<T>(t[3]) - v[3];
+        w[4] = py::cast<T>(t[4]) - v[4];   
+        w[5] = py::cast<T>(t[5]) - v[5];
     }        
     else
         THROW(IEX_NAMESPACE::LogicExc, "tuple must have length of 6");
@@ -304,18 +301,18 @@ subtractT2(Shear6<T> &v, T a)
 
 template <class T>
 static Shear6<T>
-addTuple(Shear6<T> &v, tuple t)
+addTuple(Shear6<T> &v, py::tuple t)
 {
     MATH_EXC_ON;
     Shear6<T> w;
     
-    if(t.attr("__len__")() == 6){
-        w[0] = v[0] + extract<T>(t[0]);
-        w[1] = v[1] + extract<T>(t[1]);   
-        w[2] = v[2] + extract<T>(t[2]);
-        w[3] = v[3] + extract<T>(t[3]);
-        w[4] = v[4] + extract<T>(t[4]);   
-        w[5] = v[5] + extract<T>(t[5]);
+    if(py::cast<int>(t.attr("__len__")()) == 6){
+        w[0] = v[0] + py::cast<T>(t[0]);
+        w[1] = v[1] + py::cast<T>(t[1]);   
+        w[2] = v[2] + py::cast<T>(t[2]);
+        w[3] = v[3] + py::cast<T>(t[3]);
+        w[4] = v[4] + py::cast<T>(t[4]);   
+        w[5] = v[5] + py::cast<T>(t[5]);
     }        
     else
         THROW(IEX_NAMESPACE::LogicExc, "tuple must have length of 6");
@@ -342,18 +339,18 @@ addT(Shear6<T> &v, T a)
 
 template <class T>
 static Shear6<T>
-multTuple(Shear6<T> &v, tuple t)
+multTuple(Shear6<T> &v, py::tuple t)
 {
     MATH_EXC_ON;
     Shear6<T> w;
     
-    if(t.attr("__len__")() == 6){
-        w[0] = v[0] * extract<T>(t[0]);
-        w[1] = v[1] * extract<T>(t[1]);   
-        w[2] = v[2] * extract<T>(t[2]);
-        w[3] = v[3] * extract<T>(t[3]);
-        w[4] = v[4] * extract<T>(t[4]);   
-        w[5] = v[5] * extract<T>(t[5]);
+    if(py::cast<int>(t.attr("__len__")()) == 6){
+        w[0] = v[0] * py::cast<T>(t[0]);
+        w[1] = v[1] * py::cast<T>(t[1]);   
+        w[2] = v[2] * py::cast<T>(t[2]);
+        w[3] = v[3] * py::cast<T>(t[3]);
+        w[4] = v[4] * py::cast<T>(t[4]);   
+        w[5] = v[5] * py::cast<T>(t[5]);
     }        
     else
         THROW(IEX_NAMESPACE::LogicExc, "tuple must have length of 6");
@@ -384,16 +381,16 @@ rdiv(Shear6<T> &v, T a)
 
 template <class T>
 static Shear6<T>
-divTuple(Shear6<T> &v, const tuple &t)
+divTuple(Shear6<T> &v, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() != 6)
+    if(py::cast<int>(t.attr("__len__")()) != 6)
         THROW(IEX_NAMESPACE::LogicExc, "Shear6 expects tuple of length 6");
     
     Shear6<T> w;
     for(int i = 0; i < 6; ++i)
     {
-        T a = extract<T>(t[i]);
+        T a = py::cast<T>(t[i]);
         if(a != T (0))
             w[i] = v[i] / a;
         else
@@ -405,16 +402,16 @@ divTuple(Shear6<T> &v, const tuple &t)
 
 template <class T>
 static Shear6<T>
-rdivTuple(Shear6<T> &v, const tuple &t)
+rdivTuple(Shear6<T> &v, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() != 6)
+    if(py::cast<int>(t.attr("__len__")()) != 6)
         THROW(IEX_NAMESPACE::LogicExc, "Shear6 expects tuple of length 6");
     
     Shear6<T> w;
     for(int i = 0; i < 6; ++i)
     {
-        T a = extract<T>(t[i]);
+        T a = py::cast<T>(t[i]);
         if(v[i] != T (0))
             w[i] = a / v[i];
         else
@@ -493,8 +490,8 @@ len(Shear6<T> &shear)
 
 
 template <class T>
-class_<Shear6<T> >
-register_Shear()
+py::class_<Shear6<T> >
+register_Shear(py::module &m)
 {
     const char *name = ShearName<T>::value;
     
@@ -502,53 +499,52 @@ register_Shear()
     void (IMATH_NAMESPACE::Shear6<T>::*setValue2)(const Shear6<T> &) = &IMATH_NAMESPACE::Shear6<T>::setValue;
     void (IMATH_NAMESPACE::Shear6<T>::*getValue1)(Shear6<T> &) const = &IMATH_NAMESPACE::Shear6<T>::getValue;
     
-    class_<Shear6<T> > shear_class(name, name, init<Shear6<T> >("copy construction"));
+    py::class_<Shear6<T> > shear_class(m, name, name);
     shear_class
-        .def(init<>("default construction: (0 0 0 0 0 0)"))
-        .def(init<T,T,T>("Shear(XY,XZ,YZ) construction: (XY XZ YZ 0 0 0)"))
-        .def(init<const Vec3<float> &>("Shear(v) construction: (v.x v.y v.z 0 0 0)"))
-        .def(init<const Vec3<double> &>("Shear(v) construction: (v.x v.y v.z 0 0 0)"))
-        .def(init<const Vec3<int> &>("Shear(v) construction: (v.x v.y v.z 0 0 0)"))
-        .def(init<T,T,T,T,T,T>("Shear(XY, XZ, YZ, YX, ZX, ZY) construction"))
-        .def("__init__", make_constructor(shearConstructor1<T>))
-        .def("__init__", make_constructor(shearTupleConstructor<T>),"Construction from tuple")
-        .def("__init__", make_constructor(shearConversionConstructor<T,float>))
-        .def("__init__", make_constructor(shearConversionConstructor<T,double>))
-        .def("__init__", make_constructor(shearConversionConstructor<T,int>))
-        .def("__iadd__",&iadd<T>,return_internal_reference<>())
+        .def(py::init<Shear6<T> >(/*"copy construction"*/))
+        .def(py::init<>(/*"default construction: (0 0 0 0 0 0)"*/))
+        .def(py::init<T,T,T>(/*"Shear(XY,XZ,YZ) construction: (XY XZ YZ 0 0 0)"*/))
+        .def(py::init<const Vec3<float> &>(/*"Shear(v) construction: (v.x v.y v.z 0 0 0)"*/))
+        .def(py::init<const Vec3<double> &>(/*"Shear(v) construction: (v.x v.y v.z 0 0 0)"*/))
+        .def(py::init<const Vec3<int> &>(/*"Shear(v) construction: (v.x v.y v.z 0 0 0)"*/))
+        .def(py::init<T,T,T,T,T,T>(/*"Shear(XY, XZ, YZ, YX, ZX, ZY) construction"*/))
+        .def("__init__", shearConstructor1<T>)
+        .def("__init__", shearTupleConstructor<T>,"Construction from tuple")
+        .def("__init__", shearConversionConstructor<T,float>)
+        .def("__init__", shearConversionConstructor<T,double>)
+        .def("__init__", shearConversionConstructor<T,int>)
+        .def("__iadd__",&iadd<T>,py::return_value_policy::reference_internal)
         .def("__add__",&add<T>)
-        .def("__isub__",&isub<T>,return_internal_reference<>())
+        .def("__isub__",&isub<T>,py::return_value_policy::reference_internal)
         .def("__sub__",&sub<T>)
         .def("__neg__",&neg<T>)
-        .def("__imul__",&imul<T>,return_internal_reference<>())
-        .def("__imul__",&imulT<T>,return_internal_reference<>())
+        .def("__imul__",&imul<T>,py::return_value_policy::reference_internal)
+        .def("__imul__",&imulT<T>,py::return_value_policy::reference_internal)
         .def("__mul__",&mul<T>)
         .def("__mul__",&mulT<T>)
         .def("__rmul__",&mulT<T>)
-        .def("__idiv__",&idiv<T>,return_internal_reference<>())
-        .def("__idiv__",&idivT<T>,return_internal_reference<>())
-        .def("__itruediv__",&idiv<T>,return_internal_reference<>())
-        .def("__itruediv__",&idivT<T>,return_internal_reference<>())
+        .def("__idiv__",&idiv<T>,py::return_value_policy::reference_internal)
+        .def("__idiv__",&idivT<T>,py::return_value_policy::reference_internal)
+        .def("__itruediv__",&idiv<T>,py::return_value_policy::reference_internal)
+        .def("__itruediv__",&idivT<T>,py::return_value_policy::reference_internal)
         .def("__div__",&div<T>)
         .def("__div__",&divT<T>)
         .def("__truediv__",&div<T>)
         .def("__truediv__",&divT<T>)
+        /*
         .def(self == self)
         .def(self != self)
+        */
         .def("__str__",&Shear_str<T>)
         .def("__repr__",&Shear_repr<T>)
         .def("setValue", setValue1)
         .def("setValue", setValue2)
         .def("getValue", getValue1)
-        .def("negate", &Shear6<T>::negate, return_internal_reference<>())
-        .def("baseTypeMin", &Shear6<T>::baseTypeMin)
-        .staticmethod("baseTypeMin")
-        .def("baseTypeMax", &Shear6<T>::baseTypeMax)
-        .staticmethod("baseTypeMax")
-        .def("baseTypeSmallest", &Shear6<T>::baseTypeSmallest)
-        .staticmethod("baseTypeSmallest")
-        .def("baseTypeEpsilon", &Shear6<T>::baseTypeEpsilon)
-        .staticmethod("baseTypeEpsilon")
+        .def("negate", &Shear6<T>::negate, py::return_value_policy::reference_internal)
+        .def_static("baseTypeMin", &Shear6<T>::baseTypeMin)
+        .def_static("baseTypeMax", &Shear6<T>::baseTypeMax)
+        .def_static("baseTypeSmallest", &Shear6<T>::baseTypeSmallest)
+        .def_static("baseTypeEpsilon", &Shear6<T>::baseTypeEpsilon)
         .def("equalWithAbsError", &Shear6<T>::equalWithAbsError)
         .def("equalWithRelError", &Shear6<T>::equalWithRelError)
         .def("__sub__", &subtract1<T>)
@@ -579,7 +575,7 @@ register_Shear()
     return shear_class;
 }
 
-template PYIMATH_EXPORT class_<Shear6<float> > register_Shear();
-template PYIMATH_EXPORT class_<Shear6<double> > register_Shear();
+template PYIMATH_EXPORT py::class_<Shear6<float> > register_Shear(py::module &m);
+template PYIMATH_EXPORT py::class_<Shear6<double> > register_Shear(py::module &m);
 
 }//namespace PyIMath

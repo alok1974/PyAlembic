@@ -35,18 +35,17 @@
 #ifndef _PyImathBox_h_
 #define _PyImathBox_h_
 
-#include <Python.h>
-#include <boost/python.hpp>
+#include "python_include.h"
 #include <ImathBox.h>
 #include <PyImathVec.h>
 #include <PyImathFixedArray.h>
 
 namespace PyImath {
 
-template <class T> boost::python::class_<IMATH_NAMESPACE::Box<T> > register_Box2();
-template <class T> boost::python::class_<IMATH_NAMESPACE::Box<T> > register_Box3();
+template <class T> py::class_<IMATH_NAMESPACE::Box<T> > register_Box2(py::module &m);
+template <class T> py::class_<IMATH_NAMESPACE::Box<T> > register_Box3(py::module &m);
 
-template <class T> boost::python::class_<FixedArray<IMATH_NAMESPACE::Box<T> > > register_BoxArray();
+template <class T> py::class_<FixedArray<IMATH_NAMESPACE::Box<T> > > register_BoxArray(py::module &m);
 
 typedef FixedArray<IMATH_NAMESPACE::Box2s> Box2sArray;
 typedef FixedArray<IMATH_NAMESPACE::Box2i> Box2iArray;
@@ -86,7 +85,7 @@ template <class T>
 PyObject *
 Box2<T>::wrap (const IMATH_NAMESPACE::Box< IMATH_NAMESPACE::Vec2<T> > &b)
 {
-    typename boost::python::return_by_value::apply < IMATH_NAMESPACE::Box< IMATH_NAMESPACE::Vec2<T> > >::type converter;
+    typename py::return_by_value::apply < IMATH_NAMESPACE::Box< IMATH_NAMESPACE::Vec2<T> > >::type converter;
     PyObject *p = converter (b);
     return p;
 }
@@ -95,7 +94,7 @@ template <class T>
 PyObject *
 Box3<T>::wrap (const IMATH_NAMESPACE::Box< IMATH_NAMESPACE::Vec3<T> > &b)
 {
-    typename boost::python::return_by_value::apply < IMATH_NAMESPACE::Box< IMATH_NAMESPACE::Vec3<T> > >::type converter;
+    typename py::return_by_value::apply < IMATH_NAMESPACE::Box< IMATH_NAMESPACE::Vec3<T> > >::type converter;
     PyObject *p = converter (b);
     return p;
 }
@@ -104,7 +103,7 @@ template <class T>
 int
 Box2<T>::convert (PyObject *p, IMATH_NAMESPACE::Box< IMATH_NAMESPACE::Vec2<T> > *v)
 {
-    boost::python::extract < IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V2i> > extractorV2i (p);
+    py::py::cast < IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V2i> > extractorV2i (p);
     if (extractorV2i.check())
     {
         IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V2i> b = extractorV2i();
@@ -113,7 +112,7 @@ Box2<T>::convert (PyObject *p, IMATH_NAMESPACE::Box< IMATH_NAMESPACE::Vec2<T> > 
         return 1;
     }
 
-    boost::python::extract < IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V2f> > extractorV2f (p);
+    py::py::cast < IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V2f> > extractorV2f (p);
     if (extractorV2f.check())
     {
         IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V2f> b = extractorV2f();
@@ -122,7 +121,7 @@ Box2<T>::convert (PyObject *p, IMATH_NAMESPACE::Box< IMATH_NAMESPACE::Vec2<T> > 
         return 1;
     }
 
-    boost::python::extract < IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V2d> > extractorV2d (p);
+    py::py::cast < IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V2d> > extractorV2d (p);
     if (extractorV2d.check())
     {
         IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V2d> b = extractorV2d();
@@ -131,16 +130,16 @@ Box2<T>::convert (PyObject *p, IMATH_NAMESPACE::Box< IMATH_NAMESPACE::Vec2<T> > 
         return 1;
     }
 
-    boost::python::extract <boost::python::tuple> extractorTuple (p);
+    py::py::cast <py::tuple> extractorTuple (p);
     if (extractorTuple.check())
     {
-        boost::python::tuple t = extractorTuple();
+        py::tuple t = extractorTuple();
         if (t.attr ("__len__") () == 2)
         {
             PyObject *minObj = 
-                boost::python::extract <boost::python::object> (t[0])().ptr();
+                py::py::cast <py::object> (t[0])().ptr();
             PyObject *maxObj = 
-                boost::python::extract <boost::python::object> (t[1])().ptr();
+                py::py::cast <py::object> (t[1])().ptr();
 
             IMATH_NAMESPACE::Vec2<T> min, max;
             if (! V2<T>::convert (minObj, &min))
@@ -162,7 +161,7 @@ template <class T>
 int
 Box3<T>::convert (PyObject *p, IMATH_NAMESPACE::Box< IMATH_NAMESPACE::Vec3<T> > *v)
 {
-    boost::python::extract < IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V3i> > extractorV3i (p);
+    py::py::cast < IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V3i> > extractorV3i (p);
     if (extractorV3i.check())
     {
         IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V3i> b = extractorV3i();
@@ -171,7 +170,7 @@ Box3<T>::convert (PyObject *p, IMATH_NAMESPACE::Box< IMATH_NAMESPACE::Vec3<T> > 
         return 1;
     }
 
-    boost::python::extract < IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V3f> > extractorV3f (p);
+    py::py::cast < IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V3f> > extractorV3f (p);
     if (extractorV3f.check())
     {
         IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V3f> b = extractorV3f();
@@ -180,7 +179,7 @@ Box3<T>::convert (PyObject *p, IMATH_NAMESPACE::Box< IMATH_NAMESPACE::Vec3<T> > 
         return 1;
     }
 
-    boost::python::extract < IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V3d> > extractorV3d (p);
+    py::py::cast < IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V3d> > extractorV3d (p);
     if (extractorV3d.check())
     {
         IMATH_NAMESPACE::Box<IMATH_NAMESPACE::V3d> b = extractorV3d();
@@ -189,16 +188,16 @@ Box3<T>::convert (PyObject *p, IMATH_NAMESPACE::Box< IMATH_NAMESPACE::Vec3<T> > 
         return 1;
     }
 
-    boost::python::extract <boost::python::tuple> extractorTuple (p);
+    py::py::cast <py::tuple> extractorTuple (p);
     if (extractorTuple.check())
     {
-        boost::python::tuple t = extractorTuple();
+        py::tuple t = extractorTuple();
         if (t.attr ("__len__") () == 2)
         {
             PyObject *minObj = 
-                boost::python::extract <boost::python::object> (t[0])().ptr();
+                py::py::cast <py::object> (t[0])().ptr();
             PyObject *maxObj = 
-                boost::python::extract <boost::python::object> (t[1])().ptr();
+                py::py::cast <py::object> (t[1])().ptr();
 
             IMATH_NAMESPACE::Vec3<T> min, max;
             if (! V3<T>::convert (minObj, &min))

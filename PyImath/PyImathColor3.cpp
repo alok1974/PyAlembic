@@ -38,13 +38,11 @@
 // order to work around MSVC limitations.
 //
 
+#include "python_include.h"
 #include <PyImathColor.h>
 #include <PyImathVec.h>
 #include "PyImathDecorators.h"
 #include "PyImathExport.h"
-#include <Python.h>
-#include <boost/python.hpp>
-#include <boost/python/make_constructor.hpp>
 #include <boost/format.hpp>
 #include <PyImath.h>
 #include <PyImathMathExc.h>
@@ -58,7 +56,7 @@ namespace PyImath {
 template <> const char *PyImath::C3cArray::name() { return "C3cArray"; }
 template <> const char *PyImath::C3fArray::name() { return "C3fArray"; }
 
-using namespace boost::python; 
+ 
 using namespace IMATH_NAMESPACE;
 
 template <class T> struct Color3Name { static const char *value; };
@@ -184,24 +182,24 @@ color3_repr(const Color3<float> &v)
 
 
 template <class T>
-static Color3<T> * Color3_construct_tuple(const tuple &t)
+static Color3<T> * Color3_construct_tuple(const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
-        return new Color3<T>(extract<T>(t[0]), extract<T>(t[1]), extract<T>(t[2]));
+        return new Color3<T>(py::cast<T>(t[0]), py::cast<T>(t[1]), py::cast<T>(t[2]));
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "Color3 expects tuple of length 3");
 }
 
 template <class T>
-static Color3<T> * Color3_construct_list(const list &l)
+static Color3<T> * Color3_construct_list(const py::list &l)
 {
     MATH_EXC_ON;
-    if(l.attr("__len__")() == 3)
+    if(py::cast<int>(l.attr("__len__")()) == 3)
     {
-        return new Color3<T>(extract<T>(l[0]), extract<T>(l[1]), extract<T>(l[2]));
+        return new Color3<T>(py::cast<T>(l[0]), py::cast<T>(l[1]), py::cast<T>(l[2]));
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "Color3 expects list of length 3");
@@ -225,13 +223,13 @@ add(Color3<T> &color, const Color3<T> &color2)
 
 template <class T>
 static Color3<T>
-addTuple(Color3<T> &color, const tuple &t)
+addTuple(Color3<T> &color, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 3)
-        return Color3<T>(color.x + extract<T>(t[0]), 
-                         color.y + extract<T>(t[1]), 
-                         color.z + extract<T>(t[2]));
+    if(py::cast<int>(t.attr("__len__")()) == 3)
+        return Color3<T>(color.x + py::cast<T>(t[0]), 
+                         color.y + py::cast<T>(t[1]), 
+                         color.z + py::cast<T>(t[2]));
     else
         THROW(IEX_NAMESPACE::LogicExc, "Color3 expects tuple of length 3");
 }
@@ -263,13 +261,13 @@ sub(Color3<T> &color, const Color3<T> &color2)
 
 template <class T>
 static Color3<T>
-subtractL(Color3<T> &color, const tuple &t)
+subtractL(Color3<T> &color, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 3)
-        return Color3<T>(color.x - extract<T>(t[0]), 
-                         color.y - extract<T>(t[1]), 
-                         color.z - extract<T>(t[2]));
+    if(py::cast<int>(t.attr("__len__")()) == 3)
+        return Color3<T>(color.x - py::cast<T>(t[0]), 
+                         color.y - py::cast<T>(t[1]), 
+                         color.z - py::cast<T>(t[2]));
     else
         THROW(IEX_NAMESPACE::LogicExc, "Color3 expects tuple of length 3");
 }
@@ -296,13 +294,13 @@ subtractRT(const Color3<T> &color, T a)
 
 template <class T>
 static Color3<T>
-subtractR(Color3<T> &color, const tuple &t)
+subtractR(Color3<T> &color, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 3)
-        return Color3<T>(extract<T>(t[0]) - color.x, 
-                         extract<T>(t[1]) - color.y, 
-                         extract<T>(t[2]) - color.z);
+    if(py::cast<int>(t.attr("__len__")()) == 3)
+        return Color3<T>(py::cast<T>(t[0]) - color.x, 
+                         py::cast<T>(t[1]) - color.y, 
+                         py::cast<T>(t[2]) - color.z);
     else
         THROW(IEX_NAMESPACE::LogicExc, "Color3 expects tuple of length 3");
 }
@@ -365,13 +363,13 @@ rmulT(Color3<T> &color, const T &t)
 
 template <class T>
 static Color3<T>
-mulTuple(Color3<T> &color, const tuple &t)
+mulTuple(Color3<T> &color, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 3)
-        return Color3<T>(color.x * extract<T>(t[0]), 
-                         color.y * extract<T>(t[1]), 
-                         color.z * extract<T>(t[2]));
+    if(py::cast<int>(t.attr("__len__")()) == 3)
+        return Color3<T>(color.x * py::cast<T>(t[0]), 
+                         color.y * py::cast<T>(t[1]), 
+                         color.z * py::cast<T>(t[2]));
     else
         THROW(IEX_NAMESPACE::LogicExc, "Color3 expects tuple of length 3");
 }
@@ -410,26 +408,26 @@ divT(Color3<T> &color, const T &t)
 
 template <class T>
 static Color3<T>
-divTupleL(Color3<T> &color, const tuple &t)
+divTupleL(Color3<T> &color, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 3)
-        return Color3<T>(color.x / extract<T>(t[0]), 
-                         color.y / extract<T>(t[1]), 
-                         color.z / extract<T>(t[2]));
+    if(py::cast<int>(t.attr("__len__")()) == 3)
+        return Color3<T>(color.x / py::cast<T>(t[0]), 
+                         color.y / py::cast<T>(t[1]), 
+                         color.z / py::cast<T>(t[2]));
     else
         THROW(IEX_NAMESPACE::LogicExc, "Color3 expects tuple of length 3");    
 }
 
 template <class T>
 static Color3<T>
-divTupleR(Color3<T> &color, const tuple &t)
+divTupleR(Color3<T> &color, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 3)
-        return Color3<T>(extract<T>(t[0]) / color.x, 
-                         extract<T>(t[1]) / color.y, 
-                         extract<T>(t[2]) / color.z);
+    if(py::cast<int>(t.attr("__len__")()) == 3)
+        return Color3<T>(py::cast<T>(t[0]) / color.x, 
+                         py::cast<T>(t[1]) / color.y, 
+                         py::cast<T>(t[2]) / color.z);
     else
         THROW(IEX_NAMESPACE::LogicExc, "Color3 expects tuple of length 3");    
 }
@@ -454,15 +452,15 @@ hsv2rgb(Color3<T> &color)
 
 template <class T>
 static Color3<T>
-hsv2rgbTuple(const tuple &t)
+hsv2rgbTuple(const py::tuple &t)
 {
     MATH_EXC_ON;
     Color3<T> color;
     if(t.attr("__len__")() == 3)
     {
-        color.x = extract<T>(t[0]);
-        color.y = extract<T>(t[1]);
-        color.z = extract<T>(t[2]); 
+        color.x = py::cast<T>(t[0]);
+        color.y = py::cast<T>(t[1]);
+        color.z = py::cast<T>(t[2]); 
         
         return IMATH_NAMESPACE::hsv2rgb(color);
     }
@@ -480,15 +478,15 @@ rgb2hsv(Color3<T> &color)
 
 template <class T>
 static Color3<T>
-rgb2hsvTuple(const tuple &t)
+rgb2hsvTuple(const py::tuple &t)
 {
     MATH_EXC_ON;
     Color3<T> color;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
-        color.x = extract<T>(t[0]);
-        color.y = extract<T>(t[1]);
-        color.z = extract<T>(t[2]); 
+        color.x = py::cast<T>(t[0]);
+        color.y = py::cast<T>(t[1]);
+        color.z = py::cast<T>(t[2]); 
         
         return IMATH_NAMESPACE::rgb2hsv(color);
     }
@@ -514,15 +512,15 @@ setValue2(Color3<T> &color, const Color3<T> &v)
 
 template <class T>
 static void
-setValueTuple(Color3<T> &color, const tuple &t)
+setValueTuple(Color3<T> &color, const py::tuple &t)
 {
     MATH_EXC_ON;
     Color3<T> v;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
-        v.x = extract<T>(t[0]);
-        v.y = extract<T>(t[1]);
-        v.z = extract<T>(t[2]); 
+        v.x = py::cast<T>(t[0]);
+        v.y = py::cast<T>(t[1]);
+        v.z = py::cast<T>(t[2]); 
         
         color.setValue(v);
     }
@@ -569,57 +567,60 @@ greaterThanEqual(Color3<T> &v, const Color3<T> &w)
 }
 
 template <class T>
-class_<Color3<T>, bases<Vec3<T> > >
-register_Color3()
+py::class_<Color3<T>, Vec3<T> >
+register_Color3(py::module &m)
 {
-    class_<Color3<T>, bases<Vec3<T> > > color3_class(Color3Name<T>::value, Color3Name<T>::value,init<Color3<T> >("copy construction"));
+    py::class_<Color3<T>, Vec3<T> > color3_class(m, Color3Name<T>::value, Color3Name<T>::value);
     color3_class
-        .def("__init__",make_constructor(Color3_construct_default<T>),"initialize to (0,0,0)")
-        .def("__init__",make_constructor(Color3_construct_tuple<T>), "initialize to (r,g,b) with a python tuple")
-        .def("__init__",make_constructor(Color3_construct_list<T>), "initialize to (r,g,b) with a python list")
-        .def("__init__",make_constructor(Color3_component_construct1<T,float>))
-        .def("__init__",make_constructor(Color3_component_construct1<T,int>))
-        .def("__init__",make_constructor(Color3_component_construct2<T,float>))
-        .def("__init__",make_constructor(Color3_component_construct2<T,int>))
-        .def("__init__",make_constructor(Color3_color_construct<T,float>))
-        .def("__init__",make_constructor(Color3_color_construct<T,int>))
-        .def("__init__",make_constructor(Color3_color_construct<T,unsigned char>))
-        .def("__init__",make_constructor(Color3_vector_construct<T,float>))
-        .def("__init__",make_constructor(Color3_vector_construct<T,double>))
-        .def("__init__",make_constructor(Color3_vector_construct<T,int>))
+        .def(py::init<Color3<T> >(/*"copy construction"*/))
+        .def("__init__",Color3_construct_default<T>,"initialize to (0,0,0)")
+        .def("__init__",Color3_construct_tuple<T>, "initialize to (r,g,b) with a python tuple")
+        .def("__init__",Color3_construct_list<T>, "initialize to (r,g,b) with a python list")
+        .def("__init__",Color3_component_construct1<T,float>)
+        .def("__init__",Color3_component_construct1<T,int>)
+        .def("__init__",Color3_component_construct2<T,float>)
+        .def("__init__",Color3_component_construct2<T,int>)
+        .def("__init__",Color3_color_construct<T,float>)
+        .def("__init__",Color3_color_construct<T,int>)
+        .def("__init__",Color3_color_construct<T,unsigned char>)
+        .def("__init__",Color3_vector_construct<T,float>)
+        .def("__init__",Color3_vector_construct<T,double>)
+        .def("__init__",Color3_vector_construct<T,int>)
 
         .def_readwrite("r", &Color3<T>::x)
         .def_readwrite("g", &Color3<T>::y)
         .def_readwrite("b", &Color3<T>::z)
         .def("__str__", &color3_str<T>)
         .def("__repr__", &color3_repr<T>)
+        /*
         .def(self == self)
         .def(self != self)
-        .def("__iadd__", &iadd<T>,return_internal_reference<>())
+        */
+        .def("__iadd__", &iadd<T>, py::return_value_policy::reference_internal)
         .def("__add__", &add<T>)
         .def("__add__", &addTuple<T>)
         .def("__add__", &addT<T>)
         .def("__radd__", &addTuple<T>)
         .def("__radd__", &addT<T>)
-        .def("__isub__", &isub<T>,return_internal_reference<>())
+        .def("__isub__", &isub<T>, py::return_value_policy::reference_internal)
         .def("__sub__", &sub<T>)
         .def("__sub__", &subtractL<T>)
         .def("__sub__", &subtractLT<T>)
         .def("__rsub__", &subtractR<T>)
         .def("__rsub__", &subtractRT<T>)
         .def("__neg__", &neg<T>)
-        .def("negate",&negate<T>,return_internal_reference<>(),"component-wise multiplication by -1")
-        .def("__imul__", &imul<T>,return_internal_reference<>())
-        .def("__imul__", &imulT<T>,return_internal_reference<>())
+        .def("negate",&negate<T>, py::return_value_policy::reference_internal, "component-wise multiplication by -1")
+        .def("__imul__", &imul<T>, py::return_value_policy::reference_internal)
+        .def("__imul__", &imulT<T>, py::return_value_policy::reference_internal)
         .def("__mul__", &mul<T>)
         .def("__mul__", &mulT<T>)
         .def("__rmul__", &rmulT<T>)
         .def("__mul__", &mulTuple<T>)
         .def("__rmul__", &mulTuple<T>)
-        .def("__idiv__", &idiv<T>,return_internal_reference<>())
-        .def("__idiv__", &idivT<T>,return_internal_reference<>())
-        .def("__itruediv__", &idiv<T>,return_internal_reference<>())
-        .def("__itruediv__", &idivT<T>,return_internal_reference<>())
+        .def("__idiv__", &idiv<T>, py::return_value_policy::reference_internal)
+        .def("__idiv__", &idivT<T>, py::return_value_policy::reference_internal)
+        .def("__itruediv__", &idiv<T>, py::return_value_policy::reference_internal)
+        .def("__itruediv__", &idivT<T>, py::return_value_policy::reference_internal)
         .def("__div__", &div<T>)
         .def("__div__", &divT<T>)
         .def("__div__", &divTupleL<T>)
@@ -632,16 +633,11 @@ register_Color3()
         .def("__gt__", &greaterThan<T>)
         .def("__le__", &lessThanEqual<T>)
         .def("__ge__", &greaterThanEqual<T>)
-        .def("dimensions", &Color3<T>::dimensions,"dimensions() number of dimensions in the color")
-        .staticmethod("dimensions")
-        .def("baseTypeEpsilon", &Color3<T>::baseTypeEpsilon,"baseTypeEpsilon() epsilon value of the base type of the color")
-        .staticmethod("baseTypeEpsilon")
-        .def("baseTypeMax", &Color3<T>::baseTypeMax,"baseTypeMax() max value of the base type of the color")
-        .staticmethod("baseTypeMax")
-        .def("baseTypeMin", &Color3<T>::baseTypeMin,"baseTypeMin() min value of the base type of the color")
-        .staticmethod("baseTypeMin")
-        .def("baseTypeSmallest", &Color3<T>::baseTypeSmallest,"baseTypeSmallest() smallest value of the base type of the color")
-        .staticmethod("baseTypeSmallest")
+        .def_static("dimensions", &Color3<T>::dimensions,"dimensions() number of dimensions in the color")
+        .def_static("baseTypeEpsilon", &Color3<T>::baseTypeEpsilon,"baseTypeEpsilon() epsilon value of the base type of the color")
+        .def_static("baseTypeMax", &Color3<T>::baseTypeMax,"baseTypeMax() max value of the base type of the color")
+        .def_static("baseTypeMin", &Color3<T>::baseTypeMin,"baseTypeMin() min value of the base type of the color")
+        .def_static("baseTypeSmallest", &Color3<T>::baseTypeSmallest,"baseTypeSmallest() smallest value of the base type of the color")
         .def("hsv2rgb", &hsv2rgb<T>, 
     	     "C.hsv2rgb() -- returns a new color which "
              "is C converted from RGB to HSV")
@@ -664,10 +660,10 @@ register_Color3()
     return color3_class;
 }
 
-template PYIMATH_EXPORT class_<Color3<float>, bases<Vec3<float> > > register_Color3<float>();
-template PYIMATH_EXPORT class_<Color3<unsigned char>, bases<Vec3<unsigned char> > > register_Color3<unsigned char>();
-template PYIMATH_EXPORT class_<FixedArray<Color3<float> > > register_Color3Array<float>();
-template PYIMATH_EXPORT class_<FixedArray<Color3<unsigned char> > > register_Color3Array<unsigned char>();
+template PYIMATH_EXPORT py::class_<Color3<float>, Vec3<float > > register_Color3<float>(py::module &m);
+template PYIMATH_EXPORT py::class_<Color3<unsigned char>, Vec3<unsigned char> > register_Color3<unsigned char>(py::module &m);
+template PYIMATH_EXPORT py::class_<FixedArray<Color3<float> > > register_Color3Array<float>(py::module &m);
+template PYIMATH_EXPORT py::class_<FixedArray<Color3<unsigned char> > > register_Color3Array<unsigned char>(py::module &m);
 
 template<> PYIMATH_EXPORT IMATH_NAMESPACE::Color3<float> PyImath::FixedArrayDefaultValue<IMATH_NAMESPACE::Color3<float> >::value()
 { return IMATH_NAMESPACE::Color3<float>(0,0,0); }

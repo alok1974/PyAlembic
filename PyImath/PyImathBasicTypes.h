@@ -39,7 +39,7 @@
 
 namespace PyImath {
 
-PYIMATH_EXPORT void register_basicTypes();
+PYIMATH_EXPORT void register_basicTypes(py::module &m);
 
 }
 

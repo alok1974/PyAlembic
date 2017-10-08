@@ -35,15 +35,14 @@
 #ifndef _PyImathPlane_h_
 #define _PyImathPlane_h_
 
-#include <Python.h>
-#include <boost/python.hpp>
+#include "python_include.h"
 #include <ImathPlane.h>
 #include <PyImath.h>
 
 
 namespace PyImath {
 
-template <class T> boost::python::class_<IMATH_NAMESPACE::Plane3<T> > register_Plane();
+template <class T> py::class_<IMATH_NAMESPACE::Plane3<T> > register_Plane(py::module &m);
 
 //
 
@@ -65,7 +64,7 @@ template <class T>
 PyObject *
 P3<T>::wrap (const IMATH_NAMESPACE::Plane3<T> &pl)
 {
-    typename boost::python::return_by_value::apply < IMATH_NAMESPACE::Plane3<T> >::type converter;
+    typename py::return_by_value::apply < IMATH_NAMESPACE::Plane3<T> >::type converter;
     PyObject *p = converter (pl);
     return p;
 }
@@ -74,7 +73,7 @@ template <class T>
 int
 P3<T>::convert (PyObject *p, IMATH_NAMESPACE::Plane3<T> *pl)
 {
-    boost::python::extract <IMATH_NAMESPACE::Plane3f> extractorPf (p);
+    py::py::cast <IMATH_NAMESPACE::Plane3f> extractorPf (p);
     if (extractorPf.check())
     {
         IMATH_NAMESPACE::Plane3f e = extractorPf();
@@ -83,7 +82,7 @@ P3<T>::convert (PyObject *p, IMATH_NAMESPACE::Plane3<T> *pl)
         return 1;
     }
 
-    boost::python::extract <IMATH_NAMESPACE::Plane3d> extractorPd (p);
+    py::py::cast <IMATH_NAMESPACE::Plane3d> extractorPd (p);
     if (extractorPd.check())
     {
         IMATH_NAMESPACE::Plane3d e = extractorPd();

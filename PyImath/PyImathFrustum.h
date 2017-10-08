@@ -35,8 +35,7 @@
 #ifndef _PyImathFrustum_h_
 #define _PyImathFrustum_h_
 
-#include <Python.h>
-#include <boost/python.hpp>
+#include "python_include.h"
 //#include <PyImath.h>
 #include <ImathFrustum.h>
 #include <ImathFrustumTest.h>
@@ -45,8 +44,8 @@
 
 namespace PyImath {
 
-template <class T> boost::python::class_<IMATH_NAMESPACE::Frustum<T> > register_Frustum();
-template <class T> boost::python::class_<IMATH_NAMESPACE::FrustumTest<T> > register_FrustumTest();
+template <class T> py::class_<IMATH_NAMESPACE::Frustum<T> > register_Frustum(py::module &m);
+template <class T> py::class_<IMATH_NAMESPACE::FrustumTest<T> > register_FrustumTest(py::module &m);
 
 //
 
@@ -68,7 +67,7 @@ template <class T>
 PyObject *
 F<T>::wrap (const IMATH_NAMESPACE::Frustum<T> &f)
 {
-    typename boost::python::return_by_value::apply < IMATH_NAMESPACE::Frustum<T> >::type converter;
+    typename py::return_by_value::apply < IMATH_NAMESPACE::Frustum<T> >::type converter;
     PyObject *p = converter (f);
     return p;
 }
@@ -77,7 +76,7 @@ template <class T>
 int
 F<T>::convert (PyObject *p, IMATH_NAMESPACE::Frustum<T> *f)
 {
-    boost::python::extract <IMATH_NAMESPACE::Frustumf> extractorEf (p);
+    py::py::cast <IMATH_NAMESPACE::Frustumf> extractorEf (p);
     if (extractorEf.check())
     {
         IMATH_NAMESPACE::Frustumf e = extractorEf();
@@ -86,7 +85,7 @@ F<T>::convert (PyObject *p, IMATH_NAMESPACE::Frustum<T> *f)
         return 1;
     }
 
-    boost::python::extract <IMATH_NAMESPACE::Frustumd> extractorEd (p);
+    py::py::cast <IMATH_NAMESPACE::Frustumd> extractorEd (p);
     if (extractorEd.check())
     {
         IMATH_NAMESPACE::Frustumd e = extractorEd();

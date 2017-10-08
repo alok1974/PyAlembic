@@ -37,15 +37,24 @@ SET (LIB_TYPE SHARED)
 
 #FIND_PACKAGE ( PythonLibs REQUIRED )
 #FIND_PACKAGE ( PythonInterp REQUIRED )
+
 SET(PYTHON_INCLUDE_PATH
-    ${CMAKE_INSTALL_PREFIX}/include/python3.6
+    #${CMAKE_INSTALL_PREFIX}/include/python3.6
+    D:/python27/include
     )
 SET(PYTHON_LIBRARIES
-    ${CMAKE_INSTALL_PREFIX}/lib/python36.lib
+    #${CMAKE_INSTALL_PREFIX}/lib/python36.lib
+    D:/python27/libs/python27.lib
     )
 SET(ILMBASE_LIBRARIES
-    debug ${CMAKE_INSTALL_PREFIX}/debug/lib/Iex-2_2.lib
-    optimized ${CMAKE_INSTALL_PREFIX}/lib/Iex-2_2.lib
+    debug 
+    ${CMAKE_INSTALL_PREFIX}/debug/lib/Iex-2_2.lib
+    ${CMAKE_INSTALL_PREFIX}/debug/lib/IexMath-2_2.lib
+    ${CMAKE_INSTALL_PREFIX}/debug/lib/Imath-2_2.lib
+    optimized 
+    ${CMAKE_INSTALL_PREFIX}/lib/Iex-2_2.lib
+    ${CMAKE_INSTALL_PREFIX}/lib/IexMath-2_2.lib
+    ${CMAKE_INSTALL_PREFIX}/lib/Imath-2_2.lib
     )
 
 INCLUDE_DIRECTORIES (

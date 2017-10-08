@@ -35,11 +35,12 @@
 #ifndef _PyImathStringArrayRegister_h_
 #define _PyImathStringArrayRegister_h_
 
+#include "python_include.h"
 #include <PyImathExport.h>
 
 namespace PyImath {
 
-PYIMATH_EXPORT void register_StringArrays();
+PYIMATH_EXPORT void register_StringArrays(py::module &m);
 
 }
 

@@ -32,13 +32,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-
+#include "python_include.h"
 #include <PyImathQuat.h>
 #include <PyImathExport.h>
 #include "PyImathDecorators.h"
-#include <Python.h>
-#include <boost/python.hpp>
-#include <boost/python/make_constructor.hpp>
 #include <boost/format.hpp>
 #include <PyImath.h>
 #include <PyImathMathExc.h>
@@ -46,6 +43,7 @@
 #include <ImathMatrixAlgo.h>
 #include <ImathEuler.h>
 #include <PyImathOperators.h>
+#include <PyImathTask.h>
 
 // XXX incomplete array wrapping, docstrings missing
 
@@ -55,7 +53,7 @@ template <> const char *PyImath::QuatdArray::name() { return "QuatdArray"; }
 }
 
 namespace PyImath {
-using namespace boost::python;
+
 using namespace IMATH_NAMESPACE;
 
 template <class T> struct QuatName { static const char *value; };
@@ -427,21 +425,22 @@ quatConstructor3(const Matrix44<T> &mat)
 }
 
 template <class T>
-class_<Quat<T> >
-register_Quat()
+py::class_<Quat<T> >
+register_Quat(py::module &m)
 {
-    class_<Quat<T> > quat_class(QuatName<T>::value, QuatName<T>::value,init<Quat<T> >("copy construction"));
+    py::class_<Quat<T> > quat_class(m, QuatName<T>::value, QuatName<T>::value);
     quat_class
-        .def(init<>("imath Quat initialization") )
-        .def(init<Quat<float> >("imath Quat copy initialization") )
-        .def(init<Quat<double> >("imath Quat copy initialization") )
-        .def(init<T,T,T,T>("make Quat from components") )
-        .def(init<T, Vec3<T> >("make Quat from components") )
-        .def("__init__", make_constructor(quatConstructor1<T>))
-        .def("__init__", make_constructor(quatConstructor2<T>))
-        .def("__init__", make_constructor(quatConstructor3<T>))
+        .def(py::init<Quat<T> >(/*"copy construction"*/))
+        .def(py::init<>(/*"imath Quat initialization"*/) )
+        .def(py::init<Quat<float> >(/*"imath Quat copy initialization"*/) )
+        .def(py::init<Quat<double> >(/*"imath Quat copy initialization"*/) )
+        .def(py::init<T,T,T,T>(/*"make Quat from components"*/) )
+        .def(py::init<T, Vec3<T> >(/*"make Quat from components"*/) )
+        .def("__init__", quatConstructor1<T>)
+        .def("__init__", quatConstructor2<T>)
+        .def("__init__", quatConstructor3<T>)
         .def("identity",&Quat<T>::identity)
-        .def("invert",&invert<T>,return_internal_reference<>(),
+        .def("invert",&invert<T>, py::return_value_policy::reference_internal,
         	 "q.invert() -- inverts quaternion q\n"
 			 "(modifying q); returns q")
              
@@ -449,7 +448,7 @@ register_Quat()
         	 "q.inverse() -- returns the inverse of\n"
 			 "quaternion q; q is not modified\n")
              
-        .def("normalize",&normalize<T>,return_internal_reference<>(),
+        .def("normalize",&normalize<T>,py::return_value_policy::reference_internal,
         	 "q.normalize() -- normalizes quaternion q\n"
 			 "(modifying q); returns q")
             
@@ -458,12 +457,12 @@ register_Quat()
 			 "of quaternion q; q is not modified\n")
              
         .def("length",&length<T>)
-        .def("setAxisAngle",&setAxisAngle<T>,return_internal_reference<>(),
+        .def("setAxisAngle",&setAxisAngle<T>,py::return_value_policy::reference_internal,
 			"q.setAxisAngle(x,r) -- sets the value of\n"
 			"quaternion q so that q represents a rotation\n"
 			"of r radians around axis x")
              
-        .def("setRotation",&setRotation<T>,return_internal_reference<>(),
+        .def("setRotation",&setRotation<T>,py::return_value_policy::reference_internal,
         	 "q.setRotation(v,w) -- sets the value of\n"
 			 "quaternion q so that rotating vector v by\n"
 			 "q produces vector w")
@@ -505,7 +504,7 @@ register_Quat()
 			 "of quaternion q to w")
              
         .def("extract", &extract<T>,
-        	 "q.extract(m) -- extracts the rotation component\n"
+        	 "q.py::cast(m) -- extracts the rotation component\n"
 			 "from 4x4 matrix m and stores the result in q")
              
         .def("slerp", &slerp<T>,
@@ -516,16 +515,18 @@ register_Quat()
              
         .def("__str__",Quat_str<T>)
         .def("__repr__",Quat_repr<T>)
-        .def ("__imul__", &imul<T>, return_internal_reference<>())
-        .def ("__imul__", &imulT<T>, return_internal_reference<>())
-        .def ("__idiv__", idiv<T>, return_internal_reference<>())
-        .def ("__idiv__", &idivT<T>, return_internal_reference<>())
-        .def ("__itruediv__", idiv<T>, return_internal_reference<>())
-        .def ("__itruediv__", &idivT<T>, return_internal_reference<>())
-        .def ("__iadd__", &iadd<T>, return_internal_reference<>())
-        .def ("__isub__", &isub<T>, return_internal_reference<>())
+        .def ("__imul__", &imul<T>, py::return_value_policy::reference_internal)
+        .def ("__imul__", &imulT<T>, py::return_value_policy::reference_internal)
+        .def ("__idiv__", idiv<T>, py::return_value_policy::reference_internal)
+        .def ("__idiv__", &idivT<T>, py::return_value_policy::reference_internal)
+        .def ("__itruediv__", idiv<T>, py::return_value_policy::reference_internal)
+        .def ("__itruediv__", &idivT<T>, py::return_value_policy::reference_internal)
+        .def ("__iadd__", &iadd<T>, py::return_value_policy::reference_internal)
+        .def ("__isub__", &isub<T>, py::return_value_policy::reference_internal)
+        /*
         .def(self == self)
         .def(self != self)
+        */
         .def ("__rmul__", &rmulM33<T>)
         .def ("__mul__", &mulM33<T>)
         .def ("__mul__", &mul<T>)
@@ -560,7 +561,7 @@ QuatArray_get(FixedArray<IMATH_NAMESPACE::Quat<T> > &qa)
 }
 
 template <class T>
-struct QuatArray_SetRotationTask : public Task
+struct QuatArray_SetRotationTask : public PyImath::Task
 {
     const FixedArray<IMATH_NAMESPACE::Vec3<T> > &from;
     const FixedArray<IMATH_NAMESPACE::Vec3<T> > &to;
@@ -912,38 +913,38 @@ QuatArray_quatConstructor1(const FixedArray<IMATH_NAMESPACE::Euler<T> > &e)
 }
 
 template <class T>
-class_<FixedArray<IMATH_NAMESPACE::Quat<T> > >
-register_QuatArray()
+py::class_<FixedArray<IMATH_NAMESPACE::Quat<T> > >
+register_QuatArray(py::module &m)
 {
-    class_<FixedArray<IMATH_NAMESPACE::Quat<T> > > quatArray_class = FixedArray<IMATH_NAMESPACE::Quat<T> >::register_("Fixed length array of IMATH_NAMESPACE::Quat");
+    py::class_<FixedArray<IMATH_NAMESPACE::Quat<T> > > quatArray_class = FixedArray<IMATH_NAMESPACE::Quat<T> >::register_(m, "Fixed length array of IMATH_NAMESPACE::Quat");
     quatArray_class
-        .add_property("r",&QuatArray_get<T,0>)
-        .add_property("x",&QuatArray_get<T,1>)
-        .add_property("y",&QuatArray_get<T,2>)
-        .add_property("z",&QuatArray_get<T,3>)
+        .def_property_readonly("r",&QuatArray_get<T,0>)
+        .def_property_readonly("x",&QuatArray_get<T,1>)
+        .def_property_readonly("y",&QuatArray_get<T,2>)
+        .def_property_readonly("z",&QuatArray_get<T,3>)
         .def("setRotation", &QuatArray_setRotation<T>,
-             "set rotation angles for each quat",
-             (args("from", "to")))
+             "set rotation angles for each quat"/*,
+             (args("from", "to"))*/)
         .def("orientToVectors", &QuatArray_orientToVectors<T>,
              "Sets the orientations to match the given forward and up vectors, "
              "matching the forward vector exactly if 'alignForward' is True, matching "
              "the up vector exactly if 'alignForward' is False.  If the vectors are "
-             "already orthogonal, both vectors will be matched exactly.",
-             (args("forward", "up", "alignForward")))
+             "already orthogonal, both vectors will be matched exactly."/*,
+             (args("forward", "up", "alignForward"))*/)
         .def("axis", &QuatArray_axis<T>,
              "get rotation axis for each quat")
         .def("angle", &QuatArray_angle<T>,
              "get rotation angle about the axis returned by axis() for each quat")
         .def("setAxisAngle", &QuatArray_setAxisAngle<T>,
-             "set the quaternion arrays from a given axis and angle",
-             (args("axis", "angle")))
+             "set the quaternion arrays from a given axis and angle"/*,
+             (args("axis", "angle"))*/)
         .def("setEulerXYZ", &QuatArray_setEulerXYZ<T>,
-             "set the quaternion arrays from a given euler XYZ angle vector",
-             (args("euler")))
+             "set the quaternion arrays from a given euler XYZ angle vector"/*,
+             (args("euler"))*/)
         .def("__mul__", &QuatArray_mul<T>)
         .def("__rmul__", &QuatArray_rmulVec3<T>)
         .def("__rmul__", &QuatArray_rmulVec3Array<T>)
-        .def("__init__", make_constructor(QuatArray_quatConstructor1<T>))
+        .def("__init__", QuatArray_quatConstructor1<T>)
         ;
 
     add_comparison_functions(quatArray_class);
@@ -952,11 +953,11 @@ register_QuatArray()
     return quatArray_class;
 }
 
-template PYIMATH_EXPORT class_<IMATH_NAMESPACE::Quat<float> > register_Quat<float>();
-template PYIMATH_EXPORT class_<IMATH_NAMESPACE::Quat<double> > register_Quat<double>();
+template PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Quat<float> > register_Quat<float>(py::module &m);
+template PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Quat<double> > register_Quat<double>(py::module &m);
 		 
-template PYIMATH_EXPORT class_<FixedArray<IMATH_NAMESPACE::Quat<float> > > register_QuatArray<float>();
-template PYIMATH_EXPORT class_<FixedArray<IMATH_NAMESPACE::Quat<double> > > register_QuatArray<double>();
+template PYIMATH_EXPORT py::class_<FixedArray<IMATH_NAMESPACE::Quat<float> > > register_QuatArray<float>(py::module &m);
+template PYIMATH_EXPORT py::class_<FixedArray<IMATH_NAMESPACE::Quat<double> > > register_QuatArray<double>(py::module &m);
 template<> PYIMATH_EXPORT IMATH_NAMESPACE::Quat<float> FixedArrayDefaultValue<IMATH_NAMESPACE::Quat<float> >::value() { return IMATH_NAMESPACE::Quat<float>(); }
 template<> PYIMATH_EXPORT IMATH_NAMESPACE::Quat<double> FixedArrayDefaultValue<IMATH_NAMESPACE::Quat<double> >::value() { return IMATH_NAMESPACE::Quat<double>(); }
 }

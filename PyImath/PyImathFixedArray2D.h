@@ -35,12 +35,13 @@
 #ifndef _PyImathFixedArray2D_h_
 #define _PyImathFixedArray2D_h_
 
-#include <boost/python.hpp>
+#include "python_include.h"
 #include <boost/operators.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/any.hpp>
 #include <Iex.h>
 #include <iostream>
+#include <type_traits>
 #include "PyImathFixedArray.h"
 #include "PyImathOperators.h"
 #include <ImathVec.h>
@@ -185,7 +186,7 @@ class FixedArray2D
         if (index < 0) index += length;
         if (index >= length || index < 0) {
             PyErr_SetString(PyExc_IndexError, "Index out of range");
-            boost::python::throw_error_already_set();
+            throw py::error_already_set();
         }
         return index;
     }
@@ -196,7 +197,7 @@ class FixedArray2D
             PySliceObject *slice = reinterpret_cast<PySliceObject *>(index);
             Py_ssize_t s, e, sl;
             if (PySlice_GetIndicesEx(slice,length,&s,&e,&step,&sl) == -1) {
-                boost::python::throw_error_already_set();
+                throw py::error_already_set();
             }
             if (s < 0 || e < 0 || sl < 0) {
                 throw IEX_NAMESPACE::LogicExc("Slice extraction produced invalid start, end, or length indices");
@@ -209,7 +210,7 @@ class FixedArray2D
             start = i; end = i+1; step = 1; slicelength = 1;
         } else {
             PyErr_SetString(PyExc_TypeError, "Object is not a slice");
-	    boost::python::throw_error_already_set();
+	    throw py::error_already_set();
         }
         //std::cout << "Slice indices are " << start << " " << end << " " << step << " " << slicelength << std::endl;
     }
@@ -243,7 +244,7 @@ class FixedArray2D
         else
         {
             PyErr_SetString(PyExc_TypeError, "Slice syntax error");
-            boost::python::throw_error_already_set();
+            throw py::error_already_set();
         }
         return FixedArray2D(0,0);
     }
@@ -271,10 +272,10 @@ class FixedArray2D
         return f;
     }
 
-//     void setitem(const boost::python::tuple& index, const T &data)
+//     void setitem(const py::tuple& index, const T &data)
 //     {
-//         Py_ssize_t i = boost::python::extract<Py_ssize_t>(index[0]);
-//         Py_ssize_t j = boost::python::extract<Py_ssize_t>(index[1]);
+//         Py_ssize_t i = py::py::cast<Py_ssize_t>(index[0]);
+//         Py_ssize_t j = py::py::cast<Py_ssize_t>(index[1]);
 //         (*this)(i,j) = data;
 //     }
     void
@@ -283,7 +284,7 @@ class FixedArray2D
         if (!PyTuple_Check(index) || PyTuple_Size(index) != 2)
         {
             PyErr_SetString(PyExc_TypeError, "Slice syntax error");
-            boost::python::throw_error_already_set();
+            throw py::error_already_set();
         }
 
         size_t startx=0, endx=0, slicelengthx=0;
@@ -320,7 +321,7 @@ class FixedArray2D
         // we have a valid range of indices
         if (data.len() != IMATH_NAMESPACE::Vec2<size_t>(slicelengthx, slicelengthy)) {
             PyErr_SetString(PyExc_IndexError, "Dimensions of source do not match destination");
-            boost::python::throw_error_already_set();
+            throw py::error_already_set();
         }
         for (size_t i=0; i<slicelengthx; ++i)
             for (size_t j=0; j<slicelengthy; ++j)
@@ -338,7 +339,7 @@ class FixedArray2D
                         (*this)(i,j) = data(i,j);
         } else {
             PyErr_SetString(PyExc_IndexError, "Dimensions of source data do not match destination");
-            boost::python::throw_error_already_set();
+            throw py::error_already_set();
         }
     }
 
@@ -359,7 +360,7 @@ class FixedArray2D
 
             if (data.len() != count) {
                 PyErr_SetString(PyExc_IndexError, "Dimensions of source data do not match destination either masked or unmasked");
-                boost::python::throw_error_already_set();
+                throw py::error_already_set();
             }
 
             for (size_t j = 0, z = 0; j < len.y; j++)
@@ -382,7 +383,7 @@ class FixedArray2D
         // we have a valid range of indices
         if (data.len() != slicelengthx*slicelengthy) {
             PyErr_SetString(PyExc_IndexError, "Dimensions of source data do not match destination");
-            boost::python::throw_error_already_set();
+            throw py::error_already_set();
         }
         for (size_t j=0, z=0; j<slicelengthy; ++j)
             for (size_t i=0; i<slicelengthx; ++i, ++z)
@@ -394,30 +395,22 @@ class FixedArray2D
     T       & operator () (size_t i, size_t j)       { return _ptr[_stride.x*(j*_stride.y + i)]; }
     const T & operator () (size_t i, size_t j) const { return _ptr[_stride.x*(j*_stride.y + i)]; }
     size_t totalLen() const { return _size; }
-    boost::python::tuple size() const
+    py::tuple size() const
     {
-        return boost::python::make_tuple(_length.x, _length.y);
+        return py::make_tuple(_length.x, _length.y);
     }
 
-    static boost::python::class_<FixedArray2D<T> > register_(const char *name, const char *doc)
+    static py::class_<FixedArray2D<T> > register_(py::module &m, const char *name, const char *doc)
     {
-        // a little tricky, but here we go - class types return internal references
-        // but fundemental types just get copied.  this typedef sets up the appropriate
-        // call policy for each type.
-        typedef typename boost::mpl::if_<
-            boost::is_class<T>,
-            boost::python::return_internal_reference<>,
-            boost::python::default_call_policies>::type call_policy;
-
-        boost::python::class_<FixedArray2D<T> > c(name,doc, boost::python::init<size_t, size_t>(
-            "construct an array of the specified length initialized to the default value for the type"));
+        py::class_<FixedArray2D<T> > c(m, name, doc);
         c
-            .def(boost::python::init<const FixedArray2D<T> &>("construct an array with the same values as the given array"))
-            .def(boost::python::init<const T &,size_t,size_t>("construct an array of the specified length initialized to the specified default value"))
+            .def(py::init<Py_ssize_t, Py_ssize_t>(/*"construct an array of the specified length initialized to the default value for the type"*/))
+            .def(py::init<const FixedArray2D<T> &>(/*"construct an array with the same values as the given array"*/))
+            .def(py::init<const T &, Py_ssize_t, Py_ssize_t>(/*"construct an array of the specified length initialized to the specified default value"*/))
             .def("__getitem__", &FixedArray2D<T>::getslice)
             .def("__getitem__", &FixedArray2D<T>::getslice_mask)
 //             .def("__getitem__", &FixedArray2D<T>::getitem, call_policy())
-            .def("item", &FixedArray2D<T>::getitem, call_policy())
+            .def("item", &FixedArray2D<T>::getitem, call_policy<T>())
 //             .def("__setitem__", &FixedArray2D<T>::setitem)
             .def("__setitem__", &FixedArray2D<T>::setitem_scalar)
             .def("__setitem__", &FixedArray2D<T>::setitem_scalar_mask)
@@ -438,7 +431,7 @@ class FixedArray2D
 //     {
 //         if (_length.x != a1.len()) {
 //             PyErr_SetString(PyExc_IndexError, "Dimensions of source do not match destination");
-//             boost::python::throw_error_already_set();
+//             throw py::error_already_set();
 //         }
 //         return _length.x;
 //     }
@@ -448,7 +441,7 @@ class FixedArray2D
     {
         if (len() != a1.len()) {
             PyErr_SetString(PyExc_IndexError, "Dimensions of source do not match destination");
-            boost::python::throw_error_already_set();
+            throw py::error_already_set();
         }
         return len();
     }
@@ -677,8 +670,8 @@ template <class T> static FixedArray2D<T> & operator |= (FixedArray2D<T> &a0, co
 template <class T> static FixedArray2D<T> & operator |= (FixedArray2D<T> &a0, const T &v1)               { return apply_array2d_scalar_ibinary_op<op_ibitor,T,T>(a0,v1); }
 
 template <class T>
-static void add_arithmetic_math_functions(boost::python::class_<FixedArray2D<T> > &c) {
-    using namespace boost::python;
+static void add_arithmetic_math_functions(py::class_<FixedArray2D<T> > &c) {
+    
     c
         .def("__add__",&apply_array2d_array2d_binary_op<op_add,T,T,T>)
         .def("__add__",&apply_array2d_scalar_binary_op<op_add,T,T,T>)
@@ -694,80 +687,80 @@ static void add_arithmetic_math_functions(boost::python::class_<FixedArray2D<T> 
         .def("__truediv__",&apply_array2d_array2d_binary_op<op_div,T,T,T>)
         .def("__truediv__",&apply_array2d_scalar_binary_op<op_div,T,T,T>)
         .def("__neg__",&apply_array2d_unary_op<op_neg,T,T>)
-        .def("__iadd__",&apply_array2d_array2d_ibinary_op<op_iadd,T,T>,return_internal_reference<>())
-        .def("__iadd__",&apply_array2d_scalar_ibinary_op<op_iadd,T,T>,return_internal_reference<>())
-        .def("__isub__",&apply_array2d_array2d_ibinary_op<op_isub,T,T>,return_internal_reference<>())
-        .def("__isub__",&apply_array2d_scalar_ibinary_op<op_isub,T,T>,return_internal_reference<>())
-        .def("__imul__",&apply_array2d_array2d_ibinary_op<op_imul,T,T>,return_internal_reference<>())
-        .def("__imul__",&apply_array2d_scalar_ibinary_op<op_imul,T,T>,return_internal_reference<>())
-        .def("__idiv__",&apply_array2d_array2d_ibinary_op<op_idiv,T,T>,return_internal_reference<>())
-        .def("__idiv__",&apply_array2d_scalar_ibinary_op<op_idiv,T,T>,return_internal_reference<>())
-        .def("__itruediv__",&apply_array2d_array2d_ibinary_op<op_idiv,T,T>,return_internal_reference<>())
-        .def("__itruediv__",&apply_array2d_scalar_ibinary_op<op_idiv,T,T>,return_internal_reference<>())
+        .def("__iadd__",&apply_array2d_array2d_ibinary_op<op_iadd,T,T>,py::return_value_policy::reference_internal)
+        .def("__iadd__",&apply_array2d_scalar_ibinary_op<op_iadd,T,T>,py::return_value_policy::reference_internal)
+        .def("__isub__",&apply_array2d_array2d_ibinary_op<op_isub,T,T>,py::return_value_policy::reference_internal)
+        .def("__isub__",&apply_array2d_scalar_ibinary_op<op_isub,T,T>,py::return_value_policy::reference_internal)
+        .def("__imul__",&apply_array2d_array2d_ibinary_op<op_imul,T,T>,py::return_value_policy::reference_internal)
+        .def("__imul__",&apply_array2d_scalar_ibinary_op<op_imul,T,T>,py::return_value_policy::reference_internal)
+        .def("__idiv__",&apply_array2d_array2d_ibinary_op<op_idiv,T,T>,py::return_value_policy::reference_internal)
+        .def("__idiv__",&apply_array2d_scalar_ibinary_op<op_idiv,T,T>,py::return_value_policy::reference_internal)
+        .def("__itruediv__",&apply_array2d_array2d_ibinary_op<op_idiv,T,T>,py::return_value_policy::reference_internal)
+        .def("__itruediv__",&apply_array2d_scalar_ibinary_op<op_idiv,T,T>,py::return_value_policy::reference_internal)
         ;
 }
 
 
 template <class T>
-static void add_pow_math_functions(boost::python::class_<FixedArray2D<T> > &c) {
-    using namespace boost::python;
+static void add_pow_math_functions(py::class_<FixedArray2D<T> > &c) {
+    
     c
         .def("__pow__",&apply_array2d_array2d_binary_op<op_pow,T,T,T>)
         .def("__pow__",&apply_array2d_scalar_binary_op<op_pow,T,T,T>)
         .def("__rpow__",&apply_array2d_scalar_binary_rop<op_rpow,T,T,T>)
-        .def("__ipow__",&apply_array2d_array2d_ibinary_op<op_ipow,T,T>,return_internal_reference<>())
-        .def("__ipow__",&apply_array2d_scalar_ibinary_op<op_ipow,T,T>,return_internal_reference<>())
+        .def("__ipow__",&apply_array2d_array2d_ibinary_op<op_ipow,T,T>,py::return_value_policy::reference_internal)
+        .def("__ipow__",&apply_array2d_scalar_ibinary_op<op_ipow,T,T>,py::return_value_policy::reference_internal)
         ;
 }
 
 template <class T>
-static void add_mod_math_functions(boost::python::class_<FixedArray2D<T> > &c) {
-    using namespace boost::python;
+static void add_mod_math_functions(py::class_<FixedArray2D<T> > &c) {
+    
     c
         .def("__mod__",&apply_array2d_array2d_binary_op<op_mod,T,T,T>)
         .def("__mod__",&apply_array2d_scalar_binary_op<op_mod,T,T,T>)
-        .def("__imod__",&apply_array2d_array2d_ibinary_op<op_imod,T,T>,return_internal_reference<>())
-        .def("__imod__",&apply_array2d_scalar_ibinary_op<op_imod,T,T>,return_internal_reference<>())
+        .def("__imod__",&apply_array2d_array2d_ibinary_op<op_imod,T,T>,py::return_value_policy::reference_internal)
+        .def("__imod__",&apply_array2d_scalar_ibinary_op<op_imod,T,T>,py::return_value_policy::reference_internal)
         ;
 }
 
 template <class T>
-static void add_shift_math_functions(boost::python::class_<FixedArray2D<T> > &c) {
-    using namespace boost::python;
+static void add_shift_math_functions(py::class_<FixedArray2D<T> > &c) {
+    
     c
         .def("__lshift__",&apply_array2d_array2d_binary_op<op_lshift,T,T,T>)
         .def("__lshift__",&apply_array2d_scalar_binary_op<op_lshift,T,T,T>)
-        .def("__ilshift__",&apply_array2d_array2d_ibinary_op<op_ilshift,T,T>,return_internal_reference<>())
-        .def("__ilshift__",&apply_array2d_scalar_ibinary_op<op_ilshift,T,T>,return_internal_reference<>())
+        .def("__ilshift__",&apply_array2d_array2d_ibinary_op<op_ilshift,T,T>,py::return_value_policy::reference_internal)
+        .def("__ilshift__",&apply_array2d_scalar_ibinary_op<op_ilshift,T,T>,py::return_value_policy::reference_internal)
         .def("__rshift__",&apply_array2d_array2d_binary_op<op_rshift,T,T,T>)
         .def("__rshift__",&apply_array2d_scalar_binary_op<op_rshift,T,T,T>)
-        .def("__irshift__",&apply_array2d_array2d_ibinary_op<op_irshift,T,T>,return_internal_reference<>())
-        .def("__irshift__",&apply_array2d_scalar_ibinary_op<op_irshift,T,T>,return_internal_reference<>())
+        .def("__irshift__",&apply_array2d_array2d_ibinary_op<op_irshift,T,T>,py::return_value_policy::reference_internal)
+        .def("__irshift__",&apply_array2d_scalar_ibinary_op<op_irshift,T,T>,py::return_value_policy::reference_internal)
         ;
 }
 
 template <class T>
-static void add_bitwise_math_functions(boost::python::class_<FixedArray2D<T> > &c) {
-    using namespace boost::python;
+static void add_bitwise_math_functions(py::class_<FixedArray2D<T> > &c) {
+    
     c
         .def("__and__",&apply_array2d_array2d_binary_op<op_bitand,T,T,T>)
         .def("__and__",&apply_array2d_scalar_binary_op<op_bitand,T,T,T>)
-        .def("__iand__",&apply_array2d_array2d_ibinary_op<op_ibitand,T,T>,return_internal_reference<>())
-        .def("__iand__",&apply_array2d_scalar_ibinary_op<op_ibitand,T,T>,return_internal_reference<>())
+        .def("__iand__",&apply_array2d_array2d_ibinary_op<op_ibitand,T,T>,py::return_value_policy::reference_internal)
+        .def("__iand__",&apply_array2d_scalar_ibinary_op<op_ibitand,T,T>,py::return_value_policy::reference_internal)
         .def("__or__",&apply_array2d_array2d_binary_op<op_bitor,T,T,T>)
         .def("__or__",&apply_array2d_scalar_binary_op<op_bitor,T,T,T>)
-        .def("__ior__",&apply_array2d_array2d_ibinary_op<op_ibitor,T,T>,return_internal_reference<>())
-        .def("__ior__",&apply_array2d_scalar_ibinary_op<op_ibitor,T,T>,return_internal_reference<>())
+        .def("__ior__",&apply_array2d_array2d_ibinary_op<op_ibitor,T,T>,py::return_value_policy::reference_internal)
+        .def("__ior__",&apply_array2d_scalar_ibinary_op<op_ibitor,T,T>,py::return_value_policy::reference_internal)
         .def("__xor__",&apply_array2d_array2d_binary_op<op_xor,T,T,T>)
         .def("__xor__",&apply_array2d_scalar_binary_op<op_xor,T,T,T>)
-        .def("__ixor__",&apply_array2d_array2d_ibinary_op<op_ixor,T,T>,return_internal_reference<>())
-        .def("__ixor__",&apply_array2d_scalar_ibinary_op<op_ixor,T,T>,return_internal_reference<>())
+        .def("__ixor__",&apply_array2d_array2d_ibinary_op<op_ixor,T,T>,py::return_value_policy::reference_internal)
+        .def("__ixor__",&apply_array2d_scalar_ibinary_op<op_ixor,T,T>,py::return_value_policy::reference_internal)
         ;
 }
 
 template <class T>
-static void add_comparison_functions(boost::python::class_<FixedArray2D<T> > &c) {
-    using namespace boost::python;
+static void add_comparison_functions(py::class_<FixedArray2D<T> > &c) {
+    
     c
         .def("__eq__",&apply_array2d_array2d_binary_op<op_eq,T,T,int>)
         .def("__eq__",&apply_array2d_scalar_binary_op<op_eq,T,T,int>)
@@ -777,8 +770,8 @@ static void add_comparison_functions(boost::python::class_<FixedArray2D<T> > &c)
 }
 
 template <class T>
-static void add_ordered_comparison_functions(boost::python::class_<FixedArray2D<T> > &c) {
-    using namespace boost::python;
+static void add_ordered_comparison_functions(py::class_<FixedArray2D<T> > &c) {
+    
     c
         .def("__lt__",&apply_array2d_array2d_binary_op<op_lt,T,T,int>)
         .def("__lt__",&apply_array2d_scalar_binary_op<op_lt,T,T,int>)
@@ -792,9 +785,9 @@ static void add_ordered_comparison_functions(boost::python::class_<FixedArray2D<
 }
 
 template <class S,class T>
-static void add_explicit_construction_from_type(boost::python::class_<FixedArray2D<T> > &c) {
-    using namespace boost::python;
-    c.def(boost::python::init<FixedArray2D<S> >("copy contents of other array into this one"));
+static void add_explicit_construction_from_type(py::class_<FixedArray2D<T> > &c) {
+    
+    c.def(py::init<FixedArray2D<S> >(/*"copy contents of other array into this one"*/));
 }
 
 }

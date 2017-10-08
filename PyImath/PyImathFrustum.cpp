@@ -32,19 +32,19 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
+#include "python_include.h"
 #include <PyImathFrustum.h>
 #include "PyImathDecorators.h"
 #include "PyImathExport.h"
-#include <Python.h>
-#include <boost/python.hpp>
 #include <boost/format.hpp>
 #include <PyImath.h>
 #include <PyImathMathExc.h>
 #include <PyImathVec.h>
+#include <PyImathTask.h>
 #include <Iex.h>
 
 namespace PyImath{
-using namespace boost::python;
+
 using namespace IMATH_NAMESPACE;
 
 template <class T> struct FrustumName {static const char *value;};
@@ -124,14 +124,14 @@ projectScreenToRay (Frustum<T> &f, const Vec2<T> &p)
 
 template <class T>
 static Line3<T>
-projectScreenToRayTuple(Frustum<T> &f, const tuple &t)
+projectScreenToRayTuple(Frustum<T> &f, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 2)
+    if(py::cast<int>(t.attr("__len__")()) == 2)
     {
         Vec2<T> point;
-        point.x = extract<T>(t[0]);
-        point.y = extract<T>(t[1]);
+        point.x = py::cast<T>(t[0]);
+        point.y = py::cast<T>(t[1]);
         return f.projectScreenToRay(point);
     }
     else
@@ -149,15 +149,15 @@ projectPointToScreen (Frustum<T> &f, const Vec3<T> &p)
 
 template <class T>
 static Vec2<T>
-projectPointToScreenTuple(Frustum<T> &f, const tuple &t)
+projectPointToScreenTuple(Frustum<T> &f, const py::tuple &t)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
         Vec3<T> point;
-        point.x = extract<T>(t[0]);
-        point.y = extract<T>(t[1]);
-        point.z = extract<T>(t[2]);
+        point.x = py::cast<T>(t[0]);
+        point.y = py::cast<T>(t[1]);
+        point.z = py::cast<T>(t[2]);
         return f.projectPointToScreen(point);
     }
     else
@@ -167,7 +167,7 @@ projectPointToScreenTuple(Frustum<T> &f, const tuple &t)
 
 template <class T>
 static Vec2<T>
-projectPointToScreenObj(Frustum<T> &f, const object &o)
+projectPointToScreenObj(Frustum<T> &f, const py::object &o)
 {
     MATH_EXC_ON;
     Vec3<T> v;
@@ -211,15 +211,15 @@ worldRadius(Frustum<T> &f, const Vec3<T> &p, T radius)
 
 template <class T>
 static T
-worldRadiusTuple(Frustum<T> &f, const tuple &t, T radius)
+worldRadiusTuple(Frustum<T> &f, const py::tuple &t, T radius)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
         Vec3<T> point;
-        point.x = extract<T>(t[0]);
-        point.y = extract<T>(t[1]);
-        point.z = extract<T>(t[2]);
+        point.x = py::cast<T>(t[0]);
+        point.y = py::cast<T>(t[1]);
+        point.z = py::cast<T>(t[2]);
         return f.worldRadius(point, radius);
     }
     else
@@ -236,15 +236,15 @@ screenRadius(Frustum<T> &f, const Vec3<T> &p, T radius)
 
 template <class T>
 static T
-screenRadiusTuple(Frustum<T> &f, const tuple &t, T radius)
+screenRadiusTuple(Frustum<T> &f, const py::tuple &t, T radius)
 {
     MATH_EXC_ON;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
         Vec3<T> point;
-        point.x = extract<T>(t[0]);
-        point.y = extract<T>(t[1]);
-        point.z = extract<T>(t[2]);
+        point.x = py::cast<T>(t[0]);
+        point.y = py::cast<T>(t[1]);
+        point.z = py::cast<T>(t[2]);
         return f.screenRadius(point, radius);
     }
     else
@@ -268,46 +268,49 @@ planes2(Frustum<T> &f, Plane3<T> *p, const Matrix44<T> &m)
 }
 
 template <class T>
-static tuple
+static py::tuple
 planes3(Frustum<T> &f, const Matrix44<T> &mat)
 {
     MATH_EXC_ON;
     IMATH_NAMESPACE::Plane3<T> p[6];
     f.planes(p,mat);
     
-    tuple t = make_tuple(p[0],p[1],p[2],p[3],p[4],p[5]);
+    auto t = py::make_tuple(p[0],p[1],p[2],p[3],p[4],p[5]);
     
     return t;
 }
 
 template <class T>
-static tuple
+static py::tuple
 planes4(Frustum<T> &f)
 {
     MATH_EXC_ON;
     IMATH_NAMESPACE::Plane3<T> p[6];
     f.planes(p);
     
-    tuple t = make_tuple(p[0],p[1],p[2],p[3],p[4],p[5]);
+    auto t = py::make_tuple(p[0],p[1],p[2],p[3],p[4],p[5]);
     
     return t;
 }
 
 template <class T>
-class_<Frustum<T> >
-register_Frustum()
+py::class_<Frustum<T> >
+register_Frustum(py::module &m)
 {
     void (IMATH_NAMESPACE::Frustum<T>::*set1)(T,T,T,T,T,T,bool) = &IMATH_NAMESPACE::Frustum<T>::set;
     void (IMATH_NAMESPACE::Frustum<T>::*set2)(T,T,T,T,T)        = &IMATH_NAMESPACE::Frustum<T>::set;
     const char *name = FrustumName<T>::value;
     
-    class_< Frustum<T> > frustum_class(name,name,init<Frustum<T> >("copy construction"));
+    py::class_< Frustum<T> > frustum_class(m, name,name);
     frustum_class
-        .def(init<>("Frustum() default construction"))
-        .def(init<T,T,T,T,T,T,bool>("Frustum(nearPlane,farPlane,left,right,top,bottom,ortho) construction"))
-        .def(init<T,T,T,T,T>("Frustum(nearPlane,farPlane,fovx,fovy,aspect) construction"))
+        .def(py::init<Frustum<T> >(/*"copy construction"*/))
+        .def(py::init<>(/*"Frustum() default construction"*/))
+        .def(py::init<T,T,T,T,T,T,bool>(/*"Frustum(nearPlane,farPlane,left,right,top,bottom,ortho) construction"*/))
+        .def(py::init<T,T,T,T,T>(/*"Frustum(nearPlane,farPlane,fovx,fovy,aspect) construction"*/))
+        /*
         .def(self == self)
         .def(self != self)
+        */
         .def("__repr__",&Frustum_repr<T>)
         .def("set", set1,
         	 "F.set(nearPlane, farPlane, left, right, top, bottom, "
@@ -488,8 +491,8 @@ frustumTest_isVisible(IMATH_NAMESPACE::FrustumTest<T>& ft, const PyImath::FixedA
 }
 
 template <class T>
-class_<FrustumTest<T> >
-register_FrustumTest()
+py::class_<FrustumTest<T> >
+register_FrustumTest(py::module &m)
 {
     const char *name = FrustumTestName<T>::value;
     
@@ -499,8 +502,9 @@ register_FrustumTest()
     bool (FrustumTest<T>::*completelyContainsS)(const Sphere3<T> &) const = &FrustumTest<T>::completelyContains;
     bool (FrustumTest<T>::*completelyContainsB)(const Box<Vec3<T> > &) const = &FrustumTest<T>::completelyContains;
 
-    class_< FrustumTest<T> > frustumtest_class(name,name,init<const IMATH_NAMESPACE::Frustum<T>&,const IMATH_NAMESPACE::Matrix44<T>&>("create a frustum test object from a frustum and transform"));
+    py::class_< FrustumTest<T> > frustumtest_class(m, name,name);
     frustumtest_class
+        .def(py::init<const IMATH_NAMESPACE::Frustum<T>&, const IMATH_NAMESPACE::Matrix44<T>&>(/*"create a frustum test object from a frustum and transform"*/))
         .def("isVisible",isVisibleS)
         .def("isVisible",isVisibleB)
         .def("isVisible",isVisibleV)
@@ -514,8 +518,8 @@ register_FrustumTest()
     return frustumtest_class;
 }
 
-template PYIMATH_EXPORT class_<Frustum<float> > register_Frustum<float>();
-template PYIMATH_EXPORT class_<Frustum<double> > register_Frustum<double>();
-template PYIMATH_EXPORT class_<FrustumTest<float> > register_FrustumTest<float>();
-template PYIMATH_EXPORT class_<FrustumTest<double> > register_FrustumTest<double>();
+template PYIMATH_EXPORT py::class_<Frustum<float> > register_Frustum<float>(py::module &m);
+template PYIMATH_EXPORT py::class_<Frustum<double> > register_Frustum<double>(py::module &m);
+template PYIMATH_EXPORT py::class_<FrustumTest<float> > register_FrustumTest<float>(py::module &m);
+template PYIMATH_EXPORT py::class_<FrustumTest<double> > register_FrustumTest<double>(py::module &m);
 }

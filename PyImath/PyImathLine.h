@@ -35,15 +35,14 @@
 #ifndef _PyImathLine_h_
 #define _PyImathLine_h_
 
-#include <Python.h>
-#include <boost/python.hpp>
+#include "python_include.h"
 #include <ImathLine.h>
 #include <PyImath.h>
 
 
 namespace PyImath {
 
-template <class T> boost::python::class_<IMATH_NAMESPACE::Line3<T> > register_Line();
+template <class T> py::class_<IMATH_NAMESPACE::Line3<T> > register_Line(py::module &m);
 
 //
 
@@ -65,7 +64,7 @@ template <class T>
 PyObject *
 L3<T>::wrap (const IMATH_NAMESPACE::Line3<T> &l)
 {
-    typename boost::python::return_by_value::apply < IMATH_NAMESPACE::Line3<T> >::type converter;
+    typename py::return_by_value::apply < IMATH_NAMESPACE::Line3<T> >::type converter;
     PyObject *p = converter (l);
     return p;
 }
@@ -74,7 +73,7 @@ template <class T>
 int
 L3<T>::convert (PyObject *p, IMATH_NAMESPACE::Line3<T> *l)
 {
-    boost::python::extract <IMATH_NAMESPACE::Line3f> extractorLf (p);
+    py::py::cast <IMATH_NAMESPACE::Line3f> extractorLf (p);
     if (extractorLf.check())
     {
         IMATH_NAMESPACE::Line3f e = extractorLf();
@@ -83,7 +82,7 @@ L3<T>::convert (PyObject *p, IMATH_NAMESPACE::Line3<T> *l)
         return 1;
     }
 
-    boost::python::extract <IMATH_NAMESPACE::Line3d> extractorLd (p);
+    py::py::cast <IMATH_NAMESPACE::Line3d> extractorLd (p);
     if (extractorLd.check())
     {
         IMATH_NAMESPACE::Line3d e = extractorLd();

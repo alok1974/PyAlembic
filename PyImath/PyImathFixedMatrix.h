@@ -35,7 +35,7 @@
 #ifndef _PyImathFixedMatrix_h_
 #define _PyImathFixedMatrix_h_
 
-#include <boost/python.hpp>
+#include "python_include.h"
 #include <iostream>
 #include "PyImathFixedArray.h"
 #include "PyImathOperators.h"
@@ -123,7 +123,7 @@ class FixedMatrix
         if (index < 0) index += _rows;
         if (index >= _rows || index < 0) {
             PyErr_SetString(PyExc_IndexError, "Index out of range");
-            boost::python::throw_error_already_set();
+            throw py::error_already_set();
         }
         return index;
     }
@@ -133,14 +133,14 @@ class FixedMatrix
         if (PySlice_Check(index)) {
             PySliceObject *slice = reinterpret_cast<PySliceObject *>(index);
             if (PySlice_GetIndicesEx(slice,_rows,&start,&end,&step,&slicelength) == -1) {
-		    boost::python::throw_error_already_set();
+		    throw py::error_already_set();
             }
         } else if (PyInt_Check(index)) {
             int i = convert_index(PyInt_AS_LONG(index));
             start = i; end = i+1; step = 1; slicelength = 1;
         } else {
             PyErr_SetString(PyExc_TypeError, "Object is not a slice");
-	    boost::python::throw_error_already_set();
+	    throw py::error_already_set();
         }
         //std::cout << "Slice indices are " << start << " " << end << " " << step << " " << slicelength << std::endl;
     }
@@ -182,7 +182,7 @@ class FixedMatrix
         extract_slice_indices(index,start,end,step,slicelength);
         if (data.len() != _cols) {
             PyErr_SetString(PyExc_IndexError, "Dimensions of source do not match destination");
-	    boost::python::throw_error_already_set();
+	    throw py::error_already_set();
         }
         for (int i=0; i<slicelength; ++i) {
             for (int j = 0; j < _cols; ++j) {
@@ -200,7 +200,7 @@ class FixedMatrix
         // we have a valid range of indices
         if (data.rows() != slicelength || data.cols() != cols()) {
             PyErr_SetString(PyExc_IndexError, "Dimensions of source do not match destination");
-	    boost::python::throw_error_already_set();
+	    throw py::error_already_set();
         }
         for (int i=0; i<slicelength; ++i) {
             for (int j=0; j<cols(); ++j) {
@@ -220,12 +220,13 @@ class FixedMatrix
     FixedArray<T> operator [] (int i) { return FixedArray<T>(&_ptr[i*_rowStride*_cols*_colStride],_cols,_colStride); }
     const FixedArray<T> operator [] (int i) const { return FixedArray<T>(const_cast<T *>(&_ptr[i*_rowStride*_cols*_colStride]),_cols,_colStride); }
 
-    static boost::python::class_<FixedMatrix<T> > register_(const char *name, const char *doc)
+    static py::class_<FixedMatrix<T> > register_(py::module &m, const char *name, const char *doc)
     {
-        boost::python::class_<FixedMatrix<T> > c(name,doc, boost::python::init<int,int>("return an unitialized array of the specified rows and cols"));
+        py::class_<FixedMatrix<T> > c(m, name,doc);
         c
+            .def(py::init<int, int>(/*"return an unitialized array of the specified rows and cols"*/))
             .def("__getitem__", &FixedMatrix<T>::getslice)
-            .def("__getitem__", &FixedMatrix<T>::getitem, boost::python::return_internal_reference<>()) 
+            .def("__getitem__", &FixedMatrix<T>::getitem, py::return_value_policy::reference_internal) 
             .def("__setitem__", &FixedMatrix<T>::setitem_scalar)
             .def("__setitem__", &FixedMatrix<T>::setitem_vector)
             .def("__setitem__", &FixedMatrix<T>::setitem_matrix)
@@ -241,7 +242,7 @@ class FixedMatrix
     {
         if (rows() != a1.rows() || cols() != a1.cols()) {
             PyErr_SetString(PyExc_IndexError, "Dimensions of source do not match destination");
-	    boost::python::throw_error_already_set();
+	    throw py::error_already_set();
         }
         return rows();
     }
@@ -443,8 +444,8 @@ template <class T> static FixedMatrix<T> & operator |= (FixedMatrix<T> &a0, cons
 template <class T> static FixedMatrix<T> & operator |= (FixedMatrix<T> &a0, const T &v1)              { return apply_matrix_scalar_ibinary_op<op_ibitor,T,T>(a0,v1); }
 
 template <class T>
-static void add_arithmetic_math_functions(boost::python::class_<FixedMatrix<T> > &c) {
-    using namespace boost::python;
+static void add_arithmetic_math_functions(py::class_<FixedMatrix<T> > &c) {
+    
     c
         .def("__add__",&apply_matrix_matrix_binary_op<op_add,T,T,T>)
         .def("__add__",&apply_matrix_scalar_binary_op<op_add,T,T,T>)
@@ -460,33 +461,33 @@ static void add_arithmetic_math_functions(boost::python::class_<FixedMatrix<T> >
         .def("__truediv__",&apply_matrix_matrix_binary_op<op_div,T,T,T>)
         .def("__truediv__",&apply_matrix_scalar_binary_op<op_div,T,T,T>)
         .def("__neg__",&apply_matrix_unary_op<op_neg,T,T>)
-        .def("__iadd__",&apply_matrix_matrix_ibinary_op<op_iadd,T,T>,return_internal_reference<>())
-        .def("__iadd__",&apply_matrix_scalar_ibinary_op<op_iadd,T,T>,return_internal_reference<>())
-        .def("__isub__",&apply_matrix_matrix_ibinary_op<op_isub,T,T>,return_internal_reference<>())
-        .def("__isub__",&apply_matrix_scalar_ibinary_op<op_isub,T,T>,return_internal_reference<>())
-        .def("__imul__",&apply_matrix_matrix_ibinary_op<op_imul,T,T>,return_internal_reference<>())
-        .def("__imul__",&apply_matrix_scalar_ibinary_op<op_imul,T,T>,return_internal_reference<>())
-        .def("__idiv__",&apply_matrix_matrix_ibinary_op<op_idiv,T,T>,return_internal_reference<>())
-        .def("__idiv__",&apply_matrix_scalar_ibinary_op<op_idiv,T,T>,return_internal_reference<>())
-        .def("__itruediv__",&apply_matrix_matrix_ibinary_op<op_idiv,T,T>,return_internal_reference<>())
-        .def("__itruediv__",&apply_matrix_scalar_ibinary_op<op_idiv,T,T>,return_internal_reference<>())
+        .def("__iadd__",&apply_matrix_matrix_ibinary_op<op_iadd,T,T>,py::return_value_policy::reference_internal)
+        .def("__iadd__",&apply_matrix_scalar_ibinary_op<op_iadd,T,T>,py::return_value_policy::reference_internal)
+        .def("__isub__",&apply_matrix_matrix_ibinary_op<op_isub,T,T>,py::return_value_policy::reference_internal)
+        .def("__isub__",&apply_matrix_scalar_ibinary_op<op_isub,T,T>,py::return_value_policy::reference_internal)
+        .def("__imul__",&apply_matrix_matrix_ibinary_op<op_imul,T,T>,py::return_value_policy::reference_internal)
+        .def("__imul__",&apply_matrix_scalar_ibinary_op<op_imul,T,T>,py::return_value_policy::reference_internal)
+        .def("__idiv__",&apply_matrix_matrix_ibinary_op<op_idiv,T,T>,py::return_value_policy::reference_internal)
+        .def("__idiv__",&apply_matrix_scalar_ibinary_op<op_idiv,T,T>,py::return_value_policy::reference_internal)
+        .def("__itruediv__",&apply_matrix_matrix_ibinary_op<op_idiv,T,T>,py::return_value_policy::reference_internal)
+        .def("__itruediv__",&apply_matrix_scalar_ibinary_op<op_idiv,T,T>,py::return_value_policy::reference_internal)
         ;
 }
 
 template <class T>
-static void add_pow_math_functions(boost::python::class_<FixedMatrix<T> > &c) {
-    using namespace boost::python;
+static void add_pow_math_functions(py::class_<FixedMatrix<T> > &c) {
+    
     c
         .def("__pow__",&pow_matrix_scalar<T>)
         .def("__pow__",&pow_matrix_matrix<T>)
-        .def("__ipow__",&ipow_matrix_scalar<T>,return_internal_reference<>())
-        .def("__ipow__",&ipow_matrix_matrix<T>,return_internal_reference<>())
+        .def("__ipow__",&ipow_matrix_scalar<T>,py::return_value_policy::reference_internal)
+        .def("__ipow__",&ipow_matrix_matrix<T>,py::return_value_policy::reference_internal)
         ;
 }
 
 template <class T>
-static void add_mod_math_functions(boost::python::class_<FixedMatrix<T> > &c) {
-    using namespace boost::python;
+static void add_mod_math_functions(py::class_<FixedMatrix<T> > &c) {
+    
     c
         .def(self % self)
         .def(self % other<T>())
@@ -496,8 +497,8 @@ static void add_mod_math_functions(boost::python::class_<FixedMatrix<T> > &c) {
 }
 
 template <class T>
-static void add_shift_math_functions(boost::python::class_<FixedMatrix<T> > &c) {
-    using namespace boost::python;
+static void add_shift_math_functions(py::class_<FixedMatrix<T> > &c) {
+    
     c
         .def(self << self)
         .def(self << other<T>())
@@ -511,8 +512,8 @@ static void add_shift_math_functions(boost::python::class_<FixedMatrix<T> > &c) 
 }
 
 template <class T>
-static void add_bitwise_math_functions(boost::python::class_<FixedMatrix<T> > &c) {
-    using namespace boost::python;
+static void add_bitwise_math_functions(py::class_<FixedMatrix<T> > &c) {
+    
     c
         .def(self & self)
         .def(self & other<T>())

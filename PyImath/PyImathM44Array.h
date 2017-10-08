@@ -35,12 +35,12 @@
 #ifndef _PyImathM44Array_h_
 #define _PyImathM44Array_h_
 
-#include <boost/python.hpp>
+#include "python_include.h"
 #include <ImathMatrix.h>
 #include <PyImathOperators.h>
 
 namespace PyImath {
-using namespace boost::python;
+
 
 
 template <class T> struct M44ArrayName { static const char *value(); };
@@ -55,10 +55,10 @@ setM44ArrayItem(FixedArray<IMATH_NAMESPACE::Matrix44<T> > &ma,
 }
 
 template <class T>
-class_<FixedArray<IMATH_NAMESPACE::Matrix44<T> > >
+py::class_<FixedArray<IMATH_NAMESPACE::Matrix44<T> > >
 register_M44Array()
 {
-    class_<FixedArray<IMATH_NAMESPACE::Matrix44<T> > > m44Array_class = FixedArray<IMATH_NAMESPACE::Matrix44<T> >::register_("Fixed length array of IMATH_NAMESPACE::M44");
+    py::class_<FixedArray<IMATH_NAMESPACE::Matrix44<T> > > m44Array_class = FixedArray<IMATH_NAMESPACE::Matrix44<T> >::register_("Fixed length array of IMATH_NAMESPACE::M44");
     m44Array_class
     .def("__setitem__", &setM44ArrayItem<T>)
     ;

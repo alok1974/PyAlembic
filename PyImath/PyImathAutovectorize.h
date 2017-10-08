@@ -422,7 +422,6 @@ struct VectorizedOperation3 : public Task
     }
 };
 
-
 template <class Op, class Vectorize, class Func>
 struct VectorizedFunction1 {
     BOOST_STATIC_ASSERT((size<Vectorize>::value == function_traits<Func>::arity));
@@ -446,12 +445,14 @@ struct VectorizedFunction1 {
         return retval;
     }
 
+    /*
     static std::string
-    format_arguments(const boost::python::detail::keywords<1> &args)
+    format_arguments(const py::detail::keywords<1> &args)
     {
         // TODO: add types here
         return std::string("(")+args.elements[0].name+") - ";
     }
+    */
 };
 
 template <class Op, class Vectorize, class Func>
@@ -479,7 +480,7 @@ struct VectorizedFunction2 {
     }
 
     static std::string
-    format_arguments(const boost::python::detail::keywords<2> &args)
+    format_arguments(const py::detail::keywords<2> &args)
     {
         // TODO: add types here
         return std::string("(")+args.elements[0].name+","+args.elements[1].name+") - ";
@@ -512,7 +513,7 @@ struct VectorizedFunction3 {
     }
 
     static std::string
-    format_arguments(const boost::python::detail::keywords<3> &args)
+    format_arguments(const py::detail::keywords<3> &args)
     {
         // TODO: add types here
         return std::string("(")+args.elements[0].name+","+args.elements[1].name+","+args.elements[2].name+") - ";
@@ -541,7 +542,7 @@ struct function_binding
             >,
             long_<function_traits<Func>::arity> >::type vectorized_function_type;
         std::string doc = _name + vectorized_function_type::format_arguments(_args) + _doc;
-        boost::python::def(_name.c_str(),&vectorized_function_type::apply,doc.c_str(),_args);
+        py::def(_name.c_str(),&vectorized_function_type::apply,doc.c_str(),_args);
     }
 };
 
@@ -709,7 +710,7 @@ struct VectorizedVoidMemberFunction1 {
     }
 
     static std::string
-    format_arguments(const boost::python::detail::keywords<1> &args)
+    format_arguments(const py::detail::keywords<1> &args)
     {
         // TODO: add types here
         return std::string("(")+args.elements[0].name+") - ";
@@ -756,7 +757,7 @@ struct VectorizedVoidMaskableMemberFunction1 {
     }
 
     static std::string
-    format_arguments(const boost::python::detail::keywords<1> &args)
+    format_arguments(const py::detail::keywords<1> &args)
     {
         // TODO: add types here
         return std::string("(")+args.elements[0].name+") - ";
@@ -786,7 +787,7 @@ struct VectorizedVoidMemberFunction2 {
     }
 
     static std::string
-    format_arguments(const boost::python::detail::keywords<2> &args)
+    format_arguments(const py::detail::keywords<2> &args)
     {
         // TODO: add types here
         return std::string("(")+args.elements[0].name+","+args.elements[1].name+") - ";
@@ -841,7 +842,7 @@ struct VectorizedMemberFunction1 {
     }
 
     static std::string
-    format_arguments(const boost::python::detail::keywords<1> &args)
+    format_arguments(const py::detail::keywords<1> &args)
     {
         // TODO: add types here
         return std::string("(")+args.elements[0].name+") - ";
@@ -873,7 +874,7 @@ struct VectorizedMemberFunction2 {
     }
 
     static std::string
-    format_arguments(const boost::python::detail::keywords<2> &args)
+    format_arguments(const py::detail::keywords<2> &args)
     {
         // TODO: add types here
         return std::string("(")+args.elements[0].name+","+args.elements[1].name+") - ";
@@ -906,8 +907,8 @@ struct member_function_binding
                          VectorizedMemberFunction2<Op,Vectorize,Func> >::type member_func2_type;
 
         typedef typename if_<is_same<void,typename function_traits<Func>::result_type>,
-                         boost::python::return_internal_reference<>,  // the void vectorizations return a reference to self
-                         boost::python::default_call_policies>::type call_policies;
+                         py::return_internal_reference<>,  // the void vectorizations return a reference to self
+                         py::default_call_policies>::type call_policies;
 
         typedef typename at<vector<
             int,  // unused, arity 0
@@ -946,8 +947,8 @@ generate_single_member_binding(Cls &cls,Func *func,const std::string &name,const
                          VectorizedMemberFunction0<Op,boost::mpl::vector<>,Func> >::type vectorized_function_type;
 
     typedef typename if_<is_same<void,typename function_traits<Func>::result_type>,
-                         boost::python::return_internal_reference<>,  // the void vectorizations return a reference to self
-                         boost::python::default_call_policies>::type call_policies;
+                         py::return_internal_reference<>,  // the void vectorizations return a reference to self
+                         py::default_call_policies>::type call_policies;
 
     cls.def(name.c_str(),&vectorized_function_type::apply,doc.c_str(),call_policies());
 }
@@ -956,21 +957,21 @@ generate_single_member_binding(Cls &cls,Func *func,const std::string &name,const
 
 // TODO: update for arg("name")=default_value syntax
 template <class Op,class Vectorizable0>
-void generate_bindings(const std::string &name,const std::string &doc,const boost::python::detail::keywords<1> &args) {
+void generate_bindings(const std::string &name,const std::string &doc,const py::detail::keywords<1> &args) {
     using namespace detail;
-    generate_bindings_struct<Op,vector<Vectorizable0>,boost::python::detail::keywords<1> >::apply(name,doc,args);
+    generate_bindings_struct<Op,vector<Vectorizable0>,py::detail::keywords<1> >::apply(name,doc,args);
 }
 
 template <class Op,class Vectorizable0, class Vectorizable1>
-void generate_bindings(const std::string &name,const std::string &doc,const boost::python::detail::keywords<2> &args) {
+void generate_bindings(const std::string &name,const std::string &doc,const py::detail::keywords<2> &args) {
     using namespace detail;
-    generate_bindings_struct<Op,vector<Vectorizable0,Vectorizable1>,boost::python::detail::keywords<2> >::apply(name,doc,args);
+    generate_bindings_struct<Op,vector<Vectorizable0,Vectorizable1>,py::detail::keywords<2> >::apply(name,doc,args);
 }
 
 template <class Op,class Vectorizable0, class Vectorizable1, class Vectorizable2>
-void generate_bindings(const std::string &name,const std::string &doc,const boost::python::detail::keywords<3> &args) {
+void generate_bindings(const std::string &name,const std::string &doc,const py::detail::keywords<3> &args) {
     using namespace detail;
-    generate_bindings_struct<Op,vector<Vectorizable0,Vectorizable1,Vectorizable2>,boost::python::detail::keywords<3> >::apply(name,doc,args);
+    generate_bindings_struct<Op,vector<Vectorizable0,Vectorizable1,Vectorizable2>,py::detail::keywords<3> >::apply(name,doc,args);
 }
 
 template <class Op,class Cls>
@@ -983,18 +984,18 @@ generate_member_bindings(Cls &cls,const std::string &name,const std::string &doc
 
 template <class Op,class Vectorizable0,class Cls>
 void
-generate_member_bindings(Cls &cls,const std::string &name,const std::string &doc,const boost::python::detail::keywords<1> &args)
+generate_member_bindings(Cls &cls,const std::string &name,const std::string &doc,const py::detail::keywords<1> &args)
 {
     using boost::mpl::vector;
-    detail::generate_member_bindings_struct<Op,Cls,vector<Vectorizable0>,boost::python::detail::keywords<1> >::apply(cls,name,doc,args);
+    detail::generate_member_bindings_struct<Op,Cls,vector<Vectorizable0>,py::detail::keywords<1> >::apply(cls,name,doc,args);
 }
 
 template <class Op,class Vectorizable0,class Vectorizable1,class Cls>
 void
-generate_member_bindings(Cls &cls,const std::string &name,const std::string &doc,const boost::python::detail::keywords<2> &args)
+generate_member_bindings(Cls &cls,const std::string &name,const std::string &doc,const py::detail::keywords<2> &args)
 {
     using boost::mpl::vector;
-    detail::generate_member_bindings_struct<Op,Cls,vector<Vectorizable0,Vectorizable1>,boost::python::detail::keywords<2> >::apply(cls,name,doc,args);
+    detail::generate_member_bindings_struct<Op,Cls,vector<Vectorizable0,Vectorizable1>,py::detail::keywords<2> >::apply(cls,name,doc,args);
 }
 
 } // namespace PyImath

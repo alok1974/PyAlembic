@@ -33,7 +33,6 @@
 ///////////////////////////////////////////////////////////////////////////
 
 #include <PyImath.h>
-#include <PyIex.h>
 #include <PyImathExport.h>
 
 namespace PyImath {

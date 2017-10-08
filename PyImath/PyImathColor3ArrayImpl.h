@@ -41,17 +41,15 @@
 // order to work around MSVC limitations.
 //
 
+#include "python_include.h"
 #include "PyImathDecorators.h"
-#include <Python.h>
-#include <boost/python.hpp>
-#include <boost/python/make_constructor.hpp>
 #include <boost/format.hpp>
 #include <PyImath.h>
 #include <Iex.h>
 #include <PyImathMathExc.h>
 
 namespace PyImath {
-using namespace boost::python;
+
 using namespace IMATH_NAMESPACE;
 
 // XXX fixme - template this
@@ -66,14 +64,14 @@ Color3Array_get(FixedArray<IMATH_NAMESPACE::Color3<T> > &ca)
 
 // Currently we are only exposing the RGBA components.
 template <class T>
-class_<FixedArray<IMATH_NAMESPACE::Color3<T> > >
-register_Color3Array()
+py::class_<FixedArray<IMATH_NAMESPACE::Color3<T> > >
+register_Color3Array(py::module &m)
 {
-    class_<FixedArray<IMATH_NAMESPACE::Color3<T> > > color3Array_class = FixedArray<IMATH_NAMESPACE::Color3<T> >::register_("Fixed length array of Imath::Color3");
+    py::class_<FixedArray<IMATH_NAMESPACE::Color3<T> > > color3Array_class = FixedArray<IMATH_NAMESPACE::Color3<T> >::register_(m, "Fixed length array of Imath::Color3");
     color3Array_class
-        .add_property("r",&Color3Array_get<T,0>)
-        .add_property("g",&Color3Array_get<T,1>)
-        .add_property("b",&Color3Array_get<T,2>)
+        .def_property_readonly("r",&Color3Array_get<T,0>)
+        .def_property_readonly("g",&Color3Array_get<T,1>)
+        .def_property_readonly("b",&Color3Array_get<T,2>)
         ;
 
     return color3Array_class;

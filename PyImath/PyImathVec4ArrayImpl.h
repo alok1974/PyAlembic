@@ -41,11 +41,9 @@
 // order to work around MSVC limitations.
 //
 
+#include "python_include.h"
 #include <PyImathVec.h>
 #include "PyImathDecorators.h"
-#include <Python.h>
-#include <boost/python.hpp>
-#include <boost/python/make_constructor.hpp>
 #include <boost/format.hpp>
 #include <PyImath.h>
 #include <ImathVec.h>
@@ -56,7 +54,7 @@
 #include <PyImathVecOperators.h>
 
 namespace PyImath {
-using namespace boost::python;
+
 using namespace IMATH_NAMESPACE;
 
 // XXX fixme - template this
@@ -71,15 +69,15 @@ Vec4Array_get(FixedArray<IMATH_NAMESPACE::Vec4<T> > &va)
 
 template <class T>
 static void
-setItemTuple(FixedArray<IMATH_NAMESPACE::Vec4<T> > &va, Py_ssize_t index, const tuple &t)
+setItemTuple(FixedArray<IMATH_NAMESPACE::Vec4<T> > &va, Py_ssize_t index, const py::tuple &t)
 {
-    if(t.attr("__len__")() == 4)
+    if(py::cast<int>(t.attr("__len__")()) == 4)
     {
         Vec4<T> v;
-        v.x = extract<T>(t[0]);
-        v.y = extract<T>(t[1]);
-        v.z = extract<T>(t[2]);
-        v.w = extract<T>(t[3]);
+        v.x = py::cast<T>(t[0]);
+        v.y = py::cast<T>(t[1]);
+        v.z = py::cast<T>(t[2]);
+        v.w = py::cast<T>(t[3]);
 
         va[va.canonical_index(index)] = v;
     }
@@ -131,17 +129,17 @@ Vec4Array_max(const FixedArray<IMATH_NAMESPACE::Vec4<T> > &a)
 }
 
 template <class T>
-class_<FixedArray<IMATH_NAMESPACE::Vec4<T> > >
-register_Vec4Array()
+py::class_<FixedArray<IMATH_NAMESPACE::Vec4<T> > >
+register_Vec4Array(py::module &m)
 {
     using boost::mpl::true_;
 
-    class_<FixedArray<IMATH_NAMESPACE::Vec4<T> > > vec4Array_class = FixedArray<IMATH_NAMESPACE::Vec4<T> >::register_("Fixed length array of IMATH_NAMESPACE::Vec4");
+    py::class_<FixedArray<IMATH_NAMESPACE::Vec4<T> > > vec4Array_class = FixedArray<IMATH_NAMESPACE::Vec4<T> >::register_(m, "Fixed length array of IMATH_NAMESPACE::Vec4");
     vec4Array_class
-        .add_property("x",&Vec4Array_get<T,0>)
-        .add_property("y",&Vec4Array_get<T,1>)
-        .add_property("z",&Vec4Array_get<T,2>)
-        .add_property("w",&Vec4Array_get<T,3>)
+        .def_property_readonly("x",&Vec4Array_get<T,0>)
+        .def_property_readonly("y",&Vec4Array_get<T,1>)
+        .def_property_readonly("z",&Vec4Array_get<T,2>)
+        .def_property_readonly("w",&Vec4Array_get<T,3>)
         .def("__setitem__", &setItemTuple<T>)
         .def("min", &Vec4Array_min<T>)
         .def("max", &Vec4Array_max<T>)
@@ -150,19 +148,19 @@ register_Vec4Array()
     add_arithmetic_math_functions(vec4Array_class);
     add_comparison_functions(vec4Array_class);
 
-    generate_member_bindings<op_vecLength<IMATH_NAMESPACE::Vec4<T> >     >(vec4Array_class,"length","");
-    generate_member_bindings<op_vecLength2<IMATH_NAMESPACE::Vec4<T> >    >(vec4Array_class,"length2","");
-    generate_member_bindings<op_vecNormalize<IMATH_NAMESPACE::Vec4<T> >  >(vec4Array_class,"normalize","");
-    generate_member_bindings<op_vecNormalized<IMATH_NAMESPACE::Vec4<T> > >(vec4Array_class,"normalized","");
+    generate_member_bindings(vec4Array_class, &op_vecLength<IMATH_NAMESPACE::Vec4<T> >::apply,"length","");
+    generate_member_bindings(vec4Array_class, &op_vecLength2<IMATH_NAMESPACE::Vec4<T> >::apply,"length2","");
+    generate_member_bindings(vec4Array_class, &op_vecNormalize<IMATH_NAMESPACE::Vec4<T> >::apply,"normalize","");
+    generate_member_bindings(vec4Array_class, &op_vecNormalized<IMATH_NAMESPACE::Vec4<T> >::apply,"normalized","");
 
-    generate_member_bindings<op_vecDot<IMATH_NAMESPACE::Vec4<T> >,true_>(vec4Array_class,"dot","return the inner product of (self,x)",boost::python::args("x"));
-    generate_member_bindings<op_mul<IMATH_NAMESPACE::Vec4<T>,T>,  true_>(vec4Array_class,"__mul__" ,"self*x", boost::python::args("x"));
-    generate_member_bindings<op_mul<IMATH_NAMESPACE::Vec4<T>,T>,  true_>(vec4Array_class,"__rmul__","x*self", boost::python::args("x"));
-    generate_member_bindings<op_imul<IMATH_NAMESPACE::Vec4<T>,T>, true_>(vec4Array_class,"__imul__","self*=x",boost::python::args("x"));
-    generate_member_bindings<op_div<IMATH_NAMESPACE::Vec4<T>,T>,  true_>(vec4Array_class,"__div__" ,"self/x", boost::python::args("x"));
-    generate_member_bindings<op_div<IMATH_NAMESPACE::Vec4<T>,T>,  true_>(vec4Array_class,"__truediv__" ,"self/x", boost::python::args("x"));
-    generate_member_bindings<op_idiv<IMATH_NAMESPACE::Vec4<T>,T>, true_>(vec4Array_class,"__idiv__","self/=x",boost::python::args("x"));
-    generate_member_bindings<op_idiv<IMATH_NAMESPACE::Vec4<T>,T>, true_>(vec4Array_class,"__itruediv__","self/=x",boost::python::args("x"));
+    generate_member_bindings(vec4Array_class, &op_vecDot<IMATH_NAMESPACE::Vec4<T> >::apply,"dot","return the inner product of (self,x)");
+    generate_member_bindings(vec4Array_class, &op_mul<IMATH_NAMESPACE::Vec4<T>,T>::apply,"__mul__" ,"self*x");
+    generate_member_bindings(vec4Array_class, &op_mul<IMATH_NAMESPACE::Vec4<T>,T>::apply,"__rmul__","x*self");
+    generate_member_bindings(vec4Array_class, &op_imul<IMATH_NAMESPACE::Vec4<T>,T>::apply,"__imul__","self*=x");
+    generate_member_bindings(vec4Array_class, &op_div<IMATH_NAMESPACE::Vec4<T>,T>::apply,"__div__" ,"self/x");
+    generate_member_bindings(vec4Array_class, &op_div<IMATH_NAMESPACE::Vec4<T>,T>::apply,"__truediv__" ,"self/x");
+    generate_member_bindings(vec4Array_class, &op_idiv<IMATH_NAMESPACE::Vec4<T>,T>::apply,"__idiv__","self/=x");
+    generate_member_bindings(vec4Array_class, &op_idiv<IMATH_NAMESPACE::Vec4<T>,T>::apply,"__itruediv__","self/=x");
 
     decoratecopy(vec4Array_class);
 

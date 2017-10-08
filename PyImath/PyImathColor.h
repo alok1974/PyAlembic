@@ -35,19 +35,18 @@
 #ifndef _PyImathColor3_h_
 #define _PyImathColor3_h_
 
-#include <Python.h>
-#include <boost/python.hpp>
+#include "python_include.h"
 #include <PyImath.h>
 #include <ImathColor.h>
 #include <PyImath.h>
 
 namespace PyImath {
 
-template <class T> boost::python::class_<IMATH_NAMESPACE::Color4<T> > register_Color4();
-template <class T> boost::python::class_<PyImath::FixedArray2D<IMATH_NAMESPACE::Color4<T> > > register_Color4Array2D();
-template <class T> boost::python::class_<PyImath::FixedArray<IMATH_NAMESPACE::Color4<T> > > register_Color4Array();
-template <class T> boost::python::class_<IMATH_NAMESPACE::Color3<T>, boost::python::bases<IMATH_NAMESPACE::Vec3<T> > > register_Color3();
-template <class T> boost::python::class_<PyImath::FixedArray<IMATH_NAMESPACE::Color3<T> > > register_Color3Array();
+template <class T> py::class_<IMATH_NAMESPACE::Color4<T> > register_Color4(py::module &m);
+template <class T> py::class_<PyImath::FixedArray2D<IMATH_NAMESPACE::Color4<T> > > register_Color4Array2D(py::module &m);
+template <class T> py::class_<PyImath::FixedArray<IMATH_NAMESPACE::Color4<T> > > register_Color4Array(py::module &m);
+template <class T> py::class_<IMATH_NAMESPACE::Color3<T>, IMATH_NAMESPACE::Vec3<T> > register_Color3(py::module &m);
+template <class T> py::class_<PyImath::FixedArray<IMATH_NAMESPACE::Color3<T> > > register_Color3Array(py::module &m);
 
 typedef FixedArray2D<IMATH_NAMESPACE::Color4f> Color4fArray;
 typedef FixedArray2D<IMATH_NAMESPACE::Color4c> Color4cArray;
@@ -84,7 +83,7 @@ template <class T, class U>
 PyObject *
 C3<T, U>::wrap (const IMATH_NAMESPACE::Color3<T> &c)
 {
-    typename boost::python::return_by_value::apply < IMATH_NAMESPACE::Color3<T> >::type converter;
+    typename py::return_by_value::apply < IMATH_NAMESPACE::Color3<T> >::type converter;
     PyObject *p = converter (c);
     return p;
 }
@@ -93,7 +92,7 @@ template <class T, class U>
 PyObject *
 C4<T, U>::wrap (const IMATH_NAMESPACE::Color4<T> &c)
 {
-    typename boost::python::return_by_value::apply < IMATH_NAMESPACE::Color4<T> >::type converter;
+    typename py::return_by_value::apply < IMATH_NAMESPACE::Color4<T> >::type converter;
     PyObject *p = converter (c);
     return p;
 }
@@ -102,7 +101,7 @@ template <class T, class U>
 int
 C3<T, U>::convert (PyObject *p, IMATH_NAMESPACE::Color3<T> *v)
 {
-    boost::python::extract <IMATH_NAMESPACE::C3c> extractorC3c (p);
+    py::py::cast <IMATH_NAMESPACE::C3c> extractorC3c (p);
     if (extractorC3c.check())
     {
         IMATH_NAMESPACE::C3c c3c = extractorC3c();
@@ -110,7 +109,7 @@ C3<T, U>::convert (PyObject *p, IMATH_NAMESPACE::Color3<T> *v)
         return 1;
     }
 
-    boost::python::extract <IMATH_NAMESPACE::C3f> extractorC3f (p);
+    py::py::cast <IMATH_NAMESPACE::C3f> extractorC3f (p);
     if (extractorC3f.check())
     {
         IMATH_NAMESPACE::C3f c3f = extractorC3f();
@@ -118,29 +117,29 @@ C3<T, U>::convert (PyObject *p, IMATH_NAMESPACE::Color3<T> *v)
         return 1;
     }
 
-    boost::python::extract <boost::python::tuple> extractorTuple (p);
+    py::py::cast <py::tuple> extractorTuple (p);
     if (extractorTuple.check())
     {
-        boost::python::tuple t = extractorTuple();
+        py::tuple t = extractorTuple();
         if (t.attr ("__len__") () == 3)
         {
-            double a = boost::python::extract <double> (t[0]);
-            double b = boost::python::extract <double> (t[1]);
-            double c = boost::python::extract <double> (t[2]);
+            double a = py::py::cast <double> (t[0]);
+            double b = py::py::cast <double> (t[1]);
+            double c = py::py::cast <double> (t[2]);
             v->setValue (U(a), U(b), U(c));
             return 1;
         }
     }
 
-    boost::python::extract <boost::python::list> extractorList (p);
+    py::py::cast <py::list> extractorList (p);
     if (extractorList.check())
     {
-        boost::python::list l = extractorList();
+        py::list l = extractorList();
         if (l.attr ("__len__") () == 3)
         {
-            boost::python::extract <double> extractor0 (l[0]);
-            boost::python::extract <double> extractor1 (l[1]);
-            boost::python::extract <double> extractor2 (l[2]);
+            py::py::cast <double> extractor0 (l[0]);
+            py::py::cast <double> extractor1 (l[1]);
+            py::py::cast <double> extractor2 (l[2]);
             if (extractor0.check() && extractor1.check() &&
                 extractor2.check())
             {
@@ -151,7 +150,7 @@ C3<T, U>::convert (PyObject *p, IMATH_NAMESPACE::Color3<T> *v)
         }
     }
 
-    boost::python::extract <IMATH_NAMESPACE::V3i> extractorV3i (p);
+    py::py::cast <IMATH_NAMESPACE::V3i> extractorV3i (p);
     if (extractorV3i.check())
     {
         IMATH_NAMESPACE::V3i v3i = extractorV3i();
@@ -159,7 +158,7 @@ C3<T, U>::convert (PyObject *p, IMATH_NAMESPACE::Color3<T> *v)
         return 1;
     }
 
-    boost::python::extract <IMATH_NAMESPACE::V3f> extractorV3f (p);
+    py::py::cast <IMATH_NAMESPACE::V3f> extractorV3f (p);
     if (extractorV3f.check())
     {
         IMATH_NAMESPACE::V3f v3f = extractorV3f();
@@ -167,7 +166,7 @@ C3<T, U>::convert (PyObject *p, IMATH_NAMESPACE::Color3<T> *v)
         return 1;
     }
 
-    boost::python::extract <IMATH_NAMESPACE::V3d> extractorV3d (p);
+    py::py::cast <IMATH_NAMESPACE::V3d> extractorV3d (p);
     if (extractorV3d.check())
     {
         IMATH_NAMESPACE::V3d v3d = extractorV3d();
@@ -182,7 +181,7 @@ template <class T, class U>
 int
 C4<T, U>::convert (PyObject *p, IMATH_NAMESPACE::Color4<T> *v)
 {
-    boost::python::extract <IMATH_NAMESPACE::C4c> extractorC4c (p);
+    py::py::cast <IMATH_NAMESPACE::C4c> extractorC4c (p);
     if (extractorC4c.check())
     {
         IMATH_NAMESPACE::C4c c4c = extractorC4c();
@@ -190,7 +189,7 @@ C4<T, U>::convert (PyObject *p, IMATH_NAMESPACE::Color4<T> *v)
         return 1;
     }
 
-    boost::python::extract <IMATH_NAMESPACE::C4f> extractorC4f (p);
+    py::py::cast <IMATH_NAMESPACE::C4f> extractorC4f (p);
     if (extractorC4f.check())
     {
         IMATH_NAMESPACE::C4f c4f = extractorC4f();
@@ -198,35 +197,35 @@ C4<T, U>::convert (PyObject *p, IMATH_NAMESPACE::Color4<T> *v)
         return 1;
     }
 
-    boost::python::extract <boost::python::tuple> extractorTuple (p);
+    py::py::cast <py::tuple> extractorTuple (p);
     if (extractorTuple.check())
     {
-        boost::python::tuple t = extractorTuple();
+        py::tuple t = extractorTuple();
         if (t.attr ("__len__") () == 4)
         {
-            // As with V3<T>, we extract the tuple elements as doubles and
+            // As with V3<T>, we py::cast the tuple elements as doubles and
             // cast them to Ts in setValue(), to avoid any odd cases where
             // extracting them as Ts from the start would fail.
 
-            double a = boost::python::extract <double> (t[0]);
-            double b = boost::python::extract <double> (t[1]);
-            double c = boost::python::extract <double> (t[2]);
-            double d = boost::python::extract <double> (t[3]);
+            double a = py::py::cast <double> (t[0]);
+            double b = py::py::cast <double> (t[1]);
+            double c = py::py::cast <double> (t[2]);
+            double d = py::py::cast <double> (t[3]);
             v->setValue (U(a), U(b), U(c), U(d));
             return 1;
         }
     }
 
-    boost::python::extract <boost::python::list> extractorList (p);
+    py::py::cast <py::list> extractorList (p);
     if (extractorList.check())
     {
-        boost::python::list l = extractorList();
+        py::list l = extractorList();
         if (l.attr ("__len__") () == 4)
         {
-            boost::python::extract <double> extractor0 (l[0]);
-            boost::python::extract <double> extractor1 (l[1]);
-            boost::python::extract <double> extractor2 (l[2]);
-            boost::python::extract <double> extractor3 (l[3]);
+            py::py::cast <double> extractor0 (l[0]);
+            py::py::cast <double> extractor1 (l[1]);
+            py::py::cast <double> extractor2 (l[2]);
+            py::py::cast <double> extractor3 (l[3]);
             if (extractor0.check() && extractor1.check() &&
                 extractor2.check() && extractor3.check())
             {

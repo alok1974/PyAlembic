@@ -41,11 +41,9 @@
 // order to work around MSVC limitations.
 //
 
+#include "python_include.h"
 #include <PyImathVec.h>
 #include "PyImathDecorators.h"
-#include <Python.h>
-#include <boost/python.hpp>
-#include <boost/python/make_constructor.hpp>
 #include <boost/format.hpp>
 #include <PyImath.h>
 #include <PyImathBox.h>
@@ -58,7 +56,7 @@
 #include <PyImathVecOperators.h>
 
 namespace PyImath {
-using namespace boost::python;
+
 using namespace IMATH_NAMESPACE;
 
 template <class T> struct Vec2Name { static const char *value; };
@@ -74,24 +72,27 @@ template <class T,class BoostPyType>
 static Vec2<T> * Vec2_tuple_constructor(const BoostPyType &t)
 {
     if(t.attr("__len__")() == 1)
-        return new Vec2<T>(extract<T>(t[0]), extract<T>(t[0]));
+        return new Vec2<T>(py::cast<T>(t[0]), py::cast<T>(t[0]));
     else if(t.attr("__len__")() == 2)
-        return new Vec2<T>(extract<T>(t[0]), extract<T>(t[1]));
+        return new Vec2<T>(py::cast<T>(t[0]), py::cast<T>(t[1]));
     else
         THROW(IEX_NAMESPACE::LogicExc, "Vec2 constructor expects tuple of length 1 or 2");
 }
 
 template <class T>
-static Vec2<T> * Vec2_object_constructor1(const object &obj)
+static Vec2<T> * Vec2_object_constructor1(const py::object &obj)
 {
-    Vec2<T> w;
-    extract<Vec2<int> >     e1(obj);
-    extract<Vec2<float> >   e2(obj);
-    extract<Vec2<double> >  e3(obj);
-    extract<tuple>          e4(obj);
-    extract<double>         e5(obj);
-    extract<list>           e6(obj);
-    
+    Vec2<T> w = py::cast<Vec2<T>>(obj);
+    /*
+    py::cast<Vec2<int> >     e1(obj);
+    py::cast<Vec2<float> >   e2(obj);
+    py::cast<Vec2<double> >  e3(obj);
+    py::cast<tuple>          e4(obj);
+    py::cast<double>         e5(obj);
+    py::cast<list>           e6(obj);
+    */
+
+    /*
     if(e1.check()){ w = e1(); }
     else if(e2.check()) { w = e2(); }
     else if(e3.check()) { w = e3(); }
@@ -100,8 +101,8 @@ static Vec2<T> * Vec2_object_constructor1(const object &obj)
         tuple t = e4();
         if(t.attr("__len__")() == 2)
         {
-            w.x = extract<T>(t[0]);
-            w.y = extract<T>(t[1]);
+            w.x = py::cast<T>(t[0]);
+            w.y = py::cast<T>(t[1]);
         }
         else
             THROW(IEX_NAMESPACE::LogicExc, "tuple must have length of 2");
@@ -112,15 +113,16 @@ static Vec2<T> * Vec2_object_constructor1(const object &obj)
         list l = e6();
         if(l.attr("__len__")() == 2)
         {
-            w.x = extract<T>(l[0]);
-            w.y = extract<T>(l[1]);
+            w.x = py::cast<T>(l[0]);
+            w.y = py::cast<T>(l[1]);
         }
         else
             THROW(IEX_NAMESPACE::LogicExc, "list must have length of 2");
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to Vec2 constructor");
-    
+    */
+
     Vec2<T> *v = new Vec2<T>;
     *v = w;
     
@@ -129,19 +131,25 @@ static Vec2<T> * Vec2_object_constructor1(const object &obj)
 }
 
 template <class T>
-static Vec2<T> * Vec2_object_constructor2(const object &obj1, const object &obj2)
+static Vec2<T> * Vec2_object_constructor2(const py::object &obj1, const py::object &obj2)
 {
-    extract<double> e1(obj1);
-    extract<double> e2(obj2);
-    
+    /*
+    py::cast<double> e1(obj1);
+    py::cast<double> e2(obj2);
+    */
+
     Vec2<T> *v = new Vec2<T>;
+    v->x = py::cast<double>(obj1);
+    v->y = py::cast<double>(obj2);
     
+    /*
     if(e1.check()) { v->x = boost::numeric_cast<T>(e1());}
     else { THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to Vec2 constructor"); }
     
     if(e2.check()) { v->y = boost::numeric_cast<T>(e2());}
     else { THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to Vec2 constructor"); }    
-    
+    */
+
     return v;
 }
 
@@ -415,7 +423,7 @@ Vec2_mulM33 (Vec2<T> &v, const Matrix33<U> &m)
 
 template <class T>
 static const Vec2<T> &
-Vec2_idivObj(IMATH_NAMESPACE::Vec2<T> &v, const object &o) 
+Vec2_idivObj(IMATH_NAMESPACE::Vec2<T> &v, const py::object &o) 
 { 
     MATH_EXC_ON;
     Vec2<T> v2;
@@ -425,12 +433,15 @@ Vec2_idivObj(IMATH_NAMESPACE::Vec2<T> &v, const object &o)
     }
     else
     {
-        extract<double> e(o);
+        /*
+        py::cast<double> e(o);
         if (e.check())
             return v /= e();
         else
             THROW (IEX_NAMESPACE::ArgExc, "V2 division expects an argument"
                    "convertible to a V2");
+        */
+        return v /= py::cast<double>(o);
     }
 }
 
@@ -451,10 +462,10 @@ Vec2_subTuple(const Vec2<T> &v, const BoostPyType &t)
     MATH_EXC_ON;
     Vec2<T> w;
     
-    if(t.attr("__len__")() == 2)
+    if(py::cast<int>(t.attr("__len__")()) == 2)
     {
-        w.x = v.x - extract<T>(t[0]);
-        w.y = v.y - extract<T>(t[1]);
+        w.x = v.x - py::cast<T>(t[0]);
+        w.y = v.y - py::cast<T>(t[1]);
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "tuple must have length of 2");
@@ -479,10 +490,10 @@ Vec2_rsubTuple(const Vec2<T> &v, const BoostPyType &t)
     MATH_EXC_ON;
     Vec2<T> w;
     
-    if(t.attr("__len__")() == 2)
+    if(py::cast<int>(t.attr("__len__")()) == 2)
     {
-        w.x = extract<T>(t[0]) - v.x;
-        w.y = extract<T>(t[1]) - v.y;
+        w.x = py::cast<T>(t[0]) - v.x;
+        w.y = py::cast<T>(t[1]) - v.y;
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "tuple must have length of 2");
@@ -497,10 +508,10 @@ Vec2_addTuple(const Vec2<T> &v, const BoostPyType &t)
     MATH_EXC_ON;
     Vec2<T> w;
     
-    if(t.attr("__len__")() == 2)
+    if(py::cast<int>(t.attr("__len__")()) == 2)
     {
-        w.x = v.x + extract<T>(t[0]);
-        w.y = v.y + extract<T>(t[1]);
+        w.x = v.x + py::cast<T>(t[0]);
+        w.y = v.y + py::cast<T>(t[1]);
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "tuple must have length of 2");
@@ -557,13 +568,13 @@ Vec2_mulTuple(const Vec2<T> &v, BoostPyType t)
     MATH_EXC_ON;
     Vec2<T> w;
     
-    if(t.attr("__len__")() == 1){
-        w.x = v.x*extract<T>(t[0]);
-        w.y = v.y*extract<T>(t[0]);
+    if(py::cast<int>(t.attr("__len__")()) == 1){
+        w.x = v.x*py::cast<T>(t[0]);
+        w.y = v.y*py::cast<T>(t[0]);
     }        
-    else if(t.attr("__len__")() == 2){
-        w.x = v.x*extract<T>(t[0]);
-        w.y = v.y*extract<T>(t[1]);
+    else if(py::cast<int>(t.attr("__len__")()) == 2){
+        w.x = v.x*py::cast<T>(t[0]);
+        w.y = v.y*py::cast<T>(t[1]);
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "tuple must have length of 1 or 2");
@@ -583,10 +594,10 @@ template <class T,class BoostPyType>
 static Vec2<T>
 Vec2_divTuple(const Vec2<T> &v, const BoostPyType &t)
 {
-    if(t.attr("__len__")() == 2)
+    if(py::cast<int>(t.attr("__len__")()) == 2)
     {
-        T x = extract<T>(t[0]);
-        T y = extract<T>(t[1]);
+        T x = py::cast<T>(t[0]);
+        T y = py::cast<T>(t[1]);
         if(x != T(0) && y != T(0))
             return Vec2<T>(v.x / x, v.y / y);
         else
@@ -602,10 +613,10 @@ Vec2_rdivTuple(const Vec2<T> &v, const BoostPyType &t)
 {
     MATH_EXC_ON;
     Vec2<T> w;
-    if(t.attr("__len__")() == 2)
+    if(py::cast<int>(t.attr("__len__")()) == 2)
     {
-        T x = extract<T>(t[0]);
-        T y = extract<T>(t[1]);
+        T x = py::cast<T>(t[0]);
+        T y = py::cast<T>(t[1]);
             
         if(v.x != T(0) && v.y != T(0)){
             w.setValue(x / v.x, y / v.y);
@@ -651,12 +662,15 @@ Vec2_rdivT(const Vec2<T> &v, T a)
 
 template <class T>
 static bool
-lessThan(const Vec2<T> &v, const object &obj)
+lessThan(const Vec2<T> &v, const py::object &obj)
 {
-    extract<Vec2<T> > e1(obj);
-    extract<tuple> e2(obj);
-    
-    Vec2<T> w;
+    /*
+    py::cast<Vec2<T> > e1(obj);
+    py::cast<tuple> e2(obj);
+    */
+
+    Vec2<T> w = py::cast<Vec2<T>>(obj);
+    /*
     if(e1.check())
     {
         w = e1();
@@ -665,8 +679,8 @@ lessThan(const Vec2<T> &v, const object &obj)
     {
         tuple t = e2();
         if(t.attr("__len__")() == 2){
-            T x = extract<T>(t[0]);
-            T y = extract<T>(t[1]);
+            T x = py::cast<T>(t[0]);
+            T y = py::cast<T>(t[1]);
             w.setValue(x,y);
         }
         else
@@ -674,7 +688,8 @@ lessThan(const Vec2<T> &v, const object &obj)
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to operator <");
-    
+    */
+
     bool isLessThan = (v.x <= w.x && v.y <= w.y)
                     && v != w;
     
@@ -683,12 +698,15 @@ lessThan(const Vec2<T> &v, const object &obj)
 
 template <class T>
 static bool
-greaterThan(const Vec2<T> &v, const object &obj)
+greaterThan(const Vec2<T> &v, const py::object &obj)
 {
-    extract<Vec2<T> > e1(obj);
-    extract<tuple> e2(obj);
-    
-    Vec2<T> w;
+    /*
+    py::cast<Vec2<T> > e1(obj);
+    py::cast<tuple> e2(obj);
+    */
+
+    Vec2<T> w = py::cast<Vec2<T>>(obj);
+    /*
     if(e1.check())
     {
         w = e1();
@@ -697,8 +715,8 @@ greaterThan(const Vec2<T> &v, const object &obj)
     {
         tuple t = e2();
         if(t.attr("__len__")() == 2){
-            T x = extract<T>(t[0]);
-            T y = extract<T>(t[1]);
+            T x = py::cast<T>(t[0]);
+            T y = py::cast<T>(t[1]);
             w.setValue(x,y);
         }
         else
@@ -706,7 +724,8 @@ greaterThan(const Vec2<T> &v, const object &obj)
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to operator >");
-    
+    */
+
     bool isGreaterThan = (v.x >= w.x && v.y >= w.y)
                        && v != w;
 
@@ -715,12 +734,14 @@ greaterThan(const Vec2<T> &v, const object &obj)
 
 template <class T>
 static bool
-lessThanEqual(const Vec2<T> &v, const object &obj)
+lessThanEqual(const Vec2<T> &v, const py::object &obj)
 {
-    extract<Vec2<T> > e1(obj);
-    extract<tuple> e2(obj);
-    
-    Vec2<T> w;
+    /*
+    py::cast<Vec2<T> > e1(obj);
+    py::cast<tuple> e2(obj);
+    */
+    Vec2<T> w = py::cast<Vec2<T>>(obj);
+    /*
     if(e1.check())
     {
         w = e1();
@@ -729,8 +750,8 @@ lessThanEqual(const Vec2<T> &v, const object &obj)
     {
         tuple t = e2();
         if(t.attr("__len__")() == 2){
-            T x = extract<T>(t[0]);
-            T y = extract<T>(t[1]);
+            T x = py::cast<T>(t[0]);
+            T y = py::cast<T>(t[1]);
             w.setValue(x,y);
         }
         else
@@ -738,7 +759,7 @@ lessThanEqual(const Vec2<T> &v, const object &obj)
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to operator <=");
-    
+    */
     bool isLessThanEqual = (v.x <= w.x && v.y <= w.y);
                    
     return isLessThanEqual;
@@ -746,12 +767,14 @@ lessThanEqual(const Vec2<T> &v, const object &obj)
 
 template <class T>
 static bool
-greaterThanEqual(const Vec2<T> &v, const object &obj)
+greaterThanEqual(const Vec2<T> &v, const py::object &obj)
 {
-    extract<Vec2<T> > e1(obj);
-    extract<tuple> e2(obj);
-    
-    Vec2<T> w;
+    /*
+    py::cast<Vec2<T> > e1(obj);
+    py::cast<tuple> e2(obj);
+    */
+    Vec2<T> w = py::cast<Vec2<T>>(obj);
+    /*
     if(e1.check())
     {
         w = e1();
@@ -760,8 +783,8 @@ greaterThanEqual(const Vec2<T> &v, const object &obj)
     {
         tuple t = e2();
         if(t.attr("__len__")() == 2){
-            T x = extract<T>(t[0]);
-            T y = extract<T>(t[1]);
+            T x = py::cast<T>(t[0]);
+            T y = py::cast<T>(t[1]);
             w.setValue(x,y);
         }
         else
@@ -769,7 +792,7 @@ greaterThanEqual(const Vec2<T> &v, const object &obj)
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to operator >=");
-    
+    */
     bool isGreaterThanEqual = (v.x >= w.x && v.y >= w.y);
 
     return isGreaterThanEqual;
@@ -779,11 +802,11 @@ template <class T,class BoostPyType>
 static void
 setItemTuple(FixedArray<IMATH_NAMESPACE::Vec2<T> > &va, Py_ssize_t index, const BoostPyType &t)
 {
-    if(t.attr("__len__")() == 2)
+    if(py::cast<int>(t.attr("__len__")()) == 2)
     {
         Vec2<T> v;
-        v.x = extract<T>(t[0]);
-        v.y = extract<T>(t[1]);
+        v.x = py::cast<T>(t[0]);
+        v.y = py::cast<T>(t[1]);
         va[va.canonical_index(index)] = v;
     }
     else
@@ -792,16 +815,18 @@ setItemTuple(FixedArray<IMATH_NAMESPACE::Vec2<T> > &va, Py_ssize_t index, const 
 
 template <class T>
 static bool
-equalWithAbsErrorObj(const Vec2<T> &v, const object &obj1, const object &obj2)
+equalWithAbsErrorObj(const Vec2<T> &v, const py::object &obj1, const py::object &obj2)
 {    
-    extract<Vec2<int> >    e1(obj1);
-    extract<Vec2<float> >  e2(obj1);
-    extract<Vec2<double> > e3(obj1);
+    /*
+    py::cast<Vec2<int> >    e1(obj1);
+    py::cast<Vec2<float> >  e2(obj1);
+    py::cast<Vec2<double> > e3(obj1);
     
-    extract<tuple>         e4(obj1);
-    extract<double>        e5(obj2);
-    
-    Vec2<T> w;
+    py::cast<tuple>         e4(obj1);
+    py::cast<double>        e5(obj2);
+    */
+    Vec2<T> w = py::cast<Vec2<T>>(obj1);
+    /*
     if(e1.check())      { w = e1(); }
     else if(e2.check()) { w = e2(); }
     else if(e3.check()) { w = e3(); }
@@ -810,32 +835,40 @@ equalWithAbsErrorObj(const Vec2<T> &v, const object &obj1, const object &obj2)
         tuple t = e4();
         if(t.attr("__len__")() == 2)
         {
-            w.x = extract<T>(t[0]);
-            w.y = extract<T>(t[1]);
+            w.x = py::cast<T>(t[0]);
+            w.y = py::cast<T>(t[1]);
         }
         else
             THROW(IEX_NAMESPACE::LogicExc, "tuple of length 2 expected");
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to equalWithAbsError");
-    
-    if(e5.check())      { return v.equalWithAbsError(w, e5()); }
+    */
+    //if(e5.check())      
+    { 
+        return v.equalWithAbsError(w, py::cast<double>(obj2)); 
+    }
+    /*
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to equalWithAbsError");
+        */
 }
 
 template <class T>
 static bool
-equalWithRelErrorObj(const Vec2<T> &v, const object &obj1, const object &obj2)
+equalWithRelErrorObj(const Vec2<T> &v, const py::object &obj1, const py::object &obj2)
 {    
-    extract<Vec2<int> >    e1(obj1);
-    extract<Vec2<float> >  e2(obj1);
-    extract<Vec2<double> > e3(obj1);
+    /*
+    py::cast<Vec2<int> >    e1(obj1);
+    py::cast<Vec2<float> >  e2(obj1);
+    py::cast<Vec2<double> > e3(obj1);
     
-    extract<tuple>         e4(obj1);
-    extract<double>        e5(obj2);
-    
-    Vec2<T> w;
+    py::cast<tuple>         e4(obj1);
+    py::cast<double>        e5(obj2);
+    */
+
+    Vec2<T> w = py::cast<Vec2<T>>(obj1);
+    /*
     if(e1.check())      { w = e1(); }
     else if(e2.check()) { w = e2(); }
     else if(e3.check()) { w = e3(); }
@@ -844,19 +877,23 @@ equalWithRelErrorObj(const Vec2<T> &v, const object &obj1, const object &obj2)
         tuple t = e4();
         if(t.attr("__len__")() == 2)
         {
-            w.x = extract<T>(t[0]);
-            w.y = extract<T>(t[1]);
+            w.x = py::cast<T>(t[0]);
+            w.y = py::cast<T>(t[1]);
         }
         else
             THROW(IEX_NAMESPACE::LogicExc, "tuple of length 2 expected");
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to equalWithRelError");
+    */
     
-    if(e5.check())      { return v.equalWithRelError(w, e5()); }
+    //if(e5.check())      { 
+    return v.equalWithRelError(w, py::cast<double>(obj2)); 
+    /*
+    }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to equalWithRelError");
-    
+    */
 }
 
 /*
@@ -867,8 +904,8 @@ equalWithAbsErrorTuple(Vec2<T> &v, const tuple &t, T e)
     Vec2<T> w;
     if(t.attr("__len__")() == 2)
     {
-        w.x = extract<T>(t[0]);
-        w.y = extract<T>(t[1]);
+        w.x = py::cast<T>(t[0]);
+        w.y = py::cast<T>(t[1]);
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "tuple of length 2 expected");
@@ -884,8 +921,8 @@ equalWithRelErrorTuple(Vec2<T> &v, const tuple &t, T e)
     Vec2<T> w;
     if(t.attr("__len__")() == 2)
     {
-        w.x = extract<T>(t[0]);
-        w.y = extract<T>(t[1]);
+        w.x = py::cast<T>(t[0]);
+        w.y = py::cast<T>(t[1]);
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "tuple of length 2 expected");
@@ -898,10 +935,10 @@ static bool
 equal(const Vec2<T> &v, const BoostPyType &t)
 {
     Vec2<T> w;
-    if(t.attr("__len__")() == 2)
+    if(py::cast<int>(t.attr("__len__")()) == 2)
     {
-        w.x = extract<T>(t[0]);
-        w.y = extract<T>(t[1]);
+        w.x = py::cast<T>(t[0]);
+        w.y = py::cast<T>(t[1]);
         
         return (v == w);
     }
@@ -914,10 +951,10 @@ static bool
 notequal(const Vec2<T> &v, const BoostPyType &t)
 {
     Vec2<T> w;
-    if(t.attr("__len__")() == 2)
+    if(py::cast<int>(t.attr("__len__")()) == 2)
     {
-        w.x = extract<T>(t[0]);
-        w.y = extract<T>(t[1]);
+        w.x = py::cast<T>(t[0]);
+        w.y = py::cast<T>(t[1]);
         
         return (v != w);
     }
@@ -926,30 +963,26 @@ notequal(const Vec2<T> &v, const BoostPyType &t)
 }
 
 template <class T>
-class_<Vec2<T> >
-register_Vec2()
+py::class_<Vec2<T> >
+register_Vec2(py::module &m)
 {
     typedef PyImath::StaticFixedArray<Vec2<T>,T,2> Vec2_helper;
 
-    class_<Vec2<T> > vec2_class(Vec2Name<T>::value, Vec2Name<T>::value,init<Vec2<T> >("copy construction"));
+    py::class_<Vec2<T> > vec2_class(m, Vec2Name<T>::value, Vec2Name<T>::value);
     vec2_class
-        .def("__init__",make_constructor(Vec2_construct_default<T>),"initialize to (0,0)")
-        .def("__init__",make_constructor(Vec2_object_constructor1<T>))
-        .def("__init__",make_constructor(Vec2_object_constructor2<T>))
+        .def(py::init<Vec2<T> >(/*"copy construction"*/))
+        .def("__init__",Vec2_construct_default<T>,"initialize to (0,0)")
+        .def("__init__",Vec2_object_constructor1<T>)
+        .def("__init__",Vec2_object_constructor2<T>)
         .def_readwrite("x", &Vec2<T>::x)
         .def_readwrite("y", &Vec2<T>::y)
-        .def("baseTypeEpsilon", &Vec2<T>::baseTypeEpsilon,"baseTypeEpsilon() epsilon value of the base type of the vector")
-        .staticmethod("baseTypeEpsilon")
-        .def("baseTypeMax", &Vec2<T>::baseTypeMax,"baseTypeMax() max value of the base type of the vector")
-        .staticmethod("baseTypeMax")
-        .def("baseTypeMin", &Vec2<T>::baseTypeMin,"baseTypeMin() min value of the base type of the vector")
-        .staticmethod("baseTypeMin")
-        .def("baseTypeSmallest", &Vec2<T>::baseTypeSmallest,"baseTypeSmallest() smallest value of the base type of the vector")
-        .staticmethod("baseTypeSmallest")
+        .def_static("baseTypeEpsilon", &Vec2<T>::baseTypeEpsilon,"baseTypeEpsilon() epsilon value of the base type of the vector")
+        .def_static("baseTypeMax", &Vec2<T>::baseTypeMax,"baseTypeMax() max value of the base type of the vector")
+        .def_static("baseTypeMin", &Vec2<T>::baseTypeMin,"baseTypeMin() min value of the base type of the vector")
+        .def_static("baseTypeSmallest", &Vec2<T>::baseTypeSmallest,"baseTypeSmallest() smallest value of the base type of the vector")
         .def("cross", &Vec2_cross<T>,"v1.cross(v2) right handed cross product")
         .def("cross", &Vec2_cross_Vec2Array<T>,"v1.cross(v2) right handed array cross product")
-        .def("dimensions", &Vec2<T>::dimensions,"dimensions() number of dimensions in the vector")
-        .staticmethod("dimensions")
+        .def_static("dimensions", &Vec2<T>::dimensions,"dimensions() number of dimensions in the vector")
         .def("dot", &Vec2_dot<T>,"v1.dot(v2) inner product of the two vectors")
         .def("dot", &Vec2_dot_Vec2Array<T>,"v1.dot(v2) array inner product")
         .def("equalWithAbsError", &Vec2<T>::equalWithAbsError,
@@ -966,22 +999,22 @@ register_Vec2()
 
         .def("length", &Vec2_length<T>,"length() magnitude of the vector")
         .def("length2", &Vec2_length2<T>,"length2() square magnitude of the vector")
-        .def("normalize", &Vec2_normalize<T>,return_internal_reference<>(),
+        .def("normalize", &Vec2_normalize<T>,py::return_value_policy::reference_internal,
              "v.normalize() destructively normalizes v and returns a reference to it")
          
-        .def("normalizeExc", &Vec2_normalizeExc<T>,return_internal_reference<>(),
+        .def("normalizeExc", &Vec2_normalizeExc<T>,py::return_value_policy::reference_internal,
              "v.normalizeExc() destructively normalizes V and returns a reference to it, throwing an exception if length() == 0")
          
-        .def("normalizeNonNull", &Vec2_normalizeNonNull<T>,return_internal_reference<>(),
+        .def("normalizeNonNull", &Vec2_normalizeNonNull<T>,py::return_value_policy::reference_internal,
              "v.normalizeNonNull() destructively normalizes V and returns a reference to it, faster if lngth() != 0")
         .def("normalized", &Vec2_normalized<T>, "v.normalized() returns a normalized copy of v")
         .def("normalizedExc", &Vec2_normalizedExc<T>, "v.normalizedExc() returns a normalized copy of v, throwing an exception if length() == 0")
         .def("normalizedNonNull", &Vec2_normalizedNonNull<T>, "v.normalizedNonNull() returns a normalized copy of v, faster if lngth() != 0")
         .def("__len__", Vec2_helper::len)
-        .def("__getitem__", Vec2_helper::getitem,return_value_policy<copy_non_const_reference>())
+        .def("__getitem__", Vec2_helper::getitem, py::return_value_policy::copy)
         .def("__setitem__", Vec2_helper::setitem)
         .def("closestVertex", &closestVertex<T>)
-        .def("negate", &Vec2_negate<T>, return_internal_reference<>())
+        .def("negate", &Vec2_negate<T>, py::return_value_policy::reference_internal)
         .def("orthogonal", &orthogonal<T>)
         .def("project", &project<T>)
         .def("reflect", &reflect<T>)
@@ -992,72 +1025,74 @@ register_Vec2()
         .def("__mul__", &Vec2_mul<T, double>)
         .def("__mul__", &Vec2_mulT<T>)
         .def("__mul__", &Vec2_mulTArray<T>)
-        .def("__mul__", &Vec2_mulTuple<T,tuple>)
-        .def("__mul__", &Vec2_mulTuple<T,list>)
+        .def("__mul__", &Vec2_mulTuple<T,py::tuple>)
+        .def("__mul__", &Vec2_mulTuple<T,py::list>)
         .def("__rmul__", &Vec2_rmulT<T>)
         .def("__rmul__", &Vec2_rmulTArray<T>)
-        .def("__rmul__", &Vec2_mulTuple<T,tuple>)
-        .def("__rmul__", &Vec2_mulTuple<T,list>)
-        .def("__imul__", &Vec2_imulV<T, int>,return_internal_reference<>())
-        .def("__imul__", &Vec2_imulV<T, float>,return_internal_reference<>())
-        .def("__imul__", &Vec2_imulV<T, double>,return_internal_reference<>())
-        .def("__imul__", &Vec2_imulT<T>,return_internal_reference<>())
-        .def(self * self)
+        .def("__rmul__", &Vec2_mulTuple<T,py::tuple>)
+        .def("__rmul__", &Vec2_mulTuple<T,py::list>)
+        .def("__imul__", &Vec2_imulV<T, int>,py::return_value_policy::reference_internal)
+        .def("__imul__", &Vec2_imulV<T, float>,py::return_value_policy::reference_internal)
+        .def("__imul__", &Vec2_imulV<T, double>,py::return_value_policy::reference_internal)
+        .def("__imul__", &Vec2_imulT<T>,py::return_value_policy::reference_internal)
+        /*.def(self * self)*/
         .def("__mul__", &Vec2_mulM33<T, float>)
         .def("__mul__", &Vec2_mulM33<T, double>)
-        .def("__imul__", &Vec2_imulM33<T, float>, return_internal_reference<>())
-        .def("__imul__", &Vec2_imulM33<T, double>, return_internal_reference<>())
-        .def(self / self)
+        .def("__imul__", &Vec2_imulM33<T, float>, py::return_value_policy::reference_internal)
+        .def("__imul__", &Vec2_imulM33<T, double>, py::return_value_policy::reference_internal)
+        /*.def(self / self)*/
         .def("__div__", &Vec2_div<T,int>)
         .def("__div__", &Vec2_div<T,float>)
         .def("__div__", &Vec2_div<T,double>)
-        .def("__div__", &Vec2_divTuple<T,tuple>)
-        .def("__div__", &Vec2_divTuple<T,list>)
+        .def("__div__", &Vec2_divTuple<T,py::tuple>)
+        .def("__div__", &Vec2_divTuple<T,py::list>)
         .def("__div__", &Vec2_divT<T>)
         .def("__truediv__", &Vec2_div<T,int>)
         .def("__truediv__", &Vec2_div<T,float>)
         .def("__truediv__", &Vec2_div<T,double>)
-        .def("__truediv__", &Vec2_divTuple<T,tuple>)
-        .def("__truediv__", &Vec2_divTuple<T,list>)
+        .def("__truediv__", &Vec2_divTuple<T,py::tuple>)
+        .def("__truediv__", &Vec2_divTuple<T,py::list>)
         .def("__truediv__", &Vec2_divT<T>)
-        .def("__rdiv__", &Vec2_rdivTuple<T,tuple>)
-        .def("__rdiv__", &Vec2_rdivTuple<T,list>)
+        .def("__rdiv__", &Vec2_rdivTuple<T,py::tuple>)
+        .def("__rdiv__", &Vec2_rdivTuple<T,py::list>)
         .def("__rdiv__", &Vec2_rdivT<T>)
-        .def("__idiv__", &Vec2_idivObj<T>,return_internal_reference<>())
-        .def("__itruediv__", &Vec2_idivObj<T>,return_internal_reference<>())
+        .def("__idiv__", &Vec2_idivObj<T>,py::return_value_policy::reference_internal)
+        .def("__itruediv__", &Vec2_idivObj<T>,py::return_value_policy::reference_internal)
         .def("__xor__", &Vec2_dot<T>)
         .def("__mod__", &Vec2_cross<T>)
+        /*
         .def(self == self)
         .def(self != self)
-        .def("__eq__", &equal<T,tuple>)
-        .def("__ne__", &notequal<T,tuple>)
+        */
+        .def("__eq__", &equal<T,py::tuple>)
+        .def("__ne__", &notequal<T,py::tuple>)
         .def("__add__", &Vec2_add<T>)
         .def("__add__", &Vec2_addV<T, int>)
         .def("__add__", &Vec2_addV<T, float>)
         .def("__add__", &Vec2_addV<T, double>)
         .def("__add__", &Vec2_addT<T>)
-        .def("__add__", &Vec2_addTuple<T,tuple>)
-        .def("__add__", &Vec2_addTuple<T,list>)
+        .def("__add__", &Vec2_addTuple<T,py::tuple>)
+        .def("__add__", &Vec2_addTuple<T,py::list>)
         .def("__radd__", &Vec2_add<T>)
         .def("__radd__", &Vec2_addT<T>)
-        .def("__radd__", &Vec2_addTuple<T,tuple>)
-        .def("__radd__", &Vec2_addTuple<T,list>)
-        .def("__iadd__", &Vec2_iaddV<T, int>, return_internal_reference<>())
-        .def("__iadd__", &Vec2_iaddV<T, float>, return_internal_reference<>())
-        .def("__iadd__", &Vec2_iaddV<T, double>, return_internal_reference<>())
+        .def("__radd__", &Vec2_addTuple<T,py::tuple>)
+        .def("__radd__", &Vec2_addTuple<T,py::list>)
+        .def("__iadd__", &Vec2_iaddV<T, int>, py::return_value_policy::reference_internal)
+        .def("__iadd__", &Vec2_iaddV<T, float>, py::return_value_policy::reference_internal)
+        .def("__iadd__", &Vec2_iaddV<T, double>, py::return_value_policy::reference_internal)
         .def("__sub__", &Vec2_sub<T>)
         .def("__sub__", &Vec2_subV<T, int>)
         .def("__sub__", &Vec2_subV<T, float>)
         .def("__sub__", &Vec2_subV<T, double>)
         .def("__sub__", &Vec2_subT<T>)
-        .def("__sub__", &Vec2_subTuple<T,tuple>)
-        .def("__sub__", &Vec2_subTuple<T,list>)
+        .def("__sub__", &Vec2_subTuple<T,py::tuple>)
+        .def("__sub__", &Vec2_subTuple<T,py::list>)
         .def("__rsub__", &Vec2_rsubT<T>)
-        .def("__rsub__", &Vec2_rsubTuple<T,tuple>)
-        .def("__rsub__", &Vec2_rsubTuple<T,list>)
-        .def("__isub__", &Vec2_isubV<T, int>, return_internal_reference<>())
-        .def("__isub__", &Vec2_isubV<T, float>, return_internal_reference<>())
-        .def("__isub__", &Vec2_isubV<T, double>, return_internal_reference<>())
+        .def("__rsub__", &Vec2_rsubTuple<T,py::tuple>)
+        .def("__rsub__", &Vec2_rsubTuple<T,py::list>)
+        .def("__isub__", &Vec2_isubV<T, int>, py::return_value_policy::reference_internal)
+        .def("__isub__", &Vec2_isubV<T, float>, py::return_value_policy::reference_internal)
+        .def("__isub__", &Vec2_isubV<T, double>, py::return_value_policy::reference_internal)
         .def("__lt__", &lessThan<T>)
         .def("__gt__", &greaterThan<T>)
         .def("__le__", &lessThanEqual<T>)
@@ -1131,18 +1166,18 @@ Vec2Array_bounds(const FixedArray<IMATH_NAMESPACE::Vec2<T> > &a)
 }
 
 template <class T>
-class_<FixedArray<IMATH_NAMESPACE::Vec2<T> > >
-register_Vec2Array()
+py::class_<FixedArray<IMATH_NAMESPACE::Vec2<T> > >
+register_Vec2Array(py::module &m)
 {
     using boost::mpl::true_;
     using boost::mpl::false_;
 
-    class_<FixedArray<IMATH_NAMESPACE::Vec2<T> > > vec2Array_class = FixedArray<IMATH_NAMESPACE::Vec2<T> >::register_("Fixed length array of IMATH_NAMESPACE::Vec2");
+    py::class_<FixedArray<IMATH_NAMESPACE::Vec2<T> > > vec2Array_class = FixedArray<IMATH_NAMESPACE::Vec2<T> >::register_(m, "Fixed length array of IMATH_NAMESPACE::Vec2");
     vec2Array_class
-        .add_property("x",&Vec2Array_get<T,0>)
-        .add_property("y",&Vec2Array_get<T,1>)
-        .def("__setitem__", &setItemTuple<T,tuple>)
-        .def("__setitem__", &setItemTuple<T,list>)
+        .def_property_readonly("x",&Vec2Array_get<T,0>)
+        .def_property_readonly("y",&Vec2Array_get<T,1>)
+        .def("__setitem__", &setItemTuple<T,py::tuple>)
+        .def("__setitem__", &setItemTuple<T,py::list>)
         .def("min", &Vec2Array_min<T>)
         .def("max", &Vec2Array_max<T>)
         .def("bounds", &Vec2Array_bounds<T>)
@@ -1151,21 +1186,21 @@ register_Vec2Array()
     add_arithmetic_math_functions(vec2Array_class);
     add_comparison_functions(vec2Array_class);
 
-    generate_member_bindings<op_vecLength<IMATH_NAMESPACE::Vec2<T> >     >(vec2Array_class,"length","");
-    generate_member_bindings<op_vecLength2<IMATH_NAMESPACE::Vec2<T> >    >(vec2Array_class,"length2","");
-    generate_member_bindings<op_vecNormalize<IMATH_NAMESPACE::Vec2<T> >  >(vec2Array_class,"normalize","");
-    generate_member_bindings<op_vecNormalized<IMATH_NAMESPACE::Vec2<T> > >(vec2Array_class,"normalized","");
+    generate_member_bindings(vec2Array_class, &op_vecLength<IMATH_NAMESPACE::Vec2<T>>::apply, "length","");
+    generate_member_bindings(vec2Array_class, &op_vecLength2<IMATH_NAMESPACE::Vec2<T>>::apply, "length2","");
+    generate_member_bindings(vec2Array_class, &op_vecNormalize<IMATH_NAMESPACE::Vec2<T>>::apply, "normalize","");
+    generate_member_bindings(vec2Array_class, &op_vecNormalized<IMATH_NAMESPACE::Vec2<T>>::apply, "normalized","");
 
-    generate_member_bindings<op_vec2Cross<T>,           true_>(vec2Array_class,"cross","return the cross product of (self,x)",boost::python::args("x"));
-    generate_member_bindings<op_vecDot<IMATH_NAMESPACE::Vec2<T> >,true_>(vec2Array_class,"dot","return the inner product of (self,x)",boost::python::args("x"));
+    generate_member_bindings(vec2Array_class, &op_vec2Cross<T>::apply, "cross","return the cross product of (self,x)");
+    generate_member_bindings(vec2Array_class, &op_vecDot<IMATH_NAMESPACE::Vec2<T>>::apply, "dot","return the inner product of (self,x)");
 
-    generate_member_bindings<op_mul<IMATH_NAMESPACE::Vec2<T>,T>,  true_>(vec2Array_class,"__mul__" ,"self*x", boost::python::args("x"));
-    generate_member_bindings<op_mul<IMATH_NAMESPACE::Vec2<T>,T>,  true_>(vec2Array_class,"__rmul__","x*self", boost::python::args("x"));
-    generate_member_bindings<op_imul<IMATH_NAMESPACE::Vec2<T>,T>, true_>(vec2Array_class,"__imul__","self*=x",boost::python::args("x"));
-    generate_member_bindings<op_div<IMATH_NAMESPACE::Vec2<T>,T>,  true_>(vec2Array_class,"__div__" ,"self/x", boost::python::args("x"));
-    generate_member_bindings<op_div<IMATH_NAMESPACE::Vec2<T>,T>,  true_>(vec2Array_class,"__truediv__" ,"self/x", boost::python::args("x"));
-    generate_member_bindings<op_idiv<IMATH_NAMESPACE::Vec2<T>,T>, true_>(vec2Array_class,"__idiv__","self/=x",boost::python::args("x"));
-    generate_member_bindings<op_idiv<IMATH_NAMESPACE::Vec2<T>,T>, true_>(vec2Array_class,"__itruediv__","self/=x",boost::python::args("x"));
+    generate_member_bindings(vec2Array_class, &op_mul<IMATH_NAMESPACE::Vec2<T>,T>::apply, "__mul__" ,"self*x");
+    generate_member_bindings(vec2Array_class, &op_mul<IMATH_NAMESPACE::Vec2<T>,T>::apply, "__rmul__","x*self");
+    generate_member_bindings(vec2Array_class, &op_imul<IMATH_NAMESPACE::Vec2<T>,T>::apply, "__imul__","self*=x");
+    generate_member_bindings(vec2Array_class, &op_div<IMATH_NAMESPACE::Vec2<T>,T>::apply, "__div__" ,"self/x");
+    generate_member_bindings(vec2Array_class, &op_div<IMATH_NAMESPACE::Vec2<T>,T>::apply, "__truediv__" ,"self/x");
+    generate_member_bindings(vec2Array_class, &op_idiv<IMATH_NAMESPACE::Vec2<T>,T>::apply, "__idiv__","self/=x");
+    generate_member_bindings(vec2Array_class, &op_idiv<IMATH_NAMESPACE::Vec2<T>,T>::apply, "__itruediv__","self/=x");
 
     decoratecopy(vec2Array_class);
 

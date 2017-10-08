@@ -35,8 +35,7 @@
 #ifndef _PyImathQuat_h_
 #define _PyImathQuat_h_
 
-#include <Python.h>
-#include <boost/python.hpp>
+#include "python_include.h"
 #include <PyImath.h>
 #include <ImathQuat.h>
 #include <ImathVec.h>
@@ -44,8 +43,8 @@
 
 namespace PyImath {
 
-template <class T> boost::python::class_<IMATH_NAMESPACE::Quat<T> > register_Quat();
-template <class T> boost::python::class_<PyImath::FixedArray<IMATH_NAMESPACE::Quat<T> > > register_QuatArray();
+template <class T> py::class_<IMATH_NAMESPACE::Quat<T> > register_Quat(py::module &m);
+template <class T> py::class_<PyImath::FixedArray<IMATH_NAMESPACE::Quat<T> > > register_QuatArray(py::module &m);
 typedef FixedArray<IMATH_NAMESPACE::Quatf>  QuatfArray;
 typedef FixedArray<IMATH_NAMESPACE::Quatd>  QuatdArray;
 
@@ -88,7 +87,7 @@ template <class T>
 PyObject *
 Q<T>::wrap (const IMATH_NAMESPACE::Quat<T> &q)
 {
-    typename boost::python::return_by_value::apply < IMATH_NAMESPACE::Quat<T> >::type converter;
+    typename py::return_by_value::apply < IMATH_NAMESPACE::Quat<T> >::type converter;
     PyObject *p = converter (q);
     return p;
 }
@@ -97,7 +96,7 @@ template <class T>
 int
 Q<T>::convert (PyObject *p, IMATH_NAMESPACE::Quat<T> *q)
 {
-    boost::python::extract <IMATH_NAMESPACE::Quatf> extractorQf (p);
+    py::py::cast <IMATH_NAMESPACE::Quatf> extractorQf (p);
     if (extractorQf.check())
     {
         IMATH_NAMESPACE::Quatf qf = extractorQf();
@@ -106,7 +105,7 @@ Q<T>::convert (PyObject *p, IMATH_NAMESPACE::Quat<T> *q)
         return 1;
     }
 
-    boost::python::extract <IMATH_NAMESPACE::Quatd> extractorQd (p);
+    py::py::cast <IMATH_NAMESPACE::Quatd> extractorQd (p);
     if (extractorQd.check())
     {
         IMATH_NAMESPACE::Quatd qd = extractorQd();
@@ -115,20 +114,20 @@ Q<T>::convert (PyObject *p, IMATH_NAMESPACE::Quat<T> *q)
         return 1;
     }
 
-    boost::python::extract <boost::python::tuple> extractorTuple (p);
+    py::py::cast <py::tuple> extractorTuple (p);
     if (extractorTuple.check())
     {
-        boost::python::tuple t = extractorTuple();
+        py::tuple t = extractorTuple();
         if (t.attr ("__len__") () == 4)
         {
             // Extracting the tuple elements as doubles and casting them to
             // Ts in setValue() works better than extracting them as Ts from
             // the start.  
 
-            double r = boost::python::extract <double> (t[0]);
-            double x = boost::python::extract <double> (t[1]);
-            double y = boost::python::extract <double> (t[2]);
-            double z = boost::python::extract <double> (t[3]);
+            double r = py::py::cast <double> (t[0]);
+            double x = py::py::cast <double> (t[1]);
+            double y = py::py::cast <double> (t[2]);
+            double z = py::py::cast <double> (t[3]);
             q->r = T(r);
             q->v.setValue (T(x), T(y), T(z));
             return 1;

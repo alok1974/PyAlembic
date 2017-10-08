@@ -32,12 +32,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
+#include "python_include.h"
 #include <PyImathEuler.h>
 #include "PyImathDecorators.h"
 #include "PyImathExport.h"
-#include <Python.h>
-#include <boost/python.hpp>
-#include <boost/python/make_constructor.hpp>
 #include <boost/format.hpp>
 #include <PyImath.h>
 #include <PyImathMathExc.h>
@@ -53,7 +51,7 @@ template<> const char *PyImath::EulerdArray::name() { return "EulerdArray"; }
 }
 
 namespace PyImath {
-using namespace boost::python;
+
 using namespace IMATH_NAMESPACE;
 
 template <class T> struct EulerName { static const char *value; };
@@ -187,15 +185,15 @@ static IMATH_NAMESPACE::Vec3 <int> getAngleOrder(Euler <T> &euler)
 
 template <class T>
 static void
-setXYZTuple(Euler<T> &euler, const tuple &t)
+setXYZTuple(Euler<T> &euler, const py::tuple &t)
 {
     MATH_EXC_ON;
     Vec3<T> v;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
-        v.x = extract<T>(t[0]);
-        v.y = extract<T>(t[1]);
-        v.z = extract<T>(t[2]); 
+        v.x = py::cast<T>(t[0]);
+        v.y = py::cast<T>(t[1]);
+        v.z = py::cast<T>(t[2]); 
         
         euler.setXYZVector(v);
     }
@@ -563,38 +561,39 @@ toXYZVector(Euler<T> &euler)
 }
 
 template <class T>
-class_<Euler<T>,bases<IMATH_NAMESPACE::Vec3<T> > >
-register_Euler()
+py::class_<Euler<T>, IMATH_NAMESPACE::Vec3<T> >
+register_Euler(py::module &m)
 {
-    class_<Euler<T>,bases<Vec3<T> > > euler_class(EulerName<T>::value,EulerName<T>::value,init<Euler<T> >("copy construction"));
+    py::class_<Euler<T>, Vec3<T> > euler_class(m, EulerName<T>::value,EulerName<T>::value);
     euler_class
-        .def(init<>("imath Euler default construction"))
-        .def("__init__", make_constructor(eulerConstructor1<T>))
-        .def("__init__", make_constructor(eulerConstructor1a<T>))
-        .def("__init__", make_constructor(eulerConstructor1b<T>))
-        .def("__init__", make_constructor(eulerConstructor2<T>))
-        .def("__init__", make_constructor(eulerConstructor2a<T>))
-        .def("__init__", make_constructor(eulerConstructor2b<T>))
-        .def("__init__", make_constructor(eulerConstructor3<T>),
+        .def(py::init<Euler<T> >(/*"copy construction"*/))
+        .def(py::init<>(/*"imath Euler default construction"*/))
+        .def("__init__", eulerConstructor1<T>)
+        .def("__init__", eulerConstructor1a<T>)
+        .def("__init__", eulerConstructor1b<T>)
+        .def("__init__", eulerConstructor2<T>)
+        .def("__init__", eulerConstructor2a<T>)
+        .def("__init__", eulerConstructor2b<T>)
+        .def("__init__", eulerConstructor3<T>,
              "Euler-from-matrix construction assumes, but does\n"
              "not verify, that the matrix includes no shear or\n"
              "non-uniform scaling.  If necessary, you can fix\n"
              "the matrix by calling the removeScalingAndShear()\n"
              "function.\n")
-        .def("__init__", make_constructor(eulerConstructor3a<T>))
-        .def("__init__", make_constructor(eulerConstructor3b<T>))
-        .def("__init__", make_constructor(eulerConstructor4<T>))
-        .def("__init__", make_constructor(eulerConstructor4a<T>))
-        .def("__init__", make_constructor(eulerConstructor4b<T>))
-        .def("__init__", make_constructor(eulerConstructor5<T>))
-        .def("__init__", make_constructor(eulerConstructor5a<T>))
-        .def("__init__", make_constructor(eulerConstructor5b<T>))
-        .def("__init__", make_constructor(eulerConstructor6<T>))
-        .def("__init__", make_constructor(eulerConstructor7<T>))
-        .def("__init__", make_constructor(eulerConstructor7a<T>))
-        .def("__init__", make_constructor(eulerConstructor7b<T>))
-        .def("__init__", make_constructor(eulerConversionConstructor<T, float>))
-        .def("__init__", make_constructor(eulerConversionConstructor<T, double>))
+        .def("__init__", eulerConstructor3a<T>)
+        .def("__init__", eulerConstructor3b<T>)
+        .def("__init__", eulerConstructor4<T>)
+        .def("__init__", eulerConstructor4a<T>)
+        .def("__init__", eulerConstructor4b<T>)
+        .def("__init__", eulerConstructor5<T>)
+        .def("__init__", eulerConstructor5a<T>)
+        .def("__init__", eulerConstructor5b<T>)
+        .def("__init__", eulerConstructor6<T>)
+        .def("__init__", eulerConstructor7<T>)
+        .def("__init__", eulerConstructor7a<T>)
+        .def("__init__", eulerConstructor7b<T>)
+        .def("__init__", eulerConversionConstructor<T, float>)
+        .def("__init__", eulerConversionConstructor<T, double>)
         
         .def("angleOrder", &getAngleOrder<T>, "angleOrder() set the angle order")
         
@@ -656,21 +655,21 @@ register_Euler()
              "angles in e to v[0], v[1], v[2]")
         .def("setXYZVector", &setXYZTuple<T>)
         
-        .def("extract", &extract1<T>,
+        .def("py::cast", &extract1<T>,
              "e.extract(m) -- extracts the rotation component\n"
              "from 3x3 matrix m and stores the result in e.\n"
              "Assumes that m does not contain shear or non-\n"
              "uniform scaling.  If necessary, you can fix m\n"
              "by calling m.removeScalingAndShear().")
         
-        .def("extract", &extract2<T>,
+        .def("py::cast", &extract2<T>,
              "e.extract(m) -- extracts the rotation component\n"
              "from 4x4 matrix m and stores the result in e.\n"
              "Assumes that m does not contain shear or non-\n"
              "uniform scaling.  If necessary, you can fix m\n"
              "by calling m.removeScalingAndShear().")
         
-        .def("extract", &extract3<T>,
+        .def("py::cast", &extract3<T>,
              "e.extract(q) -- extracts the rotation component\n"
              "from quaternion q and stores the result in e")            
         
@@ -692,8 +691,8 @@ register_Euler()
     
     // fill in the Euler scope
     {
-        scope euler_scope(euler_class);
-        enum_<typename Euler<T>::Order> euler_order("Order");
+        //py::scope euler_scope(euler_class);
+        py::enum_<typename Euler<T>::Order> euler_order(euler_class, "Order");
         euler_order
             .value("XYZ",Euler<T>::XYZ)
             .value("XZY",Euler<T>::XZY)
@@ -724,22 +723,23 @@ register_Euler()
             //.value("Legal",Euler<T>::Legal)
             //.value("Min",Euler<T>::Min)
             //.value("Max",Euler<T>::Max)
+            .value("Default",Euler<T>::XYZ)
 
             // handle Default seperately since boost sets up a 1-1 mapping for enum values
             //.value("Default",Euler<T>::Default)
             .export_values()
             ;
         // just set it to the XYZ value manually
-        euler_scope.attr("Default") = euler_scope.attr("XYZ");
+        //euler_scope.attr("Default") = euler_scope.attr("XYZ");
 
-        enum_<typename Euler<T>::Axis>("Axis")
+        py::enum_<typename Euler<T>::Axis>(euler_class, "Axis")
             .value("X",Euler<T>::X)
             .value("Y",Euler<T>::Y)
             .value("Z",Euler<T>::Z)
             .export_values()
             ;
 
-        enum_<typename Euler<T>::InputLayout>("InputLayout")
+        py::enum_<typename Euler<T>::InputLayout>(euler_class, "InputLayout")
             .value("XYZLayout",Euler<T>::XYZLayout)
             .value("IJKLayout",Euler<T>::IJKLayout)
             .export_values()
@@ -777,15 +777,15 @@ EulerArray_eulerConstructor7a(const FixedArray<IMATH_NAMESPACE::Quat<T> > &q)
 }
 
 template <class T>
-class_<FixedArray<IMATH_NAMESPACE::Euler<T> > >
-register_EulerArray()
+py::class_<FixedArray<IMATH_NAMESPACE::Euler<T> > >
+register_EulerArray(py::module &m)
 {
-    class_<FixedArray<IMATH_NAMESPACE::Euler<T> > > eulerArray_class = FixedArray<IMATH_NAMESPACE::Euler<T> >::register_("Fixed length array of IMATH_NAMESPACE::Euler");
+    py::class_<FixedArray<IMATH_NAMESPACE::Euler<T> > > eulerArray_class = FixedArray<IMATH_NAMESPACE::Euler<T> >::register_(m, "Fixed length array of IMATH_NAMESPACE::Euler");
     eulerArray_class
-        //.add_property("x",&EulerArray_get<T,1>)
-        //.add_property("y",&EulerArray_get<T,2>)
-        //.add_property("z",&EulerArray_get<T,3>)
-        .def("__init__", make_constructor(EulerArray_eulerConstructor7a<T>))
+        //.def_property_readonly("x",&EulerArray_get<T,1>)
+        //.def_property_readonly("y",&EulerArray_get<T,2>)
+        //.def_property_readonly("z",&EulerArray_get<T,3>)
+        .def("__init__", EulerArray_eulerConstructor7a<T>)
         ;
 
     add_comparison_functions(eulerArray_class);
@@ -794,11 +794,11 @@ register_EulerArray()
     return eulerArray_class;
 }
 
-template PYIMATH_EXPORT class_<IMATH_NAMESPACE::Euler<float>,bases<IMATH_NAMESPACE::Vec3<float> > > register_Euler<float>();
-template PYIMATH_EXPORT class_<IMATH_NAMESPACE::Euler<double>,bases<IMATH_NAMESPACE::Vec3<double> > > register_Euler<double>();
+template PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Euler<float>, IMATH_NAMESPACE::Vec3<float> > register_Euler<float>(py::module &m);
+template PYIMATH_EXPORT py::class_<IMATH_NAMESPACE::Euler<double>, IMATH_NAMESPACE::Vec3<double> > register_Euler<double>(py::module &m);
 
-template PYIMATH_EXPORT class_<FixedArray<IMATH_NAMESPACE::Euler<float> > > register_EulerArray<float>();
-template PYIMATH_EXPORT class_<FixedArray<IMATH_NAMESPACE::Euler<double> > > register_EulerArray<double>();
+template PYIMATH_EXPORT py::class_<FixedArray<IMATH_NAMESPACE::Euler<float> > > register_EulerArray<float>(py::module &m);
+template PYIMATH_EXPORT py::class_<FixedArray<IMATH_NAMESPACE::Euler<double> > > register_EulerArray<double>(py::module &m);
 }
 namespace PyImath {
 	template<> PYIMATH_EXPORT IMATH_NAMESPACE::Euler<float> FixedArrayDefaultValue<IMATH_NAMESPACE::Euler<float> >::value() { return IMATH_NAMESPACE::Euler<float>(); }

@@ -41,11 +41,9 @@
 // order to work around MSVC limitations.
 //
 
+#include "python_include.h"
 #include <PyImathBox.h>
 #include "PyImathDecorators.h"
-#include <Python.h>
-#include <boost/python.hpp>
-#include <boost/python/make_constructor.hpp>
 #include <boost/format.hpp>
 #include <PyImath.h>
 #include <ImathVec.h>
@@ -57,7 +55,7 @@
 #include <PyImathVecOperators.h>
 
 namespace PyImath {
-using namespace boost::python;
+
 using namespace IMATH_NAMESPACE;
 
 template <class T,int index>
@@ -71,13 +69,13 @@ BoxArray_get(FixedArray<IMATH_NAMESPACE::Box<T> > &va)
 
 template <class T>
 static void
-setItemTuple(FixedArray<IMATH_NAMESPACE::Box<T> > &va, Py_ssize_t index, const tuple &t)
+setItemTuple(FixedArray<IMATH_NAMESPACE::Box<T> > &va, Py_ssize_t index, const py::tuple &t)
 {
-    if(t.attr("__len__")() == 2)
+    if(py::cast<int>(t.attr("__len__")()) == 2)
     {
         Box<T> v;
-        v.min = extract<T>(t[0]);
-        v.max = extract<T>(t[1]);
+        v.min = py::cast<T>(t[0]);
+        v.max = py::cast<T>(t[1]);
         va[va.canonical_index(index)] = v;
     }
     else
@@ -85,16 +83,16 @@ setItemTuple(FixedArray<IMATH_NAMESPACE::Box<T> > &va, Py_ssize_t index, const t
 }
 
 template <class T>
-class_<FixedArray<IMATH_NAMESPACE::Box<T> > >
-register_BoxArray()
+py::class_<FixedArray<IMATH_NAMESPACE::Box<T> > >
+register_BoxArray(py::module &m)
 {
     using boost::mpl::true_;
     using boost::mpl::false_;
 
-    class_<FixedArray<IMATH_NAMESPACE::Box<T> > > boxArray_class = FixedArray<IMATH_NAMESPACE::Box<T> >::register_("Fixed length array of IMATH_NAMESPACE::Box");
+    py::class_<FixedArray<IMATH_NAMESPACE::Box<T> > > boxArray_class = FixedArray<IMATH_NAMESPACE::Box<T> >::register_(m, "Fixed length array of IMATH_NAMESPACE::Box");
     boxArray_class
-        .add_property("min",&BoxArray_get<T,0>)
-        .add_property("max",&BoxArray_get<T,1>)
+        .def_property_readonly("min",&BoxArray_get<T,0>)
+        .def_property_readonly("max",&BoxArray_get<T,1>)
         .def("__setitem__", &setItemTuple<T>)
     ;
 

@@ -41,11 +41,9 @@
 // order to work around MSVC limitations.
 //
 
+#include "python_include.h"
 #include <PyImathVec.h>
 #include "PyImathDecorators.h"
-#include <Python.h>
-#include <boost/python.hpp>
-#include <boost/python/make_constructor.hpp>
 #include <boost/format.hpp>
 #include <PyImath.h>
 #include <ImathVec.h>
@@ -54,7 +52,7 @@
 #include <PyImathMathExc.h>
 
 namespace PyImath {
-using namespace boost::python;
+
 using namespace IMATH_NAMESPACE;
 
 template <class T> struct Vec3Name      { static const char *value(); };
@@ -67,15 +65,16 @@ static Vec3<T> * Vec3_construct_default()
 }
 
 template <class T>
-static Vec3<T> * Vec3_object_constructor1(const object &obj)
+static Vec3<T> * Vec3_object_constructor1(const py::object &obj)
 {
-    Vec3<T> w;
-    extract<Vec3<int> >     e1(obj);
-    extract<Vec3<float> >   e2(obj);
-    extract<Vec3<double> >  e3(obj);
-    extract<tuple>          e4(obj);
-    extract<double>         e5(obj);
-    extract<list>           e6(obj);
+    Vec3<T> w = py::cast<Vec3<T>>(obj);
+    /*
+    py::cast<Vec3<int> >     e1(obj);
+    py::cast<Vec3<float> >   e2(obj);
+    py::cast<Vec3<double> >  e3(obj);
+    py::cast<tuple>          e4(obj);
+    py::cast<double>         e5(obj);
+    py::cast<list>           e6(obj);
     
     if(e1.check())      { w = e1(); }
     else if(e2.check()) { w = e2(); }
@@ -85,9 +84,9 @@ static Vec3<T> * Vec3_object_constructor1(const object &obj)
         tuple t = e4();
         if(t.attr("__len__")() == 3)
         {
-            w.x = extract<T>(t[0]);
-            w.y = extract<T>(t[1]);
-            w.z = extract<T>(t[2]);
+            w.x = py::cast<T>(t[0]);
+            w.y = py::cast<T>(t[1]);
+            w.z = py::cast<T>(t[2]);
         }
         else
             THROW(IEX_NAMESPACE::LogicExc, "tuple must have length of 3");
@@ -99,16 +98,16 @@ static Vec3<T> * Vec3_object_constructor1(const object &obj)
         list l = e6();
         if(l.attr("__len__")() == 3)
         {
-            w.x = extract<T>(l[0]);
-            w.y = extract<T>(l[1]);
-            w.z = extract<T>(l[2]);
+            w.x = py::cast<T>(l[0]);
+            w.y = py::cast<T>(l[1]);
+            w.z = py::cast<T>(l[2]);
         }
         else
             THROW(IEX_NAMESPACE::LogicExc, "list must have length of 3");
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to Vec3 constructor");
-    
+    */
     Vec3<T> *v = new Vec3<T>;
     *v = w;
     
@@ -117,13 +116,15 @@ static Vec3<T> * Vec3_object_constructor1(const object &obj)
 }
 
 template <class T>
-static Vec3<T> * Vec3_object_constructor2(const object &obj1, const object &obj2, const object &obj3)
+static Vec3<T> * Vec3_object_constructor2(const py::object &obj1, const py::object &obj2, const py::object &obj3)
 {
-    extract<double>    e1(obj1);
-    extract<double>    e2(obj2);
-    extract<double>    e3(obj3);
-    Vec3<T> *v = new Vec3<T>;
-    
+    /*
+    py::cast<double>    e1(obj1);
+    py::cast<double>    e2(obj2);
+    py::cast<double>    e3(obj3);
+    */
+    Vec3<T> *v = new Vec3<T>; 
+    /*
     if(e1.check()) { v->x = e1();}
     else { THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to Vec3 constructor"); }
     
@@ -132,7 +133,10 @@ static Vec3<T> * Vec3_object_constructor2(const object &obj1, const object &obj2
 
     if(e3.check()) { v->z = e3();}
     else { THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to Vec3 constructor"); } 
-    
+    */
+    v->x = py::cast<double>(obj1);
+    v->y = py::cast<double>(obj2);
+    v->z = py::cast<double>(obj3);
     return v;
 }
 
@@ -417,23 +421,26 @@ Vec3_mulM44 (Vec3<T> &v, const Matrix44<U> &m)
 
 template <class T>
 static const Vec3<T> &
-Vec3_idivObj(IMATH_NAMESPACE::Vec3<T> &v, const object &o) 
+Vec3_idivObj(IMATH_NAMESPACE::Vec3<T> &v, const py::object &o) 
 { 
     MATH_EXC_ON;
     Vec3<T> v2;
+    return v /= py::cast<double>(o);
+    /*
     if (PyImath::V3<T>::convert (o.ptr(), &v2))
     {
         return v /= v2;
     }
     else
     {
-        extract<double> e(o);
+        py::cast<double> e(o);
         if (e.check())
             return v /= e();
         else
             THROW (IEX_NAMESPACE::ArgExc, "V3 division expects an argument"
                    "convertible to a V3");
     }
+    */
 }
 
 template <class T>
@@ -453,11 +460,11 @@ Vec3_subTuple(const Vec3<T> &v, const BoostPyType &t)
     MATH_EXC_ON;
     Vec3<T> w;
     
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
-        w.x = v.x - extract<T>(t[0]);
-        w.y = v.y - extract<T>(t[1]);
-        w.z = v.z - extract<T>(t[2]);
+        w.x = v.x - py::cast<T>(t[0]);
+        w.y = v.y - py::cast<T>(t[1]);
+        w.z = v.z - py::cast<T>(t[2]);
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "tuple must have length of 3");
@@ -482,11 +489,11 @@ Vec3_rsubTuple(const Vec3<T> &v, const BoostPyType &t)
     MATH_EXC_ON;
     Vec3<T> w;
     
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
-        w.x = extract<T>(t[0]) - v.x;
-        w.y = extract<T>(t[1]) - v.y;
-        w.z = extract<T>(t[2]) - v.z;
+        w.x = py::cast<T>(t[0]) - v.x;
+        w.y = py::cast<T>(t[1]) - v.y;
+        w.z = py::cast<T>(t[2]) - v.z;
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "tuple must have length of 3");
@@ -501,11 +508,11 @@ Vec3_addTuple(const Vec3<T> &v, const BoostPyType &t)
     MATH_EXC_ON;
     Vec3<T> w;
     
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
-        w.x = v.x + extract<T>(t[0]);
-        w.y = v.y + extract<T>(t[1]);
-        w.z = v.z + extract<T>(t[2]);
+        w.x = v.x + py::cast<T>(t[0]);
+        w.y = v.y + py::cast<T>(t[1]);
+        w.z = v.z + py::cast<T>(t[2]);
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "tuple must have length of 3");
@@ -557,20 +564,20 @@ Vec3_isubV(Vec3<T> &v, const Vec3<U> &w)
 
 template <class T>
 static Vec3<T>
-mult(const Vec3<T> &v, tuple t)
+mult(const Vec3<T> &v, py::tuple t)
 {
     MATH_EXC_ON;
     Vec3<T> w;
     
-    if(t.attr("__len__")() == 1){
-        w.x = v.x*extract<T>(t[0]);
-        w.y = v.y*extract<T>(t[0]);
-        w.z = v.z*extract<T>(t[0]);
+    if(py::cast<int>(t.attr("__len__")()) == 1){
+        w.x = v.x*py::cast<T>(t[0]);
+        w.y = v.y*py::cast<T>(t[0]);
+        w.z = v.z*py::cast<T>(t[0]);
     }        
-    else if(t.attr("__len__")() == 3){
-        w.x = v.x*extract<T>(t[0]);
-        w.y = v.y*extract<T>(t[1]);
-        w.z = v.z*extract<T>(t[2]);
+    else if(py::cast<int>(t.attr("__len__")()) == 3){
+        w.x = v.x*py::cast<T>(t[0]);
+        w.y = v.y*py::cast<T>(t[1]);
+        w.z = v.z*py::cast<T>(t[2]);
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "tuple must have length of 1 or 3");
@@ -590,11 +597,11 @@ template <class T, class BoostPyType>
 static Vec3<T>
 Vec3_divTuple(const Vec3<T> &v, const BoostPyType &t)
 {
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
-        T x = extract<T>(t[0]);
-        T y = extract<T>(t[1]);
-        T z = extract<T>(t[2]);
+        T x = py::cast<T>(t[0]);
+        T y = py::cast<T>(t[1]);
+        T z = py::cast<T>(t[2]);
         if(x != T(0) && y != T(0) && z != T(0))
             return Vec3<T>(v.x / x, v.y / y, v.z / z);
         else
@@ -610,11 +617,11 @@ Vec3_rdivTuple(const Vec3<T> &v, const BoostPyType &t)
 {
     MATH_EXC_ON;
     Vec3<T> w;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
-        T x = extract<T>(t[0]);
-        T y = extract<T>(t[1]);
-        T z = extract<T>(t[2]);
+        T x = py::cast<T>(t[0]);
+        T y = py::cast<T>(t[1]);
+        T z = py::cast<T>(t[2]);
             
         if(v.x != T(0) && v.y != T(0) && v.z != T(0)){
             w.setValue(x / v.x, y / v.y, z / v.z);
@@ -676,12 +683,14 @@ Vec3_Vec3_divT(const Vec3<T>& v, const Vec3<T>& w)
 
 template <class T>
 static bool
-lessThan(const Vec3<T> &v, const object &obj)
+lessThan(const Vec3<T> &v, const py::object &obj)
 {
-    extract<Vec3<T> > e1(obj);
-    extract<tuple> e2(obj);
-    
-    Vec3<T> w;
+    /*
+    py::cast<Vec3<T> > e1(obj);
+    py::cast<tuple> e2(obj);
+    */
+    Vec3<T> w = py::cast<Vec3<T>>(obj);
+    /*
     if(e1.check())
     {
         w = e1();
@@ -689,14 +698,14 @@ lessThan(const Vec3<T> &v, const object &obj)
     else if(e2.check())
     {
         tuple t = e2();
-        T x = extract<T>(t[0]);
-        T y = extract<T>(t[1]);
-        T z = extract<T>(t[2]);
+        T x = py::cast<T>(t[0]);
+        T y = py::cast<T>(t[1]);
+        T z = py::cast<T>(t[2]);
         w.setValue(x,y,z);
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to operator <");
-    
+    */
     bool isLessThan = (v.x <= w.x && v.y <= w.y && v.z <= w.z)
                     && v != w;
     
@@ -705,12 +714,14 @@ lessThan(const Vec3<T> &v, const object &obj)
 
 template <class T>
 static bool
-greaterThan(const Vec3<T> &v, const object &obj)
+greaterThan(const Vec3<T> &v, const py::object &obj)
 {
-    extract<Vec3<T> > e1(obj);
-    extract<tuple> e2(obj);
-    
-    Vec3<T> w;
+    /*
+    py::cast<Vec3<T> > e1(obj);
+    py::cast<tuple> e2(obj);
+    */
+    Vec3<T> w = py::cast<Vec3<T>>(obj);
+    /*
     if(e1.check())
     {
         w = e1();
@@ -718,14 +729,14 @@ greaterThan(const Vec3<T> &v, const object &obj)
     else if(e2.check())
     {
         tuple t = e2();
-        T x = extract<T>(t[0]);
-        T y = extract<T>(t[1]);
-        T z = extract<T>(t[2]);
+        T x = py::cast<T>(t[0]);
+        T y = py::cast<T>(t[1]);
+        T z = py::cast<T>(t[2]);
         w.setValue(x,y,z);
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to operator >");
-    
+    */
     bool isGreaterThan = (v.x >= w.x && v.y >= w.y && v.z >= w.z)
                        && v != w;
 
@@ -734,12 +745,14 @@ greaterThan(const Vec3<T> &v, const object &obj)
 
 template <class T>
 static bool
-lessThanEqual(const Vec3<T> &v, const object &obj)
+lessThanEqual(const Vec3<T> &v, const py::object &obj)
 {
-    extract<Vec3<T> > e1(obj);
-    extract<tuple> e2(obj);
-    
-    Vec3<T> w;
+    /*
+    py::cast<Vec3<T> > e1(obj);
+    py::cast<tuple> e2(obj);
+    */
+    Vec3<T> w = py::cast<Vec3<T>>(obj);
+    /*
     if(e1.check())
     {
         w = e1();
@@ -747,14 +760,14 @@ lessThanEqual(const Vec3<T> &v, const object &obj)
     else if(e2.check())
     {
         tuple t = e2();
-        T x = extract<T>(t[0]);
-        T y = extract<T>(t[1]);
-        T z = extract<T>(t[2]);
+        T x = py::cast<T>(t[0]);
+        T y = py::cast<T>(t[1]);
+        T z = py::cast<T>(t[2]);
         w.setValue(x,y,z);
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to operator <=");
-    
+    */
     bool isLessThanEqual = (v.x <= w.x && v.y <= w.y && v.z <= w.z);
                    
     return isLessThanEqual;
@@ -762,12 +775,14 @@ lessThanEqual(const Vec3<T> &v, const object &obj)
 
 template <class T>
 static bool
-greaterThanEqual(const Vec3<T> &v, const object &obj)
+greaterThanEqual(const Vec3<T> &v, const py::object &obj)
 {
-    extract<Vec3<T> > e1(obj);
-    extract<tuple> e2(obj);
-    
-    Vec3<T> w;
+    /*
+    py::cast<Vec3<T> > e1(obj);
+    py::cast<tuple> e2(obj);
+    */
+    Vec3<T> w = py::cast<Vec3<T>>(obj);
+    /*
     if(e1.check())
     {
         w = e1();
@@ -775,14 +790,14 @@ greaterThanEqual(const Vec3<T> &v, const object &obj)
     else if(e2.check())
     {
         tuple t = e2();
-        T x = extract<T>(t[0]);
-        T y = extract<T>(t[1]);
-        T z = extract<T>(t[2]);
+        T x = py::cast<T>(t[0]);
+        T y = py::cast<T>(t[1]);
+        T z = py::cast<T>(t[2]);
         w.setValue(x,y,z);
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to operator >=");
-    
+    */
     bool isGreaterThanEqual = (v.x >= w.x && v.y >= w.y && v.z >= w.z);
 
     return isGreaterThanEqual;
@@ -791,16 +806,18 @@ greaterThanEqual(const Vec3<T> &v, const object &obj)
 
 template <class T>
 static bool
-equalWithAbsErrorObj(const Vec3<T> &v, const object &obj1, const object &obj2)
+equalWithAbsErrorObj(const Vec3<T> &v, const py::object &obj1, const py::object &obj2)
 {    
-    extract<Vec3<int> >    e1(obj1);
-    extract<Vec3<float> >  e2(obj1);
-    extract<Vec3<double> > e3(obj1);
+    /*
+    py::cast<Vec3<int> >    e1(obj1);
+    py::cast<Vec3<float> >  e2(obj1);
+    py::cast<Vec3<double> > e3(obj1);
     
-    extract<tuple>         e4(obj1);
-    extract<double>        e5(obj2);
-    
-    Vec3<T> w;
+    py::cast<tuple>         e4(obj1);
+    py::cast<double>        e5(obj2);
+    */
+    Vec3<T> w = py::cast<Vec3<T>>(obj1);
+    /*
     if(e1.check())      { w = e1(); }
     else if(e2.check()) { w = e2(); }
     else if(e3.check()) { w = e3(); }
@@ -809,9 +826,9 @@ equalWithAbsErrorObj(const Vec3<T> &v, const object &obj1, const object &obj2)
         tuple t = e4();
         if(t.attr("__len__")() == 3)
         {
-            w.x = extract<T>(t[0]);
-            w.y = extract<T>(t[1]);
-            w.z = extract<T>(t[2]);
+            w.x = py::cast<T>(t[0]);
+            w.y = py::cast<T>(t[1]);
+            w.z = py::cast<T>(t[2]);
         }
         else
             THROW(IEX_NAMESPACE::LogicExc, "tuple of length 3 expected");
@@ -819,23 +836,30 @@ equalWithAbsErrorObj(const Vec3<T> &v, const object &obj1, const object &obj2)
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to equalWithAbsError");
     
-    if(e5.check())      { return v.equalWithAbsError(w, e5()); }
+    if(e5.check())      { 
+    */
+    return v.equalWithAbsError(w, py::cast<double>(obj2)); 
+    /*
+    }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to equalWithAbsError");
+    */
 }
 
 template <class T>
 static bool
-equalWithRelErrorObj(const Vec3<T> &v, const object &obj1, const object &obj2)
+equalWithRelErrorObj(const Vec3<T> &v, const py::object &obj1, const py::object &obj2)
 {    
-    extract<Vec3<int> >    e1(obj1);
-    extract<Vec3<float> >  e2(obj1);
-    extract<Vec3<double> > e3(obj1);
+    /*
+    py::cast<Vec3<int> >    e1(obj1);
+    py::cast<Vec3<float> >  e2(obj1);
+    py::cast<Vec3<double> > e3(obj1);
     
-    extract<tuple>         e4(obj1);    
-    extract<double>        e5(obj2);
-    
-    Vec3<T> w;
+    py::cast<tuple>         e4(obj1);    
+    py::cast<double>        e5(obj2);
+    */
+    Vec3<T> w = py::cast<Vec3<T>>(obj1);
+    /*
     if(e1.check())      { w = e1(); }
     else if(e2.check()) { w = e2(); }
     else if(e3.check()) { w = e3(); }
@@ -844,9 +868,9 @@ equalWithRelErrorObj(const Vec3<T> &v, const object &obj1, const object &obj2)
         tuple t = e4();
         if(t.attr("__len__")() == 3)
         {
-            w.x = extract<T>(t[0]);
-            w.y = extract<T>(t[1]);
-            w.z = extract<T>(t[2]);
+            w.x = py::cast<T>(t[0]);
+            w.y = py::cast<T>(t[1]);
+            w.z = py::cast<T>(t[2]);
         }
         else
             THROW(IEX_NAMESPACE::LogicExc, "tuple of length 3 expected");
@@ -854,23 +878,27 @@ equalWithRelErrorObj(const Vec3<T> &v, const object &obj1, const object &obj2)
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to equalWithRelError");
     
-    if(e5.check())      { return v.equalWithRelError(w, e5()); }
+    if(e5.check())      { 
+    */
+    return v.equalWithRelError(w, py::cast<double>(obj2)); 
+    /*
+    }
     else
         THROW(IEX_NAMESPACE::LogicExc, "invalid parameters passed to equalWithRelError");    
-    
+    */
 }
 
 
 template <class T>
 static bool
-equal(const Vec3<T> &v, const tuple &t)
+equal(const Vec3<T> &v, const py::tuple &t)
 {
     Vec3<T> w;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
-        w.x = extract<T>(t[0]);
-        w.y = extract<T>(t[1]);
-        w.z = extract<T>(t[2]);
+        w.x = py::cast<T>(t[0]);
+        w.y = py::cast<T>(t[1]);
+        w.z = py::cast<T>(t[2]);
         
         return (v == w);
     }
@@ -880,14 +908,14 @@ equal(const Vec3<T> &v, const tuple &t)
 
 template <class T>
 static bool
-notequal(const Vec3<T> &v, const tuple &t)
+notequal(const Vec3<T> &v, const py::tuple &t)
 {
     Vec3<T> w;
-    if(t.attr("__len__")() == 3)
+    if(py::cast<int>(t.attr("__len__")()) == 3)
     {
-        w.x = extract<T>(t[0]);
-        w.y = extract<T>(t[1]);
-        w.z = extract<T>(t[2]);
+        w.x = py::cast<T>(t[0]);
+        w.y = py::cast<T>(t[1]);
+        w.z = py::cast<T>(t[2]);
         
         return (v != w);
     }
@@ -896,31 +924,27 @@ notequal(const Vec3<T> &v, const tuple &t)
 }
 
 template <class T>
-class_<Vec3<T> >
-register_Vec3()
+py::class_<Vec3<T> >
+register_Vec3(py::module &m)
 {
     typedef PyImath::StaticFixedArray<Vec3<T>,T,3> Vec3_helper;
 
-    class_<Vec3<T> > vec3_class(Vec3Name<T>::value(), Vec3Name<T>::value(),init<Vec3<T> >("copy construction"));
+    py::class_<Vec3<T> > vec3_class(m, Vec3Name<T>::value(), Vec3Name<T>::value());
     vec3_class
-        .def("__init__",make_constructor(Vec3_construct_default<T>),"initialize to (0,0,0)")
-        .def("__init__",make_constructor(Vec3_object_constructor1<T>))
-        .def("__init__",make_constructor(Vec3_object_constructor2<T>))
+        .def(py::init<Vec3<T> >(/*"copy construction"*/))
+        .def("__init__",Vec3_construct_default<T>,"initialize to (0,0,0)")
+        .def("__init__",Vec3_object_constructor1<T>)
+        .def("__init__",Vec3_object_constructor2<T>)
         .def_readwrite("x", &Vec3<T>::x)
         .def_readwrite("y", &Vec3<T>::y)
         .def_readwrite("z", &Vec3<T>::z)
-	.def("baseTypeEpsilon", &Vec3<T>::baseTypeEpsilon,"baseTypeEpsilon() epsilon value of the base type of the vector")
-        .staticmethod("baseTypeEpsilon")
-	.def("baseTypeMax", &Vec3<T>::baseTypeMax,"baseTypeMax() max value of the base type of the vector")
-        .staticmethod("baseTypeMax")
-	.def("baseTypeMin", &Vec3<T>::baseTypeMin,"baseTypeMin() min value of the base type of the vector")
-        .staticmethod("baseTypeMin")
-	.def("baseTypeSmallest", &Vec3<T>::baseTypeSmallest,"baseTypeSmallest() smallest value of the base type of the vector")
-        .staticmethod("baseTypeSmallest")
+	.def_static("baseTypeEpsilon", &Vec3<T>::baseTypeEpsilon,"baseTypeEpsilon() epsilon value of the base type of the vector")
+	.def_static("baseTypeMax", &Vec3<T>::baseTypeMax,"baseTypeMax() max value of the base type of the vector")
+	.def_static("baseTypeMin", &Vec3<T>::baseTypeMin,"baseTypeMin() min value of the base type of the vector")
+	.def_static("baseTypeSmallest", &Vec3<T>::baseTypeSmallest,"baseTypeSmallest() smallest value of the base type of the vector")
 	.def("cross", &Vec3_cross<T>,"v1.cross(v2) right handed cross product")
 	.def("cross", &Vec3_cross_Vec3Array<T>,"v1.cross(v2) right handed array cross product")
-	.def("dimensions", &Vec3<T>::dimensions,"dimensions() number of dimensions in the vector")
-        .staticmethod("dimensions")
+	.def_static("dimensions", &Vec3<T>::dimensions,"dimensions() number of dimensions in the vector")       
 	.def("dot", &Vec3_dot<T>,"v1.dot(v2) inner product of the two vectors")
 	.def("dot", &Vec3_dot_Vec3Array<T>,"v1.dot(v2) array inner product")
     
@@ -938,20 +962,20 @@ register_Vec3()
          
 	.def("length", &Vec3_length<T>,"length() magnitude of the vector")
 	.def("length2", &Vec3_length2<T>,"length2() square magnitude of the vector")
-	.def("normalize", &Vec3_normalize<T>,return_internal_reference<>(),
+	.def("normalize", &Vec3_normalize<T>,py::return_value_policy::reference_internal,
          "v.normalize() destructively normalizes v and returns a reference to it")
-	.def("normalizeExc", &Vec3_normalizeExc<T>,return_internal_reference<>(),
+	.def("normalizeExc", &Vec3_normalizeExc<T>,py::return_value_policy::reference_internal,
          "v.normalizeExc() destructively normalizes V and returns a reference to it, throwing an exception if length() == 0")
-	.def("normalizeNonNull", &Vec3_normalizeNonNull<T>,return_internal_reference<>(),
+	.def("normalizeNonNull", &Vec3_normalizeNonNull<T>,py::return_value_policy::reference_internal,
          "v.normalizeNonNull() destructively normalizes V and returns a reference to it, faster if lngth() != 0")
 	.def("normalized", &Vec3_normalized<T>, "v.normalized() returns a normalized copy of v")
 	.def("normalizedExc", &Vec3_normalizedExc<T>, "v.normalizedExc() returns a normalized copy of v, throwing an exception if length() == 0")
 	.def("normalizedNonNull", &Vec3_normalizedNonNull<T>, "v.normalizedNonNull() returns a normalized copy of v, faster if lngth() != 0")
 	.def("__len__", Vec3_helper::len)
-	.def("__getitem__", Vec3_helper::getitem,return_value_policy<copy_non_const_reference>())
+	.def("__getitem__", Vec3_helper::getitem,py::return_value_policy::copy)
 	.def("__setitem__", Vec3_helper::setitem)
         .def("closestVertex", &closestVertex<T>)
-        .def("negate", &Vec3_negate<T>, return_internal_reference<>())
+        .def("negate", &Vec3_negate<T>, py::return_value_policy::reference_internal)
         .def("orthogonal", &orthogonal<T>)
         .def("project", &project<T>)
         .def("reflect", &reflect<T>)
@@ -964,10 +988,10 @@ register_Vec3()
         .def("__mul__", &Vec3_mulTArray<T>)
         .def("__rmul__", &Vec3_rmulT<T>)
         .def("__rmul__", &Vec3_rmulTArray<T>)
-        .def("__imul__", &Vec3_imulV<T, int>,return_internal_reference<>())
-        .def("__imul__", &Vec3_imulV<T, float>,return_internal_reference<>())
-        .def("__imul__", &Vec3_imulV<T, double>,return_internal_reference<>())
-        .def("__imul__", &Vec3_imulT<T>,return_internal_reference<>())
+        .def("__imul__", &Vec3_imulV<T, int>,py::return_value_policy::reference_internal)
+        .def("__imul__", &Vec3_imulV<T, float>,py::return_value_policy::reference_internal)
+        .def("__imul__", &Vec3_imulV<T, double>,py::return_value_policy::reference_internal)
+        .def("__imul__", &Vec3_imulT<T>,py::return_value_policy::reference_internal)
         .def("__div__", &Vec3_Vec3_divT<T>)
         .def("__truediv__", &Vec3_Vec3_divT<T>)
         .def("__mul__", &Vec3_mulM33<T, float>)
@@ -978,55 +1002,57 @@ register_Vec3()
         .def("__div__", &Vec3_div<T,int>)
         .def("__div__", &Vec3_div<T,float>)
         .def("__div__", &Vec3_div<T,double>)
-        .def("__div__", &Vec3_divTuple<T,tuple>)
-        .def("__div__", &Vec3_divTuple<T,list>)
+        .def("__div__", &Vec3_divTuple<T,py::tuple>)
+        .def("__div__", &Vec3_divTuple<T,py::list>)
         .def("__div__", &Vec3_divT<T>)
         .def("__truediv__", &Vec3_div<T,int>)
         .def("__truediv__", &Vec3_div<T,float>)
         .def("__truediv__", &Vec3_div<T,double>)
-        .def("__truediv__", &Vec3_divTuple<T,tuple>)
-        .def("__truediv__", &Vec3_divTuple<T,list>)
+        .def("__truediv__", &Vec3_divTuple<T,py::tuple>)
+        .def("__truediv__", &Vec3_divTuple<T,py::list>)
         .def("__truediv__", &Vec3_divT<T>)
-        .def("__rdiv__", &Vec3_rdivTuple<T,tuple>)
-        .def("__rdiv__", &Vec3_rdivTuple<T,list>)
+        .def("__rdiv__", &Vec3_rdivTuple<T,py::tuple>)
+        .def("__rdiv__", &Vec3_rdivTuple<T,py::list>)
         .def("__rdiv__", &Vec3_rdivT<T>)
-        .def("__idiv__", &Vec3_idivObj<T>,return_internal_reference<>())
-        .def("__itruediv__", &Vec3_idivObj<T>,return_internal_reference<>())
+        .def("__idiv__", &Vec3_idivObj<T>,py::return_value_policy::reference_internal)
+        .def("__itruediv__", &Vec3_idivObj<T>,py::return_value_policy::reference_internal)
         .def("__xor__", &Vec3_dot<T>)
         .def("__mod__", &Vec3_cross<T>)
+        /*
         .def(self == self)
         .def(self != self)
+        */
         .def("__add__", &Vec3_add<T>)
         .def("__add__", &Vec3_addV<T, int>)
         .def("__add__", &Vec3_addV<T, float>)
         .def("__add__", &Vec3_addV<T, double>)
         .def("__add__", &Vec3_addT<T>)
-        .def("__add__", &Vec3_addTuple<T,tuple>)
-        .def("__add__", &Vec3_addTuple<T,list>)
+        .def("__add__", &Vec3_addTuple<T,py::tuple>)
+        .def("__add__", &Vec3_addTuple<T,py::list>)
         .def("__radd__", &Vec3_addT<T>)
-        .def("__radd__", &Vec3_addTuple<T,tuple>)
-        .def("__radd__", &Vec3_addTuple<T,list>)
+        .def("__radd__", &Vec3_addTuple<T,py::tuple>)
+        .def("__radd__", &Vec3_addTuple<T,py::list>)
         .def("__radd__", &Vec3_add<T>)
-        .def("__iadd__", &Vec3_iaddV<T, int>, return_internal_reference<>())
-        .def("__iadd__", &Vec3_iaddV<T, float>, return_internal_reference<>())
-        .def("__iadd__", &Vec3_iaddV<T, double>, return_internal_reference<>())
+        .def("__iadd__", &Vec3_iaddV<T, int>, py::return_value_policy::reference_internal)
+        .def("__iadd__", &Vec3_iaddV<T, float>, py::return_value_policy::reference_internal)
+        .def("__iadd__", &Vec3_iaddV<T, double>, py::return_value_policy::reference_internal)
         .def("__sub__", &Vec3_sub<T>)
         .def("__sub__", &Vec3_subV<T, int>)
         .def("__sub__", &Vec3_subV<T, float>)
         .def("__sub__", &Vec3_subV<T, double>)
         .def("__sub__", &Vec3_subT<T>)
-        .def("__sub__", &Vec3_subTuple<T,tuple>)
-        .def("__sub__", &Vec3_subTuple<T,list>)
+        .def("__sub__", &Vec3_subTuple<T,py::tuple>)
+        .def("__sub__", &Vec3_subTuple<T,py::list>)
         .def("__rsub__", &Vec3_rsubT<T>)
-        .def("__rsub__", &Vec3_rsubTuple<T,tuple>)
-        .def("__rsub__", &Vec3_rsubTuple<T,list>)
-        .def("__isub__", &Vec3_isubV<T, int>, return_internal_reference<>())
-        .def("__isub__", &Vec3_isubV<T, float>, return_internal_reference<>())
-        .def("__isub__", &Vec3_isubV<T, double>, return_internal_reference<>())
+        .def("__rsub__", &Vec3_rsubTuple<T,py::tuple>)
+        .def("__rsub__", &Vec3_rsubTuple<T,py::list>)
+        .def("__isub__", &Vec3_isubV<T, int>, py::return_value_policy::reference_internal)
+        .def("__isub__", &Vec3_isubV<T, float>, py::return_value_policy::reference_internal)
+        .def("__isub__", &Vec3_isubV<T, double>, py::return_value_policy::reference_internal)
         .def("__mul__", &mult<T>)
         .def("__rmul__", &mult<T>)
-        .def("__imul__", &Vec3_imulM44<T, float>, return_internal_reference<>())
-        .def("__imul__", &Vec3_imulM44<T, double>, return_internal_reference<>())
+        .def("__imul__", &Vec3_imulM44<T, float>, py::return_value_policy::reference_internal)
+        .def("__imul__", &Vec3_imulM44<T, double>, py::return_value_policy::reference_internal)
         .def("__lt__", &lessThan<T>)
         .def("__gt__", &greaterThan<T>)
         .def("__le__", &lessThanEqual<T>)

@@ -41,11 +41,9 @@
 // order to work around MSVC limitations.
 //
 
+#include "python_include.h"
 // #include <PyImathVec.h>
 #include "PyImathDecorators.h"
-#include <Python.h>
-#include <boost/python.hpp>
-#include <boost/python/make_constructor.hpp>
 #include <boost/format.hpp>
 #include <PyImath.h>
 // #include <ImathVec.h>
@@ -54,7 +52,7 @@
 #include <PyImathMathExc.h>
 
 namespace PyImath {
-using namespace boost::python;
+
 using namespace IMATH_NAMESPACE;
 
 template <class T> struct Color4Array2DName { static const char *value(); };
@@ -505,40 +503,40 @@ Color4Array_idivColor(FixedArray2D<IMATH_NAMESPACE::Color4<T> > &va, const IMATH
 
 template <class T>
 static void
-setItemTuple(FixedArray2D<IMATH_NAMESPACE::Color4<T> > &va, const tuple &index, const tuple &t)
+setItemTuple(FixedArray2D<IMATH_NAMESPACE::Color4<T> > &va, const py::tuple &index, const py::tuple &t)
 {
-    if(t.attr("__len__")() == 4 && index.attr("__len__")() == 2)
+    if(py::cast<int>(t.attr("__len__")()) == 4 && py::cast<int>(index.attr("__len__")()) == 2)
     {
         Color4<T> v;
-        v.r = extract<T>(t[0]);
-        v.g = extract<T>(t[1]);
-        v.b = extract<T>(t[2]);
-        v.a = extract<T>(t[3]);
-        va(va.canonical_index(extract<Py_ssize_t>(index[0]),va.len()[0]),
-           va.canonical_index(extract<Py_ssize_t>(index[1]),va.len()[1])) = v;
+        v.r = py::cast<T>(t[0]);
+        v.g = py::cast<T>(t[1]);
+        v.b = py::cast<T>(t[2]);
+        v.a = py::cast<T>(t[3]);
+        va(va.canonical_index(py::cast<Py_ssize_t>(index[0]),va.len()[0]),
+           va.canonical_index(py::cast<Py_ssize_t>(index[1]),va.len()[1])) = v;
     }
     else
         THROW(IEX_NAMESPACE::LogicExc, "tuple of length 4 expected");
 }
 
 template <class T>
-class_<FixedArray2D<IMATH_NAMESPACE::Color4<T> > >
-register_Color4Array2D()
+py::class_<FixedArray2D<IMATH_NAMESPACE::Color4<T> > >
+register_Color4Array2D(py::module &m)
 {
-    class_<FixedArray2D<IMATH_NAMESPACE::Color4<T> > > color4Array2D_class =
-        FixedArray2D<IMATH_NAMESPACE::Color4<T> >::register_(Color4Array2DName<T>::value(),"Fixed length 2d array of IMATH_NAMESPACE::Color4");
+    py::class_<FixedArray2D<IMATH_NAMESPACE::Color4<T> > > color4Array2D_class =
+        FixedArray2D<IMATH_NAMESPACE::Color4<T> >::register_(m, Color4Array2DName<T>::value(),"Fixed length 2d array of IMATH_NAMESPACE::Color4");
     color4Array2D_class
-        .add_property("r",&Color4Array2D_get<T,0>)
-        .add_property("g",&Color4Array2D_get<T,1>)
-        .add_property("b",&Color4Array2D_get<T,2>)
-        .add_property("a",&Color4Array2D_get<T,3>)
+        .def_property_readonly("r",&Color4Array2D_get<T,0>)
+        .def_property_readonly("g",&Color4Array2D_get<T,1>)
+        .def_property_readonly("b",&Color4Array2D_get<T,2>)
+        .def_property_readonly("a",&Color4Array2D_get<T,3>)
 //         .def("dot",&Color4Array_dot0<T>)
 //         .def("dot",&Color4Array_dot1<T>)
 //         .def("cross", &Color4Array_cross0<T>)
 //         .def("cross", &Color4Array_cross1<T>)
 //         .def("length", &Color4Array_length<T>)
 //         .def("length2", &Color4Array_length2<T>)
-//         .def("normalize", &Color4Array_normalize<T>,return_internal_reference<>())
+//         .def("normalize", &Color4Array_normalize<T>,py::return_value_policy::reference_internal)
 //         .def("normalized", &Color4Array_normalized<T>)
         .def("__setitem__", &setItemTuple<T>)
         .def("__mul__", &Color4Array_mulT<T>)
@@ -547,16 +545,16 @@ register_Color4Array2D()
         .def("__rmul__", &Color4Array_mulT<T>)
         .def("__mul__", &Color4Array_mulArrayT<T>)
         .def("__rmul__", &Color4Array_mulArrayT<T>)
-        .def("__imul__", &Color4Array_imulT<T>,return_internal_reference<>())
-        .def("__imul__", &Color4Array_imulArrayT<T>,return_internal_reference<>())
+        .def("__imul__", &Color4Array_imulT<T>,py::return_value_policy::reference_internal)
+        .def("__imul__", &Color4Array_imulArrayT<T>,py::return_value_policy::reference_internal)
         .def("__div__", &Color4Array_divT<T>)
         .def("__div__", &Color4Array_divArrayT<T>)
         .def("__truediv__", &Color4Array_divT<T>)
         .def("__truediv__", &Color4Array_divArrayT<T>)
-        .def("__idiv__", &Color4Array_idivT<T>,return_internal_reference<>())
-        .def("__idiv__", &Color4Array_idivArrayT<T>,return_internal_reference<>())
-        .def("__itruediv__", &Color4Array_idivT<T>,return_internal_reference<>())
-        .def("__itruediv__", &Color4Array_idivArrayT<T>,return_internal_reference<>())
+        .def("__idiv__", &Color4Array_idivT<T>,py::return_value_policy::reference_internal)
+        .def("__idiv__", &Color4Array_idivArrayT<T>,py::return_value_policy::reference_internal)
+        .def("__itruediv__", &Color4Array_idivT<T>,py::return_value_policy::reference_internal)
+        .def("__itruediv__", &Color4Array_idivArrayT<T>,py::return_value_policy::reference_internal)
         .def("__add__",&Color4Array_add<T>)
         .def("__add__",&Color4Array_addColor<T>)
         .def("__radd__",&Color4Array_addColor<T>)
@@ -571,16 +569,16 @@ register_Color4Array2D()
         .def("__truediv__",&Color4Array_div<T>)
         .def("__truediv__",&Color4Array_divColor<T>)
         .def("__neg__",&Color4Array_neg<T>)
-        .def("__iadd__",&Color4Array_iadd<T>, return_internal_reference<>())
-        .def("__iadd__",&Color4Array_iaddColor<T>, return_internal_reference<>())
-        .def("__isub__",&Color4Array_isub<T>, return_internal_reference<>())
-        .def("__isub__",&Color4Array_isubColor<T>, return_internal_reference<>())
-        .def("__imul__",&Color4Array_imul<T>, return_internal_reference<>())
-        .def("__imul__",&Color4Array_imulColor<T>, return_internal_reference<>())
-        .def("__idiv__",&Color4Array_idiv<T>, return_internal_reference<>())
-        .def("__idiv__",&Color4Array_idivColor<T>, return_internal_reference<>())
-        .def("__itruediv__",&Color4Array_idiv<T>, return_internal_reference<>())
-        .def("__itruediv__",&Color4Array_idivColor<T>, return_internal_reference<>())
+        .def("__iadd__",&Color4Array_iadd<T>, py::return_value_policy::reference_internal)
+        .def("__iadd__",&Color4Array_iaddColor<T>, py::return_value_policy::reference_internal)
+        .def("__isub__",&Color4Array_isub<T>, py::return_value_policy::reference_internal)
+        .def("__isub__",&Color4Array_isubColor<T>, py::return_value_policy::reference_internal)
+        .def("__imul__",&Color4Array_imul<T>, py::return_value_policy::reference_internal)
+        .def("__imul__",&Color4Array_imulColor<T>, py::return_value_policy::reference_internal)
+        .def("__idiv__",&Color4Array_idiv<T>, py::return_value_policy::reference_internal)
+        .def("__idiv__",&Color4Array_idivColor<T>, py::return_value_policy::reference_internal)
+        .def("__itruediv__",&Color4Array_idiv<T>, py::return_value_policy::reference_internal)
+        .def("__itruediv__",&Color4Array_idivColor<T>, py::return_value_policy::reference_internal)
         ;
 
     add_comparison_functions(color4Array2D_class);
