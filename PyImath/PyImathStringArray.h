@@ -64,12 +64,12 @@ class StringArrayT : public FixedArray<StringTableIndex>
     const StringTableT<T> & stringTable() const { return _table; }
 
     T  getitem_string(Py_ssize_t index) const {return _table.lookup(getitem(index)); }
-    StringArrayT* getslice_string(PyObject *index) const;
+    StringArrayT* getslice_string(py::object index) const;
 
-    void setitem_string_scalar(PyObject *index, const T &data);
+    void setitem_string_scalar(py::object index, const T &data);
 
     void setitem_string_scalar_mask(const FixedArray<int> &mask, const T &data);
-    void setitem_string_vector(PyObject *index, const StringArrayT<T> &data);
+    void setitem_string_vector(py::object index, const StringArrayT<T> &data);
     void setitem_string_vector_mask(const FixedArray<int> &mask, const StringArrayT<T> &data);
 
   private:

@@ -238,10 +238,10 @@ class FixedArray
         return index; // still a virtual index if this is a masked reference array
     }
 
-    void extract_slice_indices(PyObject *index, size_t &start, size_t &end, Py_ssize_t &step, size_t &slicelength) const
+    void extract_slice_indices(py::object index, size_t &start, size_t &end, Py_ssize_t &step, size_t &slicelength) const
     {
-        if (PySlice_Check(index)) {
-            PySliceObject *slice = reinterpret_cast<PySliceObject *>(index);
+        if (PySlice_Check(index.ptr())) {
+            PySliceObject *slice = reinterpret_cast<PySliceObject *>(index.ptr());
             Py_ssize_t s,e,sl;
             if (PySlice_GetIndicesEx(slice,_length,&s,&e,&step,&sl) == -1) {
                 throw py::error_already_set();
@@ -253,8 +253,8 @@ class FixedArray
             start = s;
             end = e;
             slicelength = sl;
-        } else if (PyInt_Check(index)) {
-            size_t i = canonical_index(PyInt_AsSsize_t(index));
+        } else if (PyInt_Check(index.ptr())) {
+            size_t i = canonical_index(PyInt_AsSsize_t(index.ptr()));
             start = i; end = i+1; step = 1; slicelength = 1;
         } else {
             PyErr_SetString(PyExc_TypeError, "Object is not a slice");
@@ -264,14 +264,18 @@ class FixedArray
 
     // return_internal_reference doesn't seem to work with non-class types
     typedef typename boost::mpl::if_<boost::is_class<T>,T&,T>::type get_type;
-    get_type       getitem(Py_ssize_t index) { return (*this)[canonical_index(index)]; }
+    get_type       getitem(Py_ssize_t index) { 
+        return (*this)[canonical_index(index)]; 
+    }
     typedef typename boost::mpl::if_<boost::is_class<T>,const T&,T>::type get_type_const;
-    get_type_const getitem(Py_ssize_t index) const { return (*this)[canonical_index(index)]; }
-    FixedArray  getslice(PyObject *index) const
+    get_type_const getitem(Py_ssize_t index) const { 
+        return (*this)[canonical_index(index)]; 
+    }
+    FixedArray  getslice(py::object index) const
     {
         size_t start=0, end=0, slicelength=0;
         Py_ssize_t step;
-        extract_slice_indices(index,start,end,step,slicelength);
+        extract_slice_indices(index, start,end,step,slicelength);
         FixedArray f(slicelength);
 
         if (_indices)
@@ -294,11 +298,11 @@ class FixedArray
     }
 
     void
-    setitem_scalar(PyObject *index, const T &data)
+    setitem_scalar(py::object index, const T &data)
     {
         size_t start=0, end=0, slicelength=0;
         Py_ssize_t step;
-        extract_slice_indices(index,start,end,step,slicelength);
+        extract_slice_indices(index, start,end,step,slicelength);
 
         if (_indices)
         {
@@ -330,11 +334,11 @@ class FixedArray
     }
 
     void
-    setitem_vector(PyObject *index, const FixedArray &data)
+    setitem_vector(py::object index, const FixedArray &data)
     {
         size_t start=0, end=0, slicelength=0;
         Py_ssize_t step;
-        extract_slice_indices(index,start,end,step,slicelength);
+        extract_slice_indices(index, start,end,step,slicelength);
         
         // we have a valid range of indices
         if (data.len() != slicelength) {
@@ -447,10 +451,10 @@ class FixedArray
             .def(py::init<Py_ssize_t>(/*"construct an array of the specified length initialized to the default value for the type"*/))
             .def(py::init<const FixedArray<T> &>(/*"construct an array with the same values as the given array"*/))
             .def(py::init<const T &, Py_ssize_t>(/*"construct an array of the specified length initialized to the specified default value"*/))
+            .def("__getitem__", const_getitem, const_call_policy<T>())
+            .def("__getitem__", nonconst_getitem, call_policy<T>())
             .def("__getitem__", &FixedArray<T>::getslice)
             .def("__getitem__", &FixedArray<T>::getslice_mask)
-            .def("__getitem__", const_getitem, const_call_policy<T>())
-            .def("__getitem__", nonconst_getitem, call_policy<T>()) 
             .def("__setitem__", &FixedArray<T>::setitem_scalar)
             .def("__setitem__", &FixedArray<T>::setitem_scalar_mask)
             .def("__setitem__", &FixedArray<T>::setitem_vector)

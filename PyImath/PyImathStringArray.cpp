@@ -100,7 +100,7 @@ StringArrayT<T>::StringArrayT(StringTableT<T> &table, StringTableIndex *ptr, siz
 
 template<class T>
 StringArrayT<T>*
-StringArrayT<T>::getslice_string(PyObject *index) const
+StringArrayT<T>::getslice_string(py::object index) const
 {
     typedef boost::shared_array<StringTableIndex> StringTableIndexArrayPtr;
     typedef boost::shared_ptr<StringTableT<T> > StringTablePtr;
@@ -122,7 +122,7 @@ StringArrayT<T>::getslice_string(PyObject *index) const
 
 template<class T>
 void
-StringArrayT<T>::setitem_string_scalar(PyObject *index, const T &data)
+StringArrayT<T>::setitem_string_scalar(py::object index, const T &data)
 {
     size_t start=0, end=0, slicelength=0;
     Py_ssize_t step;
@@ -146,7 +146,7 @@ StringArrayT<T>::setitem_string_scalar_mask(const FixedArray<int> &mask, const T
 
 template<class T>
 void
-StringArrayT<T>::setitem_string_vector(PyObject *index, const StringArrayT<T> &data)
+StringArrayT<T>::setitem_string_vector(py::object index, const StringArrayT<T> &data)
 {
     size_t start=0, end=0, slicelength=0;
     Py_ssize_t step;
