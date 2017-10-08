@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 
+import unittest
 from imath import *
 from math import sqrt, pi, sin, cos
 import math
@@ -8498,7 +8499,7 @@ def testWstringArray():
 
 testList.append(("testWstringArray",testWstringArray))
 
-
+'''
 # -------------------------------------------------------------------------
 # Main loop
 
@@ -8515,3 +8516,9 @@ print ""
 # Local Variables:
 # mode:python
 # End:
+'''
+
+testcase = unittest.FunctionTestCase(lambda : testNonMaskedFloatTypeArray(FloatArray))
+
+ImathTest=unittest.TestSuite([testcase])
+
