@@ -479,12 +479,14 @@ register_Line(py::module &m)
         .def_readwrite("pos", &Line3<T>::pos)
         .def_readwrite("dir", &Line3<T>::dir)
 
+        /*
         .def("pos", &getPosition<T>, 
         "l.pos() -- returns the start point of line l")
         
         .def("dir", &getDirection<T>, 
         "l.dir() -- returns the direction of line l\n")
-        
+        */
+
         .def("setPos", &setPosition<T>, 
         "l.setPos(p) -- sets the start point of line l to p")
         .def("setPos", &setPositionTuple<T>)

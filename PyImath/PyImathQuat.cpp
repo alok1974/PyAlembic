@@ -487,6 +487,8 @@ register_Quat(py::module &m)
         .def("exp",&exp<T>)
         .def_readwrite("v",&Quat<T>::v)                       
         .def_readwrite("r",&Quat<T>::r)
+
+#if 0
         .def("v", &vector<T>,
 			  "q.v() -- returns the v (vector) component\n"
 			  "of quaternion q")
@@ -494,7 +496,8 @@ register_Quat(py::module &m)
         .def("r", &scalar<T>,
         	 "q.r() -- returns the r (scalar) component\n"
 			 "of quaternion q")
-                       
+#endif
+
         .def("setR", &setR<T>,
         	 "q.setR(s) -- sets the r (scalar) component\n"
 			 "of quaternion q to s")

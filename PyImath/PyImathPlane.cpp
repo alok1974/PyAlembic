@@ -511,13 +511,15 @@ register_Plane(py::module &m)
         .def_readwrite("normal", &Plane3<T>::normal)
         .def_readwrite("distance", &Plane3<T>::distance)
         
+        /*
         .def("normal", &normal<T>, "normal()",
              "pl.normal() -- returns the normal of plane pl")
              
         .def("distance", &distance<T>, "distance()",
         	 "pl.distance() -- returns the signed distance\n"
 			 "of plane pl from the coordinate origin")
-        
+        */
+
         .def("setNormal", &setNormal<T>, "setNormal()",
         	 "pl.setNormal(n) -- sets the normal of plane\n"
 			 "pl to n.normalized()")

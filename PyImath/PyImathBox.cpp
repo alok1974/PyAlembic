@@ -339,9 +339,9 @@ register_Box2(py::module &m)
         .def("__init__", boxConstructor<T, IMATH_NAMESPACE::V2i>)
         .def_readwrite("min",&Box<T>::min)
         .def_readwrite("max",&Box<T>::max)
+        /*
         .def("min", &boxMin<T>)
         .def("max", &boxMax<T>)
-        /*
         .def(self == self)
         .def(self != self)
         */
@@ -404,6 +404,8 @@ register_Box3(py::module &m)
         .def_readwrite("min",&Box<T>::min)
         .def_readwrite("max",&Box<T>::max)
         /*
+        .def("min", &boxMin<T>)
+        .def("max", &boxMax<T>)
         .def(self == self)
         .def(self != self)
         */
@@ -411,8 +413,6 @@ register_Box3(py::module &m)
         .def("__mul__", &mulM44<T, double>)
         .def("__imul__", &imulM44<T, float>, py::return_value_policy::reference_internal)
         .def("__imul__", &imulM44<T, double>, py::return_value_policy::reference_internal)
-        .def("min", &boxMin<T>)
-        .def("max", &boxMax<T>)
         .def("__repr__", &Box3_repr<T>)
         .def("makeEmpty",&Box<T>::makeEmpty,"makeEmpty() make the box empty")
         .def("makeInfinite",&Box<T>::makeInfinite,"makeInfinite() make the box cover all space")
