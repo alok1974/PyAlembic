@@ -8545,7 +8545,7 @@ print ""
 # End:
 '''
 
-suite=unittest.TestSuite([
+ImathTest=unittest.TestSuite([
     unittest.FunctionTestCase(lambda : testNonMaskedFloatTypeArray(FloatArray)),
     unittest.FunctionTestCase(lambda : testNonMaskedFloatTypeArray(DoubleArray)),
     unittest.FunctionTestCase(lambda : testNonMaskedIntTypeArray(IntArray)),
@@ -8604,5 +8604,6 @@ suite=unittest.TestSuite([
     unittest.FunctionTestCase(testWstringArray),
     ])
 
-unittest.TextTestRunner(verbosity=2).run(suite)
+if __name__ == '__main__':
+    unittest.TextTestRunner(verbosity=2).run(ImathTest)
 
